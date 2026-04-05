@@ -52,7 +52,6 @@
                 style="padding: 1rem 3rem; font-size: 1.1rem;">BẮT ĐẦU NGAY</button>
         </div>
     </div>
-
     <script>
         const bgMusic = new Audio('ailatrieuphu.mp3');
         bgMusic.loop = true;
@@ -76,9 +75,7 @@
         }
 
         function closeInstructions() {
-            // Start music on first interaction
             bgMusic.play().catch(e => console.log("Autoplay blocked:", e));
-
             document.getElementById('instructionModal').style.filter = 'opacity(0)';
             setTimeout(() => {
                 document.getElementById('instructionModal').style.display = 'none';

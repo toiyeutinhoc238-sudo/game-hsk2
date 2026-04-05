@@ -10,16 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Audio Elements
-    const bgMusic = new Audio('ailatrieuphu.mp3');
-    bgMusic.loop = true;
     const correctSound = new Audio('traloidung.mp3');
     const wrongSound = new Audio('traloisai.mp3');
-
-    function playBgMusic() {
-        if (bgMusic.paused) {
-            bgMusic.play().catch(e => console.log("Autoplay blocked: ", e));
-        }
-    }
 
     // Money Ladder Values
     const ladderValues = [
@@ -49,6 +41,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const lessonNumDisp = document.getElementById('lessonNum');
     const statusMsg = document.getElementById('statusMsg');
     const timerBar = document.getElementById('timerBar');
+    const countdownOverlay = document.getElementById('countdownOverlay');
+    const countdownNumber = document.getElementById('countdownNumber');
 
     lessonNumDisp.textContent = lessonId;
 
@@ -89,6 +83,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 100);
     }
 
+    function startCountdown() {
+        let count = 3;
+        countdownOverlay.style.display = 'flex';
+        countdownNumber.textContent = count;
+
+        const interval = setInterval(() => {
+            count--;
+            if (count > 0) {
+                countdownNumber.textContent = count;
+            } else {
+                clearInterval(interval);
+                countdownOverlay.style.display = 'none';
+                loadQuestion();
+            }
+        }, 1000);
+    }
+
     function loadQuestion() {
         if (currentIdx >= 10) {
             endGame(true);
@@ -117,7 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function handleChoice(idx) {
         if (isGameOver) return;
-        playBgMusic(); 
         clearInterval(timerInterval); // Stop timer on choice
         
         const q = questions[currentIdx];
@@ -155,8 +165,6 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 // Wrong
                 wrongSound.play();
-                bgMusic.pause();
-                bgMusic.currentTime = 0;
                 buttons[idx].classList.remove('selected');
                 buttons[idx].classList.add('wrong');
                 buttons[q.correct].classList.add('correct');
@@ -199,8 +207,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function endGame(isWin, stoppedManually = false) {
         isGameOver = true;
         clearInterval(timerInterval);
-        bgMusic.pause();
-        bgMusic.currentTime = 0;
         resultModal.style.display = 'flex';
         
         // Generate vocab review
@@ -229,5 +235,5 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     initLadder();
-    loadQuestion();
+    startCountdown();
 });
