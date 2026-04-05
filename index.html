@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HSK 2: Ai Là Triệu Phú - Chinh Phục Từ Vựng</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👑</text></svg>">
+</head>
+
+<body>
+    <div class="container"
+        style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        <header>
+            <h1>AI LÀ TRIỆU PHÚ</h1>
+            <p style="text-align: center; color: var(--secondary); font-weight: 600; letter-spacing: 1px;">PHIÊN BẢN HSK
+                2</p>
+            <p
+                style="text-align: center; color: var(--text-muted); margin-top: 1rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+                Chinh phục 10 câu hỏi từ vựng để giành lấy danh hiệu Triệu Phú HSK 2. Bạn đã sẵn sàng thử thách kiến
+                thức của mình?
+            </p>
+        </header>
+
+        <section class="lesson-selection" style="width: 100%;">
+            <div class="lesson-grid" id="lessonGrid">
+                <!-- Lessons will be generated here -->
+            </div>
+        </section>
+
+        <footer style="margin-top: 4rem; color: var(--text-muted); font-size: 0.9rem;">
+            &copy; 2026 HSK 2 Millionaire Edition
+        </footer>
+    </div>
+
+    <!-- Instructions Modal -->
+    <div id="instructionModal" class="modal" style="display: flex;">
+        <div class="glass modal-content">
+            <h2
+                style="margin-bottom: 1.5rem; color: var(--secondary); font-family: 'Playfair Display', serif; font-size: 2rem;">
+                Luật Chơi Triệu Phú</h2>
+            <div style="text-align: left; margin-bottom: 2rem; line-height: 1.8; color: #e2e8f0;">
+                <p>💎 Có 10 câu hỏi. Trả lời đúng cả 10 câu để chiến thắng.</p>
+                <p>📍 Mốc số 5 là <strong>Mốc An Toàn</strong>. Nếu sai sau mốc này, bạn vẫn giữ được điểm thưởng mốc 5.
+                </p>
+                <p>💡 Bạn có <strong>1 Quyền trợ giúp 50/50</strong> (loại bỏ 2 phương án sai).</p>
+                <p>🛑 Bạn có thể <strong>Dừng cuộc chơi</strong> bất cứ lúc nào để bảo toàn số điểm đang có.</p>
+            </div>
+            <button class="btn-secondary" onclick="closeInstructions()"
+                style="padding: 1rem 3rem; font-size: 1.1rem;">BẮT ĐẦU NGAY</button>
+        </div>
+    </div>
+
+    <script>
+        const bgMusic = new Audio('ailatrieuphu.mp3');
+        bgMusic.loop = true;
+
+        const grid = document.getElementById('lessonGrid');
+        for (let i = 1; i <= 15; i++) {
+            const card = document.createElement('div');
+            card.className = 'glass lesson-card';
+            card.innerHTML = `
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">CẤP ĐỘ</div>
+                <h3>BÀI ${i}</h3>
+                <p style="color: var(--text-muted); font-size: 0.9rem;">HSK 2 Lesson ${i}</p>
+            `;
+            card.onclick = () => {
+                card.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    window.location.href = `game.html?lesson=${i}`;
+                }, 150);
+            };
+            grid.appendChild(card);
+        }
+
+        function closeInstructions() {
+            // Start music on first interaction
+            bgMusic.play().catch(e => console.log("Autoplay blocked:", e));
+
+            document.getElementById('instructionModal').style.filter = 'opacity(0)';
+            setTimeout(() => {
+                document.getElementById('instructionModal').style.display = 'none';
+            }, 300);
+        }
+    </script>
+</body>
+
+</html>

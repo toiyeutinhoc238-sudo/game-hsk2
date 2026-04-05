@@ -1,0 +1,298 @@
+:root {
+    --primary: #0a0e28;
+    --secondary: #d4af37; /* Gold */
+    --accent: #1e3a8a;
+    --success: #22c55e;
+    --error: #ef4444;
+    --text: #ffffff;
+    --text-muted: #94a3b8;
+    --glass: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playfair+Display:wght@700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Outfit', sans-serif;
+}
+
+body {
+    background: radial-gradient(circle at center, #1e3a8a 0%, #0a0e28 100%);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+.glass {
+    background: var(--glass);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    width: 100%;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.5rem;
+    background: linear-gradient(to bottom, #fff, var(--secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 0.5rem;
+}
+
+/* Lesson Grid */
+.lesson-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1.5rem;
+}
+
+.lesson-card {
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.lesson-card:hover {
+    transform: translateY(-10px);
+    border-color: var(--secondary);
+    background: rgba(212, 175, 55, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.lesson-card h3 {
+    font-size: 1.5rem;
+    color: var(--secondary);
+    margin-bottom: 0.5rem;
+}
+
+/* Game Arena */
+.game-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 2rem;
+}
+
+.question-container {
+    padding: 3rem;
+    position: relative;
+}
+
+.money-ladder {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+}
+
+.ladder-item {
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+    color: var(--text-muted);
+}
+
+.ladder-item.active {
+    background: var(--secondary);
+    color: var(--primary);
+    transform: scale(1.05);
+}
+
+.ladder-item.safe {
+    color: #fff;
+    border: 1px solid var(--secondary);
+}
+
+.question-text {
+    font-size: 1.8rem;
+    text-align: center;
+    margin-bottom: 3rem;
+    line-height: 1.4;
+    font-weight: 600;
+}
+
+/* Timer */
+.timer-container {
+    width: 100%;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.timer-bar {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to right, #22c55e, #eab308, #ef4444);
+    background-size: 200% 100%;
+    transition: width 0.1s linear;
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.option-btn {
+    padding: 1.2rem 2rem;
+    font-size: 1.1rem;
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: left;
+    display: flex;
+    align-items: center;
+}
+
+.option-btn:hover:not(:disabled) {
+    background: rgba(212, 175, 55, 0.2);
+    border-color: var(--secondary);
+}
+
+.option-btn.selected {
+    background: var(--secondary) !important;
+    color: var(--primary);
+    border-color: #fff;
+}
+
+.option-btn.correct {
+    background: var(--success) !important;
+    border-color: var(--success);
+    color: white;
+    animation: pulse-green 0.5s infinite;
+}
+
+.option-btn.wrong {
+    background: var(--error) !important;
+    border-color: var(--error);
+    color: white;
+}
+
+.option-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.option-btn::before {
+    content: attr(data-prefix);
+    margin-right: 1rem;
+    color: var(--secondary);
+    font-weight: 800;
+}
+
+.option-btn.selected::before {
+    color: var(--primary);
+}
+
+/* Controls */
+.controls {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+}
+
+.btn-secondary {
+    background: transparent;
+    border: 2px solid var(--secondary);
+    color: var(--secondary);
+    padding: 0.8rem 2rem;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: var(--secondary);
+    color: var(--primary);
+}
+
+.btn-secondary:disabled {
+    opacity: 0.3;
+}
+
+/* Modals */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 2rem;
+}
+
+.modal-content {
+    max-width: 600px;
+    width: 100%;
+    padding: 3rem;
+    text-align: center;
+}
+
+@keyframes pulse-green {
+    0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(34, 197, 94, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+/* Review Section */
+.review-scroll {
+    max-height: 400px;
+    overflow-y: auto;
+    margin: 2rem 0;
+    text-align: left;
+    padding-right: 1rem;
+}
+
+.review-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+    border-left: 4px solid var(--secondary);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .game-layout {
+        grid-template-columns: 1fr;
+    }
+    .money-ladder {
+        display: none; /* Hide ladder on small screens or move it */
+    }
+}

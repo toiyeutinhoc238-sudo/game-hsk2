@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ai Là Triệu Phú - HSK 2</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="container" style="flex: 1; display: flex; flex-direction: column;">
+        <header style="margin-bottom: 2rem;">
+            <h1 style="font-size: 2.5rem; text-align: center;">AI LÀ TRIỆU PHÚ</h1>
+            <div style="text-align: center; color: var(--secondary); font-size: 1.2rem; margin-bottom: 1rem;">BÀI <span id="lessonNum">0</span></div>
+        </header>
+
+        <div class="game-layout">
+            <!-- Main Question Area -->
+            <div class="glass question-container" style="display: flex; flex-direction: column; justify-content: center;">
+                <div id="questionNum" style="position: absolute; top: 1.5rem; left: 2rem; color: var(--secondary); font-weight: 600;">Câu 1/10</div>
+                <div id="statusMsg" style="position: absolute; top: 1.5rem; right: 2rem; color: var(--text-muted); font-size: 0.9rem;">Hãy chọn đáp án đúng</div>
+                
+                <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 300px;">
+                    <div id="questionText" class="question-text">Đang tải câu hỏi...</div>
+                    <div class="timer-container" style="margin-bottom: 2rem;">
+                        <div id="timerBar" class="timer-bar"></div>
+                    </div>
+                    <div id="optionsGrid" class="options-grid">
+                        <!-- Options will be generated here -->
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <button id="help5050" class="btn-secondary" onclick="use5050()">Trợ giúp 50/50</button>
+                    <button id="stopBtn" class="btn-secondary" onclick="stopGamePrompt()">Dừng cuộc chơi</button>
+                </div>
+            </div>
+
+            <!-- Money Ladder -->
+            <div class="glass money-ladder" id="moneyLadder">
+                <!-- Ladder items generated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Result Modal -->
+    <div id="resultModal" class="modal">
+        <div class="glass modal-content">
+            <h2 id="resultTitle" style="margin-bottom: 1rem; font-size: 2rem;">KẾT QUẢ</h2>
+            <div id="resultMessage" style="font-size: 1.2rem; margin-bottom: 2rem; color: var(--text-muted);"></div>
+            
+            <h3 style="color: var(--secondary); margin-bottom: 1rem;">ÔN TẬP TỪ VỰNG</h3>
+            <div id="reviewList" class="review-scroll">
+                <!-- Vocabulary summary here -->
+            </div>
+            
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button class="btn-secondary" onclick="window.location.reload()">Chơi Lại</button>
+                <button class="btn-secondary" onclick="window.location.href='index.html'">Về Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stop Confirmation Modal -->
+    <div id="stopModal" class="modal">
+        <div class="glass modal-content">
+            <h2 style="color: var(--secondary); margin-bottom: 1.5rem;">DỪNG CUỘC CHƠI?</h2>
+            <p style="margin-bottom: 2rem;">Bạn mốn bảo toàn số điểm hiện có và kết thúc trận đấu chứ?</p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button class="btn-secondary" onclick="confirmStop()">Đồng Ý</button>
+                <button class="btn-secondary" onclick="document.getElementById('stopModal').style.display='none'">Tiếp Tục Chơi</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/questions.js"></script>
+    <script src="js/game.js"></script>
+</body>
+
+</html>
