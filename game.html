@@ -13,13 +13,14 @@
     <div class="container" style="flex: 1; display: flex; flex-direction: column;">
         <header style="margin-bottom: 2rem;">
             <h1 style="font-size: 2.5rem; text-align: center;">AI LÀ TRIỆU PHÚ</h1>
-            <div style="text-align: center; color: var(--secondary); font-size: 1.2rem; margin-bottom: 1rem;">BÀI <span id="lessonNum">0</span></div>
+            <div style="text-align: center; color: var(--secondary); font-size: 1.2rem; margin-bottom: 1rem;">CHỦ ĐỀ: <span id="lessonNum">...</span></div>
+            <button id="musicToggle" class="btn-secondary" onclick="toggleMusic()" style="position: fixed; top: 2rem; right: 2rem; z-index: 1001; padding: 0.8rem; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">🔊</button>
         </header>
 
         <div class="game-layout">
             <!-- Main Question Area -->
             <div class="glass question-container" style="display: flex; flex-direction: column; justify-content: center;">
-                <div id="questionNum" style="position: absolute; top: 1.5rem; left: 2rem; color: var(--secondary); font-weight: 600;">Câu 1/10</div>
+                <div id="questionNum" style="position: absolute; top: 1.5rem; left: 2rem; color: var(--secondary); font-weight: 600;">Câu 1/15</div>
                 <div id="statusMsg" style="position: absolute; top: 1.5rem; right: 2rem; color: var(--text-muted); font-size: 0.9rem;">Hãy chọn đáp án đúng</div>
                 
                 <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 300px;">
@@ -33,9 +34,11 @@
                 </div>
 
                 <div class="controls">
-                    <button id="help5050" class="btn-secondary" onclick="use5050()">Trợ giúp 50/50</button>
-                    <button id="stopBtn" class="btn-secondary" onclick="stopGamePrompt()">Dừng cuộc chơi</button>
-                </div>
+                <button id="help5050" class="btn-secondary" onclick="use5050()">Trợ giúp 50/50</button>
+                <button id="helpAudience" class="btn-secondary" onclick="useAudience()">Hỏi Ý Kiến Khán Giả</button>
+                <button id="helpExpert" class="btn-secondary" onclick="useExpert()">Gọi Cho Chuyên Gia</button>
+                <button class="btn-secondary" onclick="stopGamePrompt()">Dừng Cuộc Chơi</button>
+            </div>
             </div>
 
             <!-- Money Ladder -->
@@ -47,7 +50,7 @@
 
     <!-- Result Modal -->
     <div id="resultModal" class="modal">
-        <div class="glass modal-content">
+        <div class="glass modal-content" style="max-width: 800px;">
             <h2 id="resultTitle" style="margin-bottom: 1rem; font-size: 2rem;">KẾT QUẢ</h2>
             <div id="resultMessage" style="font-size: 1.2rem; margin-bottom: 2rem; color: var(--text-muted);"></div>
             
@@ -72,6 +75,32 @@
                 <button class="btn-secondary" onclick="confirmStop()">Đồng Ý</button>
                 <button class="btn-secondary" onclick="document.getElementById('stopModal').style.display='none'">Tiếp Tục Chơi</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Audience Modal -->
+    <div id="audienceModal" class="modal">
+        <div class="glass modal-content">
+            <h2 style="color: var(--secondary); margin-bottom: 2rem;">Ý KIẾN KHÁN GIẢ</h2>
+            <div id="audienceChart" style="display: flex; justify-content: space-around; align-items: flex-end; height: 200px; margin-bottom: 2rem; padding: 0 1rem;">
+                <!-- Bars will be generated here -->
+            </div>
+            <button id="closeAudienceBtn" class="btn-secondary" onclick="document.getElementById('audienceModal').style.display='none'" style="display: none;">Quay lại</button>
+        </div>
+    </div>
+
+    <!-- Expert Modal -->
+    <div id="expertModal" class="modal">
+        <div class="glass modal-content">
+            <h2 style="color: var(--secondary); margin-bottom: 1.5rem;">GỌI CHO CHUYÊN GIA</h2>
+            <div id="expertThinking" style="margin-bottom: 2rem;">
+                <p>Đang kết nối với chuyên gia...</p>
+                <div class="timer-container" style="margin-top: 1rem;"><div id="expertTimerBar" class="timer-bar" style="width: 100%;"></div></div>
+            </div>
+            <div id="expertAnswer" style="display: none; margin-bottom: 2rem; font-size: 1.2rem; background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 15px; border-left: 4px solid var(--secondary);">
+                <!-- Expert answer here -->
+            </div>
+            <button id="closeExpertBtn" class="btn-secondary" onclick="document.getElementById('expertModal').style.display='none'" style="display: none;">Quay lại</button>
         </div>
     </div>
 

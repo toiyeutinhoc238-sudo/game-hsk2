@@ -1,182 +1,3422 @@
-const hsk2Questions = {
-    1: [
-        { q: "Từ 'Du lịch' trong tiếng Trung là gì?", a: ['上班', '旅游', '运动', '休息'], correct: 1, vocab: "旅游 (lǚyóu) - du lịch - Ví dụ: 我喜欢去旅游。" },
-        { q: "Từ 'Thể thao, tập thể dục' trong tiếng Trung là gì?", a: ['跑步', '游泳', '运动', '踢足球'], correct: 2, vocab: "运动 (yùndòng) - thể thao / tập thể dục - Ví dụ: 你最喜欢什么运动？" },
-        { q: "Từ 'Chơi bóng đá' trong tiếng Trung là gì?", a: ['打篮球', '打乒乓球', '打羽毛球', '踢足球'], correct: 3, vocab: "踢足球 (tīzúqiú) - chơi bóng đá - Ví dụ: 我最喜欢的运动是踢足球。" },
-        { q: "Đại từ 'Nó' tiếng Trung là gì?", a: ['他', '她', '它', '您'], correct: 2, vocab: "它 (tā) - Nó - Ví dụ: 这是我的小狗，它叫小李。" },
-        { q: "Từ 'Mắt' trong tiếng Trung là gì?", a: ['鼻子', '眼睛', '嘴巴', '手'], correct: 1, vocab: "眼睛 (yǎnjīng) - Mắt - Ví dụ: 你的眼睛非常漂亮。" },
-        { q: "Từ '最' nghĩa là gì?", a: ['Nhất', 'Rất, vô cùng', 'Quá', 'Cũng'], correct: 0, vocab: "最 (zuì) - nhất - Ví dụ: 他的眼睛最漂亮。" },
-        { q: "Từ 'Cho rằng, nghĩ rằng' trong tiếng Trung là gì?", a: ['觉得', '决的', '叫的', '学的'], correct: 0, vocab: "觉得 (juéde) - cho rằng, nghĩ rằng - Ví dụ: 我觉得今天他生病了。" },
-        { q: "'Tại sao' tiếng Trung là gì?", a: ['怎么', '什么时候', '为什么', '什么'], correct: 2, vocab: "为什么 (wèishénme) - Tại sao - Ví dụ: 你为什么 hôm nay không đi học?" },
-        { q: "Tính từ 'Mới' tiếng Trung viết là gì?", a: ['老', '新', '好', '贵'], correct: 1, vocab: "新 (xīn) - mới - Ví dụ: 这是我新的书包。" },
-        { q: "Từ 'Cùng nhau' trong tiếng Trung là gì?", a: ['自己', '一起', '都', '只'], correct: 1, vocab: "一起 (yīqǐ) - Cùng nhau - Ví dụ: 今天我跟女朋友出去吃饭。" }
+const hsk2Vocab = {
+    "Con người & Mối quan hệ": [
+        {
+            "zh": "啊",
+            "pinyin": "a",
+            "meaning": "à"
+        },
+        {
+            "zh": "介绍",
+            "pinyin": "jièshào",
+            "meaning": "giới thiệu"
+        },
+        {
+            "zh": "奶奶",
+            "pinyin": "nǎinai",
+            "meaning": "bà nội"
+        },
+        {
+            "zh": "男孩儿",
+            "pinyin": "nánháir",
+            "meaning": "con trai"
+        },
+        {
+            "zh": "女孩儿",
+            "pinyin": "nǚháir",
+            "meaning": "Con gái"
+        },
+        {
+            "zh": "妻子",
+            "pinyin": "qīzi",
+            "meaning": "vợ"
+        },
+        {
+            "zh": "小孩儿",
+            "pinyin": "xiǎoháir",
+            "meaning": "những đứa trẻ"
+        },
+        {
+            "zh": "姓",
+            "pinyin": "xìng",
+            "meaning": "họ"
+        },
+        {
+            "zh": "姓名",
+            "pinyin": "xìngmíng",
+            "meaning": "Tên"
+        },
+        {
+            "zh": "爷爷",
+            "pinyin": "yéye",
+            "meaning": "ông nội"
+        },
+        {
+            "zh": "丈夫",
+            "pinyin": "zhàngfu",
+            "meaning": "chồng"
+        },
+        {
+            "zh": "爱情",
+            "pinyin": "",
+            "meaning": "yêu"
+        },
+        {
+            "zh": "爱人",
+            "pinyin": "",
+            "meaning": "vợ chồng"
+        },
+        {
+            "zh": "班长",
+            "pinyin": "",
+            "meaning": "Đội trưởng"
+        },
+        {
+            "zh": "帮助",
+            "pinyin": "",
+            "meaning": "giúp đỡ"
+        },
+        {
+            "zh": "称¹（动）",
+            "pinyin": "",
+            "meaning": "Gọi¹ (động từ)"
+        },
+        {
+            "zh": "出门",
+            "pinyin": "",
+            "meaning": "Đi ra ngoài"
+        },
+        {
+            "zh": "大家",
+            "pinyin": "",
+            "meaning": "Mọi người"
+        },
+        {
+            "zh": "大人",
+            "pinyin": "",
+            "meaning": "người lớn"
+        },
+        {
+            "zh": "短",
+            "pinyin": "",
+            "meaning": "ngắn"
+        },
+        {
+            "zh": "段",
+            "pinyin": "",
+            "meaning": "phần"
+        },
+        {
+            "zh": "公平",
+            "pinyin": "",
+            "meaning": "hội chợ"
+        },
+        {
+            "zh": "广告",
+            "pinyin": "",
+            "meaning": "quảng cáo"
+        },
+        {
+            "zh": "过",
+            "pinyin": "",
+            "meaning": "Vượt qua"
+        },
+        {
+            "zh": "然",
+            "pinyin": "",
+            "meaning": "Tuy nhiên"
+        },
+        {
+            "zh": "活动",
+            "pinyin": "",
+            "meaning": "Hoạt động"
+        },
+        {
+            "zh": "或",
+            "pinyin": "",
+            "meaning": "hoặc"
+        },
+        {
+            "zh": "或者",
+            "pinyin": "",
+            "meaning": "hoặc"
+        },
+        {
+            "zh": "级",
+            "pinyin": "",
+            "meaning": "lớp học"
+        },
+        {
+            "zh": "计算机",
+            "pinyin": "",
+            "meaning": "máy tính"
+        },
+        {
+            "zh": "加",
+            "pinyin": "",
+            "meaning": "thêm vào"
+        },
+        {
+            "zh": "加油",
+            "pinyin": "",
+            "meaning": "Thôi nào"
+        },
+        {
+            "zh": "进入",
+            "pinyin": "",
+            "meaning": "Đi vào"
+        },
+        {
+            "zh": "举行",
+            "pinyin": "",
+            "meaning": "Giữ"
+        },
+        {
+            "zh": "句",
+            "pinyin": "",
+            "meaning": "câu"
+        },
+        {
+            "zh": "可能",
+            "pinyin": "",
+            "meaning": "khả thi"
+        },
+        {
+            "zh": "可以",
+            "pinyin": "",
+            "meaning": "Có thể"
+        },
+        {
+            "zh": "快餐",
+            "pinyin": "",
+            "meaning": "thức ăn nhanh"
+        },
+        {
+            "zh": "快点儿",
+            "pinyin": "",
+            "meaning": "Nhanh lên"
+        },
+        {
+            "zh": "老（副）",
+            "pinyin": "",
+            "meaning": "Ông (Phó)"
+        },
+        {
+            "zh": "零下",
+            "pinyin": "",
+            "meaning": "dưới không"
+        },
+        {
+            "zh": "流利",
+            "pinyin": "",
+            "meaning": "thông thạo"
+        },
+        {
+            "zh": "旅行",
+            "pinyin": "",
+            "meaning": "du lịch"
+        },
+        {
+            "zh": "绿色",
+            "pinyin": "",
+            "meaning": "màu xanh lá"
+        },
+        {
+            "zh": "满意",
+            "pinyin": "",
+            "meaning": "thỏa mãn"
+        },
+        {
+            "zh": "猫",
+            "pinyin": "",
+            "meaning": "con mèo"
+        },
+        {
+            "zh": "米（量）",
+            "pinyin": "",
+            "meaning": "Gạo (số lượng)"
+        }
     ],
-    2: [
-        { q: "Từ 'Thức dậy' tiếng Trung là gì?", a: ['睡觉', '洗澡', '起床', '吃饭'], correct: 2, vocab: "起床 (qǐchuáng) - thức dậy - Ví dụ: 我每天都6点起床。" },
-        { q: "Từ 'Bị bệnh, bị ốm' trong tiếng Trung là gì?", a: ['健康', '生病', '上班', '出院'], correct: 1, vocab: "生病 (shēngbìng) - bị bệnh, bị ốm - Ví dụ: 今天我不舒服，可能生病了。" },
-        { q: "'Chạy bộ' tiếng Trung là gì?", a: ['散步', '运动', '跑步', '走'], correct: 2, vocab: "跑步 (pǎobù) - chạy bộ - Ví dụ: 我每天早上都出去跑步。" },
-        { q: "'Thuốc' tiếng Trung viết chữ Hán thế nào?", a: ['药', '草', '茶', '菜'], correct: 0, vocab: "药 (yào) - thuốc - Ví dụ: 你吃药了吗？" },
-        { q: "'休息' nghĩa là gì?", a: ['Làm việc', 'Thể thao / tập thể dục', 'Đi bộ', 'Nghỉ ngơi'], correct: 3, vocab: "休息 (xiūxi) - nghỉ ngơi - Ví dụ: 最近我很忙，没有时间休息。" },
-        { q: "Tính từ 'Bận' tiếng Trung là gì?", a: ['累', '忙', '快', '慢'], correct: 1, vocab: "忙 (máng) - bận - Ví dụ: 最近他很忙。" },
-        { q: "Từ 'Thời gian' tiếng Trung là gì?", a: ['时候', '小时', '时间', '年'], correct: 2, vocab: "时间 (shíjiān) - thời gian - Ví dụ: 今天我没有时间跟你吃饭。" },
-        { q: "'Buổi sáng' tiếng Trung viết là gì?", a: ['上午', '早上', '中午', '晚上'], correct: 1, vocab: "早上 (zǎoshang) - Buổi sáng - Ví dụ: 我每天早上都出去跑步。" },
-        { q: "Nghĩa của động từ '知道' là gì?", a: ['Hiểu', 'Nhớ', 'Biết', 'Nhìn'], correct: 2, vocab: "知道 (zhīdào) - Biết - Ví dụ: 我不知道他是谁？" },
-        { q: "Từ 'Mỗi' tiếng Trung là gì?", a: ['多', '几', '少', '每'], correct: 3, vocab: "每 (měi) - mỗi - Ví dụ: 我每天都上学。" }
+    "Cơ thể & Sức khỏe": [
+        {
+            "zh": "个子",
+            "pinyin": "gèzi",
+            "meaning": "Chiều cao"
+        },
+        {
+            "zh": "累",
+            "pinyin": "lèi",
+            "meaning": "mệt"
+        },
+        {
+            "zh": "身体",
+            "pinyin": "shēntǐ",
+            "meaning": "thân thể, sức khỏe"
+        },
+        {
+            "zh": "手",
+            "pinyin": "shǒu",
+            "meaning": "tay"
+        },
+        {
+            "zh": "疼",
+            "pinyin": "téng",
+            "meaning": "đau"
+        },
+        {
+            "zh": "头",
+            "pinyin": "tóu",
+            "meaning": "cái đầu"
+        },
+        {
+            "zh": "眼睛",
+            "pinyin": "yǎnjing",
+            "meaning": "Mắt"
+        },
+        {
+            "zh": "药",
+            "pinyin": "yào",
+            "meaning": "thuốc"
+        },
+        {
+            "zh": "药店",
+            "pinyin": "yàodiàn",
+            "meaning": "nhà thuốc"
+        },
+        {
+            "zh": "饱",
+            "pinyin": "",
+            "meaning": "no"
+        },
+        {
+            "zh": "感谢",
+            "pinyin": "",
+            "meaning": "tri ân"
+        },
+        {
+            "zh": "计划",
+            "pinyin": "",
+            "meaning": "kế hoạch"
+        },
+        {
+            "zh": "假",
+            "pinyin": "",
+            "meaning": "Giả mạo"
+        },
+        {
+            "zh": "教学",
+            "pinyin": "",
+            "meaning": "giảng dạy"
+        },
+        {
+            "zh": "酒店",
+            "pinyin": "",
+            "meaning": "khách sạn"
+        },
+        {
+            "zh": "看法",
+            "pinyin": "",
+            "meaning": "xem"
+        },
+        {
+            "zh": "旅游",
+            "pinyin": "",
+            "meaning": "du lịch"
+        },
+        {
+            "zh": "明星",
+            "pinyin": "",
+            "meaning": "ngôi sao"
+        }
     ],
-    3: [
-        { q: "'Đồng hồ đeo tay' tiếng Trung là gì?", a: ['手机', '电脑', '手表', '电视'], correct: 2, vocab: "手表 (shǒubiǎo) - đồng hồ đeo tay - Ví dụ: 你的手表多少钱？" },
-        { q: "'Tờ báo' tiếng Trung viết chữ Hán thế nào?", a: ['报纸', '书本', '汉语', '纸'], correct: 0, vocab: "报纸 (bàozhǐ) - báo - Ví dụ: 你看过今天的报纸了吗。" },
-        { q: "Từ 'Phòng' trong tiếng Trung là gì?", a: ['房子', '班', '房间', '商店'], correct: 2, vocab: "房间 (fángjiān) - Phòng - Ví dụ: 你的房间有大又漂亮。" },
-        { q: "Từ 'Chồng' tiếng Trung là gì?", a: ['妻子', '爸爸', '哥哥', '丈夫'], correct: 3, vocab: "丈夫 (zhàngfu) - chồng - Ví dụ: 我丈夫在上海工作。" },
-        { q: "Từ 'Màu sắc' trong tiếng Trung là gì?", a: ['东西', '衣服', '颜色', '身体'], correct: 2, vocab: "颜色 (yánsè) - màu sắc - Ví dụ: 你最喜欢什么颜色？" },
-        { q: "'Màu đỏ' tiếng Trung là gì?", a: ['黑色', '红色', '白色', '粉色'], correct: 1, vocab: "红色 (hóngsè) - màu đỏ - Ví dụ: 红色的是我的。" },
-        { q: "Từ 'Bên trái' tiếng Trung viết là gì?", a: ['右边', '下边', '左边', '上边'], correct: 2, vocab: "左边 (zuǒbian) - bên trái - Ví dụ: 银行在学校的左边。" },
-        { q: "Từ 'Bên cạnh' trong tiếng Trung là gì?", a: ['后面', '前面', '里面', '旁边'], correct: 3, vocab: "旁边 (pángbiān) - bên cạnh - Ví dụ: 学校在银行的旁边。" },
-        { q: "'Sữa bò' tiếng Trung là gì?", a: ['水', '茶', '牛奶', '咖啡'], correct: 2, vocab: "牛奶 (niúnǎi) - sữa bò - Ví dụ: 我不喜欢喝牛奶？" },
-        { q: "'Nghìn' tiếng Trung là gì?", a: ['十', '百', '千', '万'], correct: 2, vocab: "千 (qiān) - nghìn - Ví dụ: 我的手表一千人民币。" }
+    "Cảm xúc & Thái độ": [
+        {
+            "zh": "爱好",
+            "pinyin": "àihào",
+            "meaning": "sở thích\nhứng thú với"
+        },
+        {
+            "zh": "不好意思",
+            "pinyin": "bù hǎoyìsi",
+            "meaning": "Xin lỗi khi thấy ngại (làm việc gì đó)"
+        },
+        {
+            "zh": "快乐",
+            "pinyin": "kuàilè",
+            "meaning": "hạnh phúc"
+        },
+        {
+            "zh": "舒服",
+            "pinyin": "shūfu",
+            "meaning": "Thoải mái"
+        },
+        {
+            "zh": "希望",
+            "pinyin": "xīwàng",
+            "meaning": "mong"
+        },
+        {
+            "zh": "笑",
+            "pinyin": "xiào",
+            "meaning": "cười"
+        },
+        {
+            "zh": "不要",
+            "pinyin": "",
+            "meaning": "không muốn"
+        },
+        {
+            "zh": "不好意思",
+            "pinyin": "",
+            "meaning": "Xin lỗi"
+        },
+        {
+            "zh": "不久",
+            "pinyin": "",
+            "meaning": "sớm"
+        },
+        {
+            "zh": "方便",
+            "pinyin": "",
+            "meaning": "thuận lợi"
+        },
+        {
+            "zh": "服务",
+            "pinyin": "",
+            "meaning": "Phục vụ"
+        },
+        {
+            "zh": "复习",
+            "pinyin": "",
+            "meaning": "ôn tập"
+        },
+        {
+            "zh": "该（动）",
+            "pinyin": "",
+            "meaning": "Đó (phong trào)"
+        },
+        {
+            "zh": "改",
+            "pinyin": "",
+            "meaning": "thay đổi"
+        },
+        {
+            "zh": "公路",
+            "pinyin": "",
+            "meaning": "đường cao tốc"
+        },
+        {
+            "zh": "公园",
+            "pinyin": "",
+            "meaning": "vườn"
+        },
+        {
+            "zh": "湖",
+            "pinyin": "",
+            "meaning": "hồ"
+        },
+        {
+            "zh": "黄色",
+            "pinyin": "",
+            "meaning": "màu vàng"
+        },
+        {
+            "zh": "件",
+            "pinyin": "",
+            "meaning": "Mục"
+        },
+        {
+            "zh": "接下来",
+            "pinyin": "",
+            "meaning": "Kế tiếp"
+        },
+        {
+            "zh": "结果",
+            "pinyin": "",
+            "meaning": "kết quả"
+        },
+        {
+            "zh": "经常",
+            "pinyin": "",
+            "meaning": "thường"
+        },
+        {
+            "zh": "经理",
+            "pinyin": "",
+            "meaning": "giám đốc"
+        },
+        {
+            "zh": "刻（量）",
+            "pinyin": "",
+            "meaning": "Thang đo (đo lường)"
+        },
+        {
+            "zh": "蓝",
+            "pinyin": "",
+            "meaning": "màu xanh da trời"
+        },
+        {
+            "zh": "老朋友",
+            "pinyin": "",
+            "meaning": "Những người bạn cũ"
+        },
+        {
+            "zh": "离",
+            "pinyin": "",
+            "meaning": "Rời khỏi"
+        },
+        {
+            "zh": "留学生",
+            "pinyin": "",
+            "meaning": "Sinh viên quốc tế"
+        },
+        {
+            "zh": "流利",
+            "pinyin": "",
+            "meaning": "thông thạo"
+        },
+        {
+            "zh": "绿色",
+            "pinyin": "",
+            "meaning": "màu xanh lá"
+        }
     ],
-    4: [
-        { q: "Từ 'Sinh nhật' tiếng Trung là gì?", a: ['节日', '生日', '明天', '昨天'], correct: 1, vocab: "生日 (shēngrì) - Sinh nhật - Ví dụ: 你的生日是几月几号？" },
-        { q: "Từ 'Vui vẻ' trong tiếng Trung là gì?", a: ['快乐', '难过', '生气', '漂亮'], correct: 0, vocab: "快乐 (kuàilè) - vui vẻ - Ví dụ: 祝你生日快乐。" },
-        { q: "Từ 'Buổi tối' tiếng Trung viết chữ Hán thế nào?", a: ['早上', '下午', '晚上', '中午'], correct: 2, vocab: "晚上 (wǎnshàng) - buổi tối - Ví dụ: 晚上我经常跟父母去喝咖啡。" },
-        { q: "Động từ 'Bắt đầu' tiếng Trung là gì?", a: ['结束', '准备', '开始', '休息'], correct: 2, vocab: "开始 (kāishǐ) - bắt đầu - Ví dụ: 我 từ 7 tuổi bắt đầu học tiếng Trung." },
-        { q: "Từ 'Đã' trong tiếng Trung là gì?", a: ['正在', '已经', '会', '新'], correct: 1, vocab: "已经 (yǐjīng) - đã - Ví dụ: 他已经回家了。" },
-        { q: "Động từ 'Giới thiệu' tiếng Trung là gì?", a: ['介绍', '帮助', '认识', '知道'], correct: 0, vocab: "介绍 (jièshào) - giới thiệu - Ví dụ: 老师给我们介绍一个新的朋友。" },
-        { q: "'Giúp đỡ' tiếng Trung viết là gì?", a: ['让', '给', '帮', '找'], correct: 2, vocab: "帮 (bāng) - giúp, giúp đỡ - Ví dụ: 你可以帮我一下吗？" },
-        { q: "Từ 'Rất, vô cùng' trong tiếng Trung là gì?", a: ['非常', '飞唱', '飞常', '费常'], correct: 0, vocab: "非常 (fēicháng) - rất, vô cùng - Ví dụ: 他的房间非常大。" },
-        { q: "Tính từ 'Dài' tiếng Trung là gì?", a: ['短', '高', '远', '长'], correct: 3, vocab: "长 (cháng) - dài, lâu - Ví dụ: 这条路很长。" },
-        { q: "Động từ 'Hỏi' viết chữ Hán thế nào?", a: ['说', '问', '听', '读'], correct: 1, vocab: "问 (wèn) - hỏi - Ví dụ: 别问我。我不知道。" }
+    "Tư duy & Nhận thức": [
+        {
+            "zh": "懂",
+            "pinyin": "dǒng",
+            "meaning": "Hiểu"
+        },
+        {
+            "zh": "告诉",
+            "pinyin": "gàosu",
+            "meaning": "Kể"
+        },
+        {
+            "zh": "记得",
+            "pinyin": "jìde",
+            "meaning": "Nhớ"
+        },
+        {
+            "zh": "事情",
+            "pinyin": "shìqing",
+            "meaning": "vấn đề"
+        },
+        {
+            "zh": "题",
+            "pinyin": "tí",
+            "meaning": "câu hỏi"
+        },
+        {
+            "zh": "忘",
+            "pinyin": "wàng",
+            "meaning": "quên"
+        },
+        {
+            "zh": "意思",
+            "pinyin": "yìsi",
+            "meaning": "ý kiến, nghĩa"
+        },
+        {
+            "zh": "办法",
+            "pinyin": "",
+            "meaning": "cách thức, phương pháp"
+        },
+        {
+            "zh": "笔记",
+            "pinyin": "",
+            "meaning": "ghi chú"
+        },
+        {
+            "zh": "变成",
+            "pinyin": "",
+            "meaning": "trở nên"
+        },
+        {
+            "zh": "不行",
+            "pinyin": "",
+            "meaning": "KHÔNG"
+        },
+        {
+            "zh": "道理",
+            "pinyin": "",
+            "meaning": "lý do"
+        },
+        {
+            "zh": "得出",
+            "pinyin": "",
+            "meaning": "Kết luận là"
+        },
+        {
+            "zh": "懂",
+            "pinyin": "",
+            "meaning": "Hiểu"
+        },
+        {
+            "zh": "多久",
+            "pinyin": "",
+            "meaning": "bao lâu"
+        },
+        {
+            "zh": "而且",
+            "pinyin": "",
+            "meaning": "Và"
+        },
+        {
+            "zh": "发",
+            "pinyin": "",
+            "meaning": "tóc"
+        },
+        {
+            "zh": "分开",
+            "pinyin": "",
+            "meaning": "chia"
+        },
+        {
+            "zh": "狗",
+            "pinyin": "",
+            "meaning": "chó"
+        },
+        {
+            "zh": "欢迎",
+            "pinyin": "",
+            "meaning": "Chào mừng"
+        },
+        {
+            "zh": "回（量）",
+            "pinyin": "",
+            "meaning": "Trả lại (số lượng)"
+        },
+        {
+            "zh": "家庭",
+            "pinyin": "",
+            "meaning": "gia đình"
+        },
+        {
+            "zh": "交给",
+            "pinyin": "",
+            "meaning": "Đưa cho"
+        },
+        {
+            "zh": "街",
+            "pinyin": "",
+            "meaning": "đường phố"
+        },
+        {
+            "zh": "节日",
+            "pinyin": "",
+            "meaning": "lễ hội"
+        },
+        {
+            "zh": "借",
+            "pinyin": "",
+            "meaning": "vay mượn"
+        },
+        {
+            "zh": "开心",
+            "pinyin": "",
+            "meaning": "vui mừng"
+        },
+        {
+            "zh": "快乐",
+            "pinyin": "",
+            "meaning": "hạnh phúc"
+        },
+        {
+            "zh": "蓝色",
+            "pinyin": "",
+            "meaning": "màu xanh da trời"
+        },
+        {
+            "zh": "卖",
+            "pinyin": "",
+            "meaning": "Bán"
+        },
+        {
+            "zh": "面前",
+            "pinyin": "",
+            "meaning": "trước"
+        },
+        {
+            "zh": "拿出",
+            "pinyin": "",
+            "meaning": "Mang ra"
+        }
     ],
-    5: [
-        { q: "Từ 'Bên ngoài' tiếng Trung là gì?", a: ['里面', '前面', '外面', '后面'], correct: 2, vocab: "外面 (wàimiàn) - bên ngoài - Ví dụ: 我在外面等你。" },
-        { q: "Từ 'Chuẩn bị, định, dự định' trong tiếng Trung là gì?", a: ['开始', '准备', '结束', '复习'], correct: 1, vocab: "准备 (zhǔnbèi) - chuẩn bị, định, dự định - Ví dụ: 他准备去中国学习中文。" },
-        { q: "'Con cá' tiếng Trung viết chữ Hán thế nào?", a: ['羊', '牛', '鱼', '鸟'], correct: 2, vocab: "鱼 (yú) - cá - Ví dụ: 河里有很多鱼。" },
-        { q: "'Bài kiểm tra, cuộc thi' tiếng Trung là gì?", a: ['学习', '考试', '问题', '课'], correct: 1, vocab: "考试 (kǎoshì) - cuộc thi, bài kiểm tra - Ví dụ: 明天有一个中文的考试。" },
-        { q: "Từ 'Nghĩa, ý nghĩa' trong tiếng Trung là gì?", a: ['声音', '问题', '意思', '事情'], correct: 2, vocab: "意思 (yìsi) - nghĩa, ý nghĩa - Ví dụ: 我 không hiểu ý thầy nói gì." },
-        { q: "'Cà phê' tiếng Trung viết là gì?", a: ['咖啡', '牛奶', '果汁', '啤酒'], correct: 0, vocab: "咖啡 (kāfēi) - cà phê - Ví dụ: 就喝咖啡吧。" },
-        { q: "Từ 'Sau này' trong tiếng Trung là gì?", a: ['以前', '现在', '以后', '今天'], correct: 2, vocab: "以后 (yǐhòu) - sau này - Ví dụ: 考试以后他打算去中国旅游。" },
-        { q: "Từ 'Tuyệt, khá tốt' trong tiếng Trung là gì?", a: ['错了', '不错', '很差', '一般'], correct: 1, vocab: "不错 (bùcuò) - tuyệt, khá tốt - Ví dụ: 很不错，挺不错……" },
-        { q: "Lượng từ dành cho quần áo là gì?", a: ['个', '本', '块', '件'], correct: 3, vocab: "件 (jiàn) - cái, chiếc - Ví dụ: 这件衣服太贵。" },
-        { q: "Có thể, tạm được tiếng Trung là gì?", a: ['觉得', '要', '可以', '想'], correct: 2, vocab: "可以 (kěyǐ) - không tệ, tạm được - Ví dụ: 他的成绩还可以。" }
+    "Đời sống sinh hoạt": [
+        {
+            "zh": "爱情片",
+            "pinyin": "àiqíngpiàn",
+            "meaning": "phim tình cảm lãng mạn"
+        },
+        {
+            "zh": "帮",
+            "pinyin": "bāng",
+            "meaning": "giúp đỡ"
+        },
+        {
+            "zh": "帮忙",
+            "pinyin": "bāngmáng",
+            "meaning": "giúp đỡ"
+        },
+        {
+            "zh": "打",
+            "pinyin": "dǎ",
+            "meaning": "chơi (môn thể thao), đánh"
+        },
+        {
+            "zh": "打开",
+            "pinyin": "dǎkāi",
+            "meaning": "Mở"
+        },
+        {
+            "zh": "蛋糕",
+            "pinyin": "dàngāo",
+            "meaning": "bánh gato"
+        },
+        {
+            "zh": "等",
+            "pinyin": "děng",
+            "meaning": "Chờ đợi"
+        },
+        {
+            "zh": "点",
+            "pinyin": "diǎn",
+            "meaning": "gọi (đồ ăn)"
+        },
+        {
+            "zh": "画",
+            "pinyin": "huà",
+            "meaning": "bức vẽ, vẽ (động từ)"
+        },
+        {
+            "zh": "咖啡",
+            "pinyin": "kāfēi",
+            "meaning": "cà phê"
+        },
+        {
+            "zh": "考试",
+            "pinyin": "kǎoshì",
+            "meaning": "Làm bài kiểm tra\nkiểm tra"
+        },
+        {
+            "zh": "旅游",
+            "pinyin": "lǚyóu",
+            "meaning": "du lịch"
+        },
+        {
+            "zh": "面",
+            "pinyin": "miàn",
+            "meaning": "mì"
+        },
+        {
+            "zh": "拿",
+            "pinyin": "ná",
+            "meaning": "lấy"
+        },
+        {
+            "zh": "奶茶",
+            "pinyin": "nǎichá",
+            "meaning": "trà sữa"
+        },
+        {
+            "zh": "肉",
+            "pinyin": "ròu",
+            "meaning": "Thịt"
+        },
+        {
+            "zh": "试",
+            "pinyin": "shì",
+            "meaning": "thử"
+        },
+        {
+            "zh": "送",
+            "pinyin": "sòng",
+            "meaning": "giao"
+        },
+        {
+            "zh": "踢",
+            "pinyin": "tī",
+            "meaning": "Đá"
+        },
+        {
+            "zh": "跳舞",
+            "pinyin": "tiàowǔ",
+            "meaning": "Nhảy"
+        },
+        {
+            "zh": "洗",
+            "pinyin": "xǐ",
+            "meaning": "rửa"
+        },
+        {
+            "zh": "鱼",
+            "pinyin": "yú",
+            "meaning": "cá"
+        },
+        {
+            "zh": "运动",
+            "pinyin": "yùndòng",
+            "meaning": "thể thao \nvận động"
+        },
+        {
+            "zh": "准备",
+            "pinyin": "zhǔnbèi",
+            "meaning": "Chuẩn bị"
+        },
+        {
+            "zh": "足球",
+            "pinyin": "zúqiú",
+            "meaning": "bóng đá"
+        },
+        {
+            "zh": "花",
+            "pinyin": "huā",
+            "meaning": "tiêu, tốn"
+        },
+        {
+            "zh": "背（动）",
+            "pinyin": "",
+            "meaning": "mang, vác"
+        },
+        {
+            "zh": "菜单",
+            "pinyin": "",
+            "meaning": "thực đơn"
+        },
+        {
+            "zh": "参观",
+            "pinyin": "",
+            "meaning": "thăm nom"
+        },
+        {
+            "zh": "参加",
+            "pinyin": "",
+            "meaning": "tham gia"
+        },
+        {
+            "zh": "出口（名）",
+            "pinyin": "",
+            "meaning": "Xuất khẩu (tên)"
+        },
+        {
+            "zh": "出生",
+            "pinyin": "",
+            "meaning": "sinh"
+        },
+        {
+            "zh": "出现",
+            "pinyin": "",
+            "meaning": "Xuất hiện"
+        },
+        {
+            "zh": "出院",
+            "pinyin": "",
+            "meaning": "Xuất viện"
+        },
+        {
+            "zh": "出租",
+            "pinyin": "",
+            "meaning": "thuê"
+        },
+        {
+            "zh": "吹",
+            "pinyin": "",
+            "meaning": "thổi"
+        },
+        {
+            "zh": "答应",
+            "pinyin": "",
+            "meaning": "hứa"
+        },
+        {
+            "zh": "打工",
+            "pinyin": "",
+            "meaning": "làm việc để kiếm sống"
+        },
+        {
+            "zh": "打算",
+            "pinyin": "",
+            "meaning": "Có ý định"
+        },
+        {
+            "zh": "带",
+            "pinyin": "",
+            "meaning": "mang đến"
+        },
+        {
+            "zh": "倒",
+            "pinyin": "",
+            "meaning": "ngã"
+        },
+        {
+            "zh": "点头",
+            "pinyin": "",
+            "meaning": "gật đầu"
+        },
+        {
+            "zh": "多云",
+            "pinyin": "",
+            "meaning": "Trời nhiều mây một phần"
+        },
+        {
+            "zh": "封（量）",
+            "pinyin": "",
+            "meaning": "Con dấu (Số lượng)"
+        },
+        {
+            "zh": "公里",
+            "pinyin": "",
+            "meaning": "ki-lô-mét"
+        },
+        {
+            "zh": "故事",
+            "pinyin": "",
+            "meaning": "câu chuyện"
+        },
+        {
+            "zh": "海",
+            "pinyin": "",
+            "meaning": "đại dương"
+        },
+        {
+            "zh": "黑",
+            "pinyin": "",
+            "meaning": "đen"
+        },
+        {
+            "zh": "黑色",
+            "pinyin": "",
+            "meaning": "đen"
+        },
+        {
+            "zh": "护照",
+            "pinyin": "",
+            "meaning": "hộ chiếu"
+        },
+        {
+            "zh": "坏处",
+            "pinyin": "",
+            "meaning": "làm hại"
+        },
+        {
+            "zh": "会（名）",
+            "pinyin": "",
+            "meaning": "Hiệp hội (tên)"
+        },
+        {
+            "zh": "家长",
+            "pinyin": "",
+            "meaning": "Cha mẹ"
+        },
+        {
+            "zh": "交",
+            "pinyin": "",
+            "meaning": "chi trả"
+        },
+        {
+            "zh": "交朋友",
+            "pinyin": "",
+            "meaning": "Kết bạn"
+        },
+        {
+            "zh": "教师",
+            "pinyin": "",
+            "meaning": "giáo viên"
+        },
+        {
+            "zh": "教育",
+            "pinyin": "",
+            "meaning": "giáo dục"
+        },
+        {
+            "zh": "经过",
+            "pinyin": "",
+            "meaning": "đi qua"
+        },
+        {
+            "zh": "举手",
+            "pinyin": "",
+            "meaning": "Giơ tay lên"
+        },
+        {
+            "zh": "卡",
+            "pinyin": "",
+            "meaning": "Thẻ"
+        },
+        {
+            "zh": "可爱",
+            "pinyin": "",
+            "meaning": "dễ thương"
+        },
+        {
+            "zh": "刻（量）",
+            "pinyin": "",
+            "meaning": "Thang đo (đo lường)"
+        },
+        {
+            "zh": "空气",
+            "pinyin": "",
+            "meaning": "Không khí"
+        },
+        {
+            "zh": "老年",
+            "pinyin": "",
+            "meaning": "người già"
+        },
+        {
+            "zh": "老是",
+            "pinyin": "",
+            "meaning": "luôn luôn"
+        },
+        {
+            "zh": "礼物",
+            "pinyin": "",
+            "meaning": "Quà"
+        },
+        {
+            "zh": "留学生",
+            "pinyin": "",
+            "meaning": "Sinh viên quốc tế"
+        },
+        {
+            "zh": "流行",
+            "pinyin": "",
+            "meaning": "Sự phổ biến"
+        },
+        {
+            "zh": "面¹（名、量）",
+            "pinyin": "",
+            "meaning": "Bề mặt¹ (tên, số lượng)"
+        },
+        {
+            "zh": "名",
+            "pinyin": "",
+            "meaning": "tên"
+        },
+        {
+            "zh": "名称",
+            "pinyin": "",
+            "meaning": "tên"
+        }
     ],
-    6: [
-        { q: "Từ 'Xe đạp' tiếng Trung là gì?", a: ['汽车', '自行车', '火车', '飞机'], correct: 1, vocab: "自行车 (zìxíngchē) - xe đạp - Ví dụ: 我骑自行车去学校。" },
-        { q: "Từ 'Mì' trong tiếng Trung là gì?", a: ['米饭', '包子', '面条', '面包'], correct: 2, vocab: "面条 (miàntiáo) - Mì - Ví dụ: 我不喜欢吃面条。" },
-        { q: "'Thịt cừu' tiếng Trung viết là gì?", a: ['羊肉', '猪肉', '牛肉', '鸡肉'], correct: 0, vocab: "羊肉 (yángròu) - thịt cừu - Ví dụ: 中国人喜欢吃羊肉。" },
-        { q: "Cụm từ 'Chơi bóng rổ' tiếng Trung là gì?", a: ['踢足球', '游泳', '跑步', '打篮球'], correct: 3, vocab: "打篮球 (dǎlánqiú) - Chơi bóng rổ - Ví dụ: 我喜欢打篮球。" },
-        { q: "Liên từ 'Bởi vì' tiếng Trung là gì?", a: ['所以', '因为', '但是', '虽然'], correct: 1, vocab: "因为 (yīnwèi) - bởi vì - Ví dụ: 因为……所以……" },
-        { q: "Liên từ 'Cho nên' tiếng Trung là gì?", a: ['所以', '因为', '但是', '还是'], correct: 0, vocab: "所以 (suǒyǐ) - cho nên - Ví dụ: 因为他每天都跑步，所以身体很好。" },
-        { q: "Động từ 'Bơi lội' tiếng Trung là gì?", a: ['旅游', '运动', '游泳', '跳舞'], correct: 2, vocab: "游泳 (yóuyǒng) - bơi - Ví dụ: 我不会游泳。" },
-        { q: "Phó từ 'Thường xuyên' tiếng Trung viết là gì?", a: ['已经', '非常', '一直', '经常'], correct: 3, vocab: "经常 (jīngcháng) - thường xuyên - Ví dụ: 我经常坐公共汽车去学校。" },
-        { q: "Từ 'Kilogram' trong tiếng Trung là gì?", a: ['公斤', '米', '升', '克'], correct: 0, vocab: "公斤 (gōngjīn) - Kilogram - Ví dụ: 苹果一公斤多少钱？" },
-        { q: "Từ 'Chị gái' tiếng Trung là gì?", a: ['妹妹', '姐姐', '哥哥', '妈妈'], correct: 1, vocab: "姐姐 (jiĕjie) - chị gái - Ví dụ: 你姐姐很漂亮。" }
+    "Đồ vật & Công cụ": [
+        {
+            "zh": "包",
+            "pinyin": "bāo",
+            "meaning": "cái túi\ngói lại"
+        },
+        {
+            "zh": "本子",
+            "pinyin": "běnzi",
+            "meaning": "sách"
+        },
+        {
+            "zh": "笔",
+            "pinyin": "bǐ",
+            "meaning": "Cái bút"
+        },
+        {
+            "zh": "床",
+            "pinyin": "chuáng",
+            "meaning": "giường"
+        },
+        {
+            "zh": "花",
+            "pinyin": "huā",
+            "meaning": "hoa"
+        },
+        {
+            "zh": "画笔",
+            "pinyin": "huàbǐ",
+            "meaning": "bút màu, cọ vẽ"
+        },
+        {
+            "zh": "机票",
+            "pinyin": "jīpiào",
+            "meaning": "Vé máy bay"
+        },
+        {
+            "zh": "考",
+            "pinyin": "kǎo",
+            "meaning": "Bài kiểm tra"
+        },
+        {
+            "zh": "裤子",
+            "pinyin": "kùzi",
+            "meaning": "Quần dài"
+        },
+        {
+            "zh": "篮球",
+            "pinyin": "lánqiú",
+            "meaning": "bóng rổ"
+        },
+        {
+            "zh": "礼物",
+            "pinyin": "lǐwù",
+            "meaning": "Quà"
+        },
+        {
+            "zh": "门票",
+            "pinyin": "ménpiào",
+            "meaning": "Vé"
+        },
+        {
+            "zh": "票",
+            "pinyin": "piào",
+            "meaning": "vé"
+        },
+        {
+            "zh": "球",
+            "pinyin": "qiú",
+            "meaning": "quả bóng"
+        },
+        {
+            "zh": "手表",
+            "pinyin": "shǒubiǎo",
+            "meaning": "đồng hồ đeo tay"
+        },
+        {
+            "zh": "书包",
+            "pinyin": "shūbāo",
+            "meaning": "cái túi, cặp sách"
+        },
+        {
+            "zh": "报纸",
+            "pinyin": "",
+            "meaning": "báo"
+        },
+        {
+            "zh": "笔",
+            "pinyin": "",
+            "meaning": "Cái bút"
+        },
+        {
+            "zh": "笔记本",
+            "pinyin": "",
+            "meaning": "sổ tay"
+        },
+        {
+            "zh": "词",
+            "pinyin": "",
+            "meaning": "từ"
+        },
+        {
+            "zh": "词典",
+            "pinyin": "",
+            "meaning": "từ điển"
+        },
+        {
+            "zh": "词语",
+            "pinyin": "",
+            "meaning": "từ"
+        },
+        {
+            "zh": "大门",
+            "pinyin": "",
+            "meaning": "cửa"
+        },
+        {
+            "zh": "大衣",
+            "pinyin": "",
+            "meaning": "áo khoác ngoài"
+        },
+        {
+            "zh": "蛋",
+            "pinyin": "",
+            "meaning": "Trứng"
+        },
+        {
+            "zh": "读音",
+            "pinyin": "",
+            "meaning": "cách phát âm"
+        },
+        {
+            "zh": "公司",
+            "pinyin": "",
+            "meaning": "công ty"
+        },
+        {
+            "zh": "好多",
+            "pinyin": "",
+            "meaning": "nhiều"
+        },
+        {
+            "zh": "河",
+            "pinyin": "",
+            "meaning": "dòng sông"
+        },
+        {
+            "zh": "红色",
+            "pinyin": "",
+            "meaning": "màu đỏ"
+        },
+        {
+            "zh": "回国",
+            "pinyin": "",
+            "meaning": "Trở về Trung Quốc"
+        },
+        {
+            "zh": "接到",
+            "pinyin": "",
+            "meaning": "Đã nhận"
+        },
+        {
+            "zh": "接受",
+            "pinyin": "",
+            "meaning": "chấp nhận"
+        },
+        {
+            "zh": "酒",
+            "pinyin": "",
+            "meaning": "rượu"
+        },
+        {
+            "zh": "脸",
+            "pinyin": "",
+            "meaning": "Khuôn mặt"
+        },
+        {
+            "zh": "辆",
+            "pinyin": "",
+            "meaning": "phương tiện giao thông"
+        },
+        {
+            "zh": "满",
+            "pinyin": "",
+            "meaning": "Đầy"
+        },
+        {
+            "zh": "名",
+            "pinyin": "",
+            "meaning": "tên"
+        },
+        {
+            "zh": "名单",
+            "pinyin": "",
+            "meaning": "Danh sách"
+        }
     ],
-    7: [
-        { q: "Từ 'Lớp học' tiếng Trung là gì?", a: ['教室', '学校', '房间', '饭店'], correct: 0, vocab: "教室 (jiàoshì) - lớp học - Ví dụ: 教室里有多少学生？" },
-        { q: "Từ 'Sân bay' trong tiếng Trung là gì?", a: ['火车站', '车站', '机场', '公司'], correct: 2, vocab: "机场 (jīchǎng) - Sân bay - Ví dụ: 从宿舍到机场远不远？" },
-        { q: "Động từ 'Cách' tiếng Trung là gì?", a: ['去', '离', '从', '到'], correct: 1, vocab: "离 (lí) - cách - Ví dụ: 你家离公司远吗？" },
-        { q: "Từ 'Công ty' tiếng Trung viết là gì?", a: ['医院', '商店', '公司', '学校'], correct: 2, vocab: "公司 (gōngsī) - công ty - Ví dụ: 你的公司在哪儿？" },
-        { q: "Tính từ 'Xa' tiếng Trung là gì?", a: ['近', '高', '远', '长'], correct: 2, vocab: "远 (yuǎn) - Xa - Ví dụ: 从我家到公司很远。" },
-        { q: "'Xe buýt' tiếng Trung là gì?", a: ['出租车', '自行车', '公共汽车', '火车'], correct: 2, vocab: "公共汽车 (gōnggòngqìchē) - xe buýt - Ví dụ: 我坐公共汽车去学校。" },
-        { q: "Từ 'Giờ ' tiếng Trung là gì?", a: ['时间', '小时', '分钟', '時候'], correct: 1, vocab: "小时 (xiǎoshí) - giờ (đồng hồ) - Ví dụ: 坐火车去北京要一个多小时。" },
-        { q: "Tính từ 'Chậm' tiếng Trung viết là gì?", a: ['快', '慢', '少', '错'], correct: 1, vocab: "慢 (màn) - chậm - Ví dụ: 他汉语说得很慢。" },
-        { q: "Tính từ 'Nhanh' tiếng Trung là gì?", a: ['慢', '快', '多', '对'], correct: 1, vocab: "快 (kuài) - nhanh - Ví dụ: 他跑得很快。" },
-        { q: "Động từ 'Đi bộ' tiếng Trung là gì?", a: ['跑', '来', '去', '走'], correct: 3, vocab: "走 (zǒu) - đi bộ - Ví dụ: 我每天 đều đi bộ đi học." }
+    "Địa điểm & Nơi chốn": [
+        {
+            "zh": "班",
+            "pinyin": "bān",
+            "meaning": "lớp học"
+        },
+        {
+            "zh": "车站",
+            "pinyin": "chēzhàn",
+            "meaning": "trạm xe"
+        },
+        {
+            "zh": "出国",
+            "pinyin": "chūguó",
+            "meaning": "Đi nước ngoài"
+        },
+        {
+            "zh": "出门",
+            "pinyin": "chūmén",
+            "meaning": "Đi ra ngoài"
+        },
+        {
+            "zh": "出去",
+            "pinyin": "chūqù",
+            "meaning": "đi ra ngoài"
+        },
+        {
+            "zh": "饭馆",
+            "pinyin": "fànguǎn",
+            "meaning": "nhà hàng"
+        },
+        {
+            "zh": "房子",
+            "pinyin": "fángzi",
+            "meaning": "căn nhà"
+        },
+        {
+            "zh": "高中",
+            "pinyin": "gāozhōng",
+            "meaning": "trường trung học phổ thông"
+        },
+        {
+            "zh": "机场",
+            "pinyin": "jīchǎng",
+            "meaning": "Sân bay"
+        },
+        {
+            "zh": "教室",
+            "pinyin": "jiàoshì",
+            "meaning": "lớp học"
+        },
+        {
+            "zh": "酒店",
+            "pinyin": "jiǔdiàn",
+            "meaning": "khách sạn"
+        },
+        {
+            "zh": "楼",
+            "pinyin": "lóu",
+            "meaning": "tòa nhà"
+        },
+        {
+            "zh": "路",
+            "pinyin": "lù",
+            "meaning": "đường"
+        },
+        {
+            "zh": "路上",
+            "pinyin": "lùshang",
+            "meaning": "Trên đường"
+        },
+        {
+            "zh": "门",
+            "pinyin": "mén",
+            "meaning": "Cửa"
+        },
+        {
+            "zh": "门口",
+            "pinyin": "ménkǒu",
+            "meaning": "Lối vào"
+        },
+        {
+            "zh": "商场",
+            "pinyin": "shāngchǎng",
+            "meaning": "trung tâm mua sắm"
+        },
+        {
+            "zh": "外国",
+            "pinyin": "wàiguó",
+            "meaning": "nước ngoài"
+        },
+        {
+            "zh": "外面",
+            "pinyin": "wàimiàn",
+            "meaning": "Ngoài"
+        },
+        {
+            "zh": "洗手间",
+            "pinyin": "xǐshǒujiān",
+            "meaning": "Nhà vệ sinh"
+        },
+        {
+            "zh": "站",
+            "pinyin": "zhàn",
+            "meaning": "trạm (xe, tàu)"
+        },
+        {
+            "zh": "办公室",
+            "pinyin": "",
+            "meaning": "văn phòng"
+        },
+        {
+            "zh": "场",
+            "pinyin": "",
+            "meaning": "cánh đồng"
+        },
+        {
+            "zh": "超市",
+            "pinyin": "",
+            "meaning": "siêu thị"
+        },
+        {
+            "zh": "地球",
+            "pinyin": "",
+            "meaning": "Trái đất"
+        },
+        {
+            "zh": "店",
+            "pinyin": "",
+            "meaning": "cửa hàng"
+        },
+        {
+            "zh": "动物园",
+            "pinyin": "",
+            "meaning": "vườn thú"
+        },
+        {
+            "zh": "多么",
+            "pinyin": "",
+            "meaning": "Làm sao"
+        },
+        {
+            "zh": "公共汽车",
+            "pinyin": "",
+            "meaning": "xe buýt"
+        },
+        {
+            "zh": "够",
+            "pinyin": "",
+            "meaning": "đủ"
+        },
+        {
+            "zh": "故意",
+            "pinyin": "",
+            "meaning": "cố ý"
+        },
+        {
+            "zh": "广场",
+            "pinyin": "",
+            "meaning": "quảng trường"
+        },
+        {
+            "zh": "黑板",
+            "pinyin": "",
+            "meaning": "bảng đen"
+        },
+        {
+            "zh": "检查",
+            "pinyin": "",
+            "meaning": "nghiên cứu"
+        },
+        {
+            "zh": "讲",
+            "pinyin": "",
+            "meaning": "nói chuyện"
+        },
+        {
+            "zh": "教师",
+            "pinyin": "",
+            "meaning": "giáo viên"
+        },
+        {
+            "zh": "进行",
+            "pinyin": "",
+            "meaning": "chỉ đạo"
+        },
+        {
+            "zh": "流利",
+            "pinyin": "",
+            "meaning": "thông thạo"
+        },
+        {
+            "zh": "旅客",
+            "pinyin": "",
+            "meaning": "Hành khách"
+        },
+        {
+            "zh": "满意",
+            "pinyin": "",
+            "meaning": "thỏa mãn"
+        },
+        {
+            "zh": "面²（名）",
+            "pinyin": "",
+            "meaning": "Face² (tên)"
+        },
+        {
+            "zh": "名",
+            "pinyin": "",
+            "meaning": "tên"
+        }
     ],
-    8: [
-        { q: "Phó từ 'Lại, hãy ' tiếng Trung là gì?", a: ['还', '也', '再', '就'], correct: 2, vocab: "再 (zài) - lại, lại lần nữa - Ví dụ: 你帮我再说一遍吧。" },
-        { q: "Động từ 'Để, bảo, nhường' tiếng Trung là gì?", a: ['让', '给', '帮', '找'], correct: 0, vocab: "让 (ràng) - để, bảo - Ví dụ: 妈妈让你去吃饭。" },
-        { q: "Từ 'Nói cho biết' trong tiếng Trung là gì?", a: ['听', '想', '告诉', '回答'], correct: 2, vocab: "告诉 (gàosu) - nói cho biết" },
-        { q: "Động từ 'Đợi' tiếng Trung viết là gì?", a: ['找', '等', '看', '听'], correct: 1, vocab: "等 (děng) - đợi - Ví dụ: 我在外面等你。" },
-        { q: "Động từ 'Tìm, kiếm' tiếng Trung là gì?", a: ['买', '卖', '找', '送'], correct: 2, vocab: "找 (zhǎo) - tìm - Ví dụ: 你找谁？" },
-        { q: "Từ 'Sự việc' trong tiếng Trung là gì?", a: ['东西', '时间', '事情', '人'], correct: 2, vocab: "事情 (shìqing) - sự việc - Ví dụ: 你找我有什么事情？" },
-        { q: "Từ 'Nhân viên phục vụ' tiếng Trung là gì?", a: ['服务员', '老师', '医生', '学生'], correct: 0, vocab: "服务员 (fúwùyuán) - nhân viên phục vụ - Ví dụ: 服务员 giúp tôi gọi taxi." },
-        { q: "Tính từ 'Trắng' tiếng Trung là gì?", a: ['黑', '红', '白', '粉'], correct: 2, vocab: "白 (bái) - có màu trắng - Ví dụ: 这件白色的衣服还可以。" },
-        { q: "Tính từ 'Đen' tiếng Trung viết là gì?", a: ['白', '黑', '蓝', '绿'], correct: 1, vocab: "黑 (hēi) - có màu đen - Ví dụ: 这条黑色的裤子很不错。" },
-        { q: "Tính từ 'Đắt' tiếng Trung là gì?", a: ['便宜', '高', '贵', '多'], correct: 2, vocab: "贵 (guì) - đắt - Ví dụ: 这件衣服太贵了。" }
+    "Giao thông & Di chuyển": [
+        {
+            "zh": "打车",
+            "pinyin": "dǎchē",
+            "meaning": "bắt xe taxi"
+        },
+        {
+            "zh": "地铁",
+            "pinyin": "dìtiě",
+            "meaning": "tàu điện ngầm"
+        },
+        {
+            "zh": "动",
+            "pinyin": "dòng",
+            "meaning": "di chuyển"
+        },
+        {
+            "zh": "飞",
+            "pinyin": "fēi",
+            "meaning": "bay"
+        },
+        {
+            "zh": "公交车",
+            "pinyin": "gōngjiāochē",
+            "meaning": "xe buýt"
+        },
+        {
+            "zh": "过",
+            "pinyin": "guò",
+            "meaning": "Vượt qua"
+        },
+        {
+            "zh": "过来",
+            "pinyin": "guòlái",
+            "meaning": "đến đây"
+        },
+        {
+            "zh": "过去",
+            "pinyin": "guòqù",
+            "meaning": "qua đó"
+        },
+        {
+            "zh": "过",
+            "pinyin": "guo",
+            "meaning": "Vượt qua"
+        },
+        {
+            "zh": "回来",
+            "pinyin": "huílái",
+            "meaning": "trở lại"
+        },
+        {
+            "zh": "回去",
+            "pinyin": "huíqù",
+            "meaning": "quay lại"
+        },
+        {
+            "zh": "接",
+            "pinyin": "jiē",
+            "meaning": "đón, nhận"
+        },
+        {
+            "zh": "进",
+            "pinyin": "jìn",
+            "meaning": "Đi vào"
+        },
+        {
+            "zh": "进来",
+            "pinyin": "jìnlái",
+            "meaning": "vào trong"
+        },
+        {
+            "zh": "进去",
+            "pinyin": "jìnqù",
+            "meaning": "Đi vào"
+        },
+        {
+            "zh": "离",
+            "pinyin": "lí",
+            "meaning": "Rời khỏi"
+        },
+        {
+            "zh": "跑",
+            "pinyin": "pǎo",
+            "meaning": "chạy"
+        },
+        {
+            "zh": "跑步",
+            "pinyin": "pǎobù",
+            "meaning": "đang chạy"
+        },
+        {
+            "zh": "上来",
+            "pinyin": "shànglái",
+            "meaning": "Lên đây nào"
+        },
+        {
+            "zh": "上去",
+            "pinyin": "shàngqù",
+            "meaning": "Đi lên"
+        },
+        {
+            "zh": "上网",
+            "pinyin": "shàngwǎng",
+            "meaning": "lên mạng"
+        },
+        {
+            "zh": "往",
+            "pinyin": "wǎng",
+            "meaning": "hướng về\nđi về"
+        },
+        {
+            "zh": "下来",
+            "pinyin": "xiàlái",
+            "meaning": "xuống đây"
+        },
+        {
+            "zh": "下去",
+            "pinyin": "xiàqù",
+            "meaning": "Đi xuống"
+        },
+        {
+            "zh": "游",
+            "pinyin": "yóu",
+            "meaning": "bơi"
+        },
+        {
+            "zh": "游泳",
+            "pinyin": "yóuyǒng",
+            "meaning": "bơi"
+        },
+        {
+            "zh": "站",
+            "pinyin": "zhàn",
+            "meaning": "đứng"
+        },
+        {
+            "zh": "走",
+            "pinyin": "zǒu",
+            "meaning": "đi bộ, đi"
+        },
+        {
+            "zh": "走路",
+            "pinyin": "zǒulù",
+            "meaning": "đi bộ"
+        },
+        {
+            "zh": "车辆",
+            "pinyin": "",
+            "meaning": "phương tiện giao thông"
+        },
+        {
+            "zh": "出发",
+            "pinyin": "",
+            "meaning": "Khởi hành"
+        },
+        {
+            "zh": "出国",
+            "pinyin": "",
+            "meaning": "Đi nước ngoài"
+        },
+        {
+            "zh": "出租车",
+            "pinyin": "",
+            "meaning": "Taxi"
+        },
+        {
+            "zh": "船",
+            "pinyin": "",
+            "meaning": "Thuyền"
+        },
+        {
+            "zh": "大自然",
+            "pinyin": "",
+            "meaning": "Thiên nhiên"
+        },
+        {
+            "zh": "道",
+            "pinyin": "",
+            "meaning": "đường"
+        },
+        {
+            "zh": "道路",
+            "pinyin": "",
+            "meaning": "con đường"
+        },
+        {
+            "zh": "地铁",
+            "pinyin": "",
+            "meaning": "tàu điện ngầm"
+        },
+        {
+            "zh": "地铁站",
+            "pinyin": "",
+            "meaning": "ga tàu điện ngầm"
+        },
+        {
+            "zh": "饭馆",
+            "pinyin": "",
+            "meaning": "nhà hàng"
+        },
+        {
+            "zh": "刚",
+            "pinyin": "",
+            "meaning": "Chỉ"
+        },
+        {
+            "zh": "刚才",
+            "pinyin": "",
+            "meaning": "Vừa nãy"
+        },
+        {
+            "zh": "高中",
+            "pinyin": "",
+            "meaning": "trường trung học"
+        },
+        {
+            "zh": "顾客",
+            "pinyin": "",
+            "meaning": "khách hàng"
+        },
+        {
+            "zh": "观点",
+            "pinyin": "",
+            "meaning": "Ý kiến"
+        },
+        {
+            "zh": "画家",
+            "pinyin": "",
+            "meaning": "họa sĩ"
+        },
+        {
+            "zh": "家（科学家）",
+            "pinyin": "",
+            "meaning": "Trang chủ (nhà khoa học)"
+        },
+        {
+            "zh": "见过",
+            "pinyin": "",
+            "meaning": "Tôi đã thấy"
+        },
+        {
+            "zh": "角度",
+            "pinyin": "",
+            "meaning": "góc"
+        },
+        {
+            "zh": "就要",
+            "pinyin": "",
+            "meaning": "Nó sắp"
+        },
+        {
+            "zh": "句子",
+            "pinyin": "",
+            "meaning": "câu"
+        },
+        {
+            "zh": "可以",
+            "pinyin": "",
+            "meaning": "Có thể"
+        },
+        {
+            "zh": "快要",
+            "pinyin": "",
+            "meaning": "Sớm"
+        },
+        {
+            "zh": "老是",
+            "pinyin": "",
+            "meaning": "luôn luôn"
+        },
+        {
+            "zh": "离开",
+            "pinyin": "",
+            "meaning": "rời khỏi"
+        },
+        {
+            "zh": "里头",
+            "pinyin": "",
+            "meaning": "Bên trong"
+        },
+        {
+            "zh": "凉",
+            "pinyin": "",
+            "meaning": "lạnh lẽo"
+        },
+        {
+            "zh": "路边",
+            "pinyin": "",
+            "meaning": "ven đường"
+        },
+        {
+            "zh": "拿到",
+            "pinyin": "",
+            "meaning": "Lấy"
+        }
     ],
-    9: [
-        { q: "Tính từ 'Sai' tiếng Trung là gì?", a: ['对', '错', '慢', '快'], correct: 1, vocab: "错 (cuò) - sai - Ví dụ: 你说错了。" },
-        { q: "Giới từ 'Từ ' tiếng Trung là gì?", a: ['到', '在', '离', '从'], correct: 3, vocab: "从 (cóng) - từ - Ví dụ: 你从几岁开始学习汉语？" },
-        { q: "Từ 'Nhảy, khiêu vũ' trong tiếng Trung là gì?", a: ['唱歌', '游泳', '跳舞', '跑步'], correct: 2, vocab: "跳舞 (tiàowǔ) - nhảy, khiêu vũ - Ví dụ: 他喜欢跟女朋友跳舞。" },
-        { q: "Từ 'Thứ nhất, đầu tiên' tiếng Trung là gì?", a: ['一次', '第一', '一件', '一起'], correct: 1, vocab: "第一 (dìyī) - thứ nhất, đầu tiên - Ví dụ: 这是我第一次来中国。" },
-        { q: "Từ 'Mong, hy vọng' trong tiếng Trung là gì?", a: ['希望', '准备', '决定', '开始'], correct: 0, vocab: "希望 (xīwàng) - mong, hy vọng - Ví dụ: 我希望今年能跟父母过春节。" },
-        { q: "Từ 'Vấn đề, câu hỏi' tiếng Trung viết là gì?", a: ['意思', '事情', '问题', '题'], correct: 2, vocab: "问题 (wèntí) - vấn đề, câu hỏi" },
-        { q: "Từ 'Hoan nghênh' trong tiếng Trung là gì?", a: ['再见', '谢谢', '对不起', '欢迎'], correct: 3, vocab: "欢迎 (huānyíng) - hoan nghênh - Ví dụ: 欢迎光临。" },
-        { q: "Động từ 'Đi làm' tiếng Trung là gì?", a: ['下班', '工作', '上课', '上班'], correct: 3, vocab: "上班 (shàngbān) - đi làm - Ví dụ: 你每天几点上班？" },
-        { q: "Động từ 'Hiểu' tiếng Trung là gì?", a: ['知道', '懂', '认识', '觉得'], correct: 1, vocab: "懂 (dǒng) - hiểu, biết - Ví dụ: 我听不懂老师的问题。" },
-        { q: "Từ 'Xong, hết' trong tiếng Trung là gì?", a: ['完', '开始', '在做', '没完'], correct: 0, vocab: "完 (wán) - xong, hết - Ví dụ: 你做完了吗？" }
+    "Không gian & Vị trí": [
+        {
+            "zh": "后面",
+            "pinyin": "hòumiàn",
+            "meaning": "phía sau"
+        },
+        {
+            "zh": "近",
+            "pinyin": "jìn",
+            "meaning": "gần"
+        },
+        {
+            "zh": "里面",
+            "pinyin": "lǐmiàn",
+            "meaning": "trong"
+        },
+        {
+            "zh": "旁边",
+            "pinyin": "pángbiān",
+            "meaning": "bên cạnh"
+        },
+        {
+            "zh": "前面",
+            "pinyin": "qiánmiàn",
+            "meaning": "Đằng trước"
+        },
+        {
+            "zh": "上面",
+            "pinyin": "shàngmiàn",
+            "meaning": "bên trên"
+        },
+        {
+            "zh": "网上",
+            "pinyin": "wǎngshang",
+            "meaning": "Trực tuyến"
+        },
+        {
+            "zh": "下面",
+            "pinyin": "xiàmiàn",
+            "meaning": "dưới"
+        },
+        {
+            "zh": "右",
+            "pinyin": "yòu",
+            "meaning": "Phải"
+        },
+        {
+            "zh": "右边",
+            "pinyin": "yòubian",
+            "meaning": "bên phải"
+        },
+        {
+            "zh": "远",
+            "pinyin": "yuǎn",
+            "meaning": "Xa"
+        },
+        {
+            "zh": "左",
+            "pinyin": "zuǒ",
+            "meaning": "Bên trái"
+        },
+        {
+            "zh": "左边",
+            "pinyin": "zuǒbian",
+            "meaning": "bên trái"
+        },
+        {
+            "zh": "北方",
+            "pinyin": "",
+            "meaning": "phía bắc"
+        },
+        {
+            "zh": "东北",
+            "pinyin": "",
+            "meaning": "đông bắc"
+        },
+        {
+            "zh": "东方",
+            "pinyin": "",
+            "meaning": "Phía đông"
+        },
+        {
+            "zh": "东南",
+            "pinyin": "",
+            "meaning": "phía đông nam"
+        },
+        {
+            "zh": "队",
+            "pinyin": "",
+            "meaning": "Đội"
+        },
+        {
+            "zh": "发现",
+            "pinyin": "",
+            "meaning": "Phát hiện"
+        },
+        {
+            "zh": "饺子",
+            "pinyin": "",
+            "meaning": "bánh bao"
+        },
+        {
+            "zh": "节目",
+            "pinyin": "",
+            "meaning": "chương trình"
+        },
+        {
+            "zh": "句子",
+            "pinyin": "",
+            "meaning": "câu"
+        },
+        {
+            "zh": "开机",
+            "pinyin": "",
+            "meaning": "Bật nguồn"
+        },
+        {
+            "zh": "可是",
+            "pinyin": "",
+            "meaning": "Nhưng"
+        },
+        {
+            "zh": "哭",
+            "pinyin": "",
+            "meaning": "khóc"
+        },
+        {
+            "zh": "来自",
+            "pinyin": "",
+            "meaning": "Từ"
+        },
+        {
+            "zh": "米（量）",
+            "pinyin": "",
+            "meaning": "Gạo (số lượng)"
+        }
     ],
-    10: [
-        { q: "Từ 'Giờ học, môn, bài' trong tiếng Trung là gì?", a: ['作业', '课', '学校', '老师'], correct: 1, vocab: "课 (kè) - giờ học, môn, bài - Ví dụ: 明天上午还有汉语课呢。" },
-        { q: "Động từ 'Giúp đỡ' tiếng Trung viết là gì?", a: ['介绍', '告诉', '帮助', '准备'], correct: 2, vocab: "帮助 (bāngzhù) - giúp ích, giúp đỡ - Ví dụ: 他经常帮助老人过马路。" },
-        { q: "Phó từ 'Đừng' tiếng Trung là gì?", a: ['不', '没', '别', '非常'], correct: 2, vocab: "别 (bié) - Đừng - Ví dụ: 睡觉前你别喝咖啡。" },
-        { q: "Từ 'Anh trai' tiếng Trung là gì?", a: ['弟弟', '哥哥', '姐姐', '爸爸'], correct: 1, vocab: "哥哥 (gēge) - anh trai - Ví dụ: 我没有哥哥。" },
-        { q: "'Trứng gà' tiếng Trung viết là gì?", a: ['牛肉', '羊肉', '鸡蛋', '米饭'], correct: 2, vocab: "鸡蛋 (jīdàn) - trứng - Ví dụ: 你帮我去超市买鸡蛋吧。" },
-        { q: "'Dưa hấu' tiếng Trung là gì?", a: ['苹果', '西瓜', '水果', '茶'], correct: 1, vocab: "西瓜 (xīguā) - dưa hấu - Ví dụ: 他不喜欢吃西瓜。" },
-        { q: "Phó từ 'Đang ' tiếng Trung là gì?", a: ['已经', '准备', '开始', '正在'], correct: 3, vocab: "正在 (zhèngzài) - đang - Ví dụ: 妈妈正在准备午饭呢。" },
-        { q: "'Điện thoại di động' tiếng Trung là gì?", a: ['电脑', '电视', '电话', '手机'], correct: 3, vocab: "手机 (shǒujī) - điện thoại di động - Ví dụ: 你看见我的手机了吗？" },
-        { q: "Động từ 'Giặt, rửa' tiếng Trung viết là gì?", a: ['洗', '做', '买', '穿'], correct: 0, vocab: "洗 (xǐ) - giặt, rửa - Ví dụ: 那件衣服我帮你洗了。" },
-        { q: "Câu 'Đừng tìm nữa' tiếng Trung nói thế nào?", a: ['别买了', '别看了', '别找了', '别问了'], correct: 2, vocab: "别找了 (bié zhǎo le) - Đừng tìm nữa" }
+    "Thời gian": [
+        {
+            "zh": "从小",
+            "pinyin": "cóngxiǎo",
+            "meaning": "Từ thời thơ ấu"
+        },
+        {
+            "zh": "过年",
+            "pinyin": "guònián",
+            "meaning": "đón năm mới"
+        },
+        {
+            "zh": "经常",
+            "pinyin": "jīngcháng",
+            "meaning": "thường"
+        },
+        {
+            "zh": "开始",
+            "pinyin": "kāishǐ",
+            "meaning": "bắt đầu\nsự bắt đầu"
+        },
+        {
+            "zh": "开学",
+            "pinyin": "kāixué",
+            "meaning": "khai giảng"
+        },
+        {
+            "zh": "快要",
+            "pinyin": "kuàiyào",
+            "meaning": "sắp"
+        },
+        {
+            "zh": "生日",
+            "pinyin": "shēngrì",
+            "meaning": "Sinh nhật"
+        },
+        {
+            "zh": "小时候",
+            "pinyin": "xiǎoshíhou",
+            "meaning": "khi bé"
+        },
+        {
+            "zh": "新年",
+            "pinyin": "xīnnián",
+            "meaning": "năm mới"
+        },
+        {
+            "zh": "一会儿",
+            "pinyin": "yíhuìr",
+            "meaning": "Một lúc"
+        },
+        {
+            "zh": "已经",
+            "pinyin": "yǐjīng",
+            "meaning": "đã"
+        },
+        {
+            "zh": "周",
+            "pinyin": "zhōu",
+            "meaning": "tuần"
+        },
+        {
+            "zh": "半夜",
+            "pinyin": "",
+            "meaning": "nửa đêm"
+        },
+        {
+            "zh": "不一定",
+            "pinyin": "",
+            "meaning": "không chắc chắn"
+        },
+        {
+            "zh": "春节",
+            "pinyin": "",
+            "meaning": "Tết Nguyên Đán"
+        },
+        {
+            "zh": "从小",
+            "pinyin": "",
+            "meaning": "Từ thời thơ ấu"
+        },
+        {
+            "zh": "冬天",
+            "pinyin": "",
+            "meaning": "mùa đông"
+        },
+        {
+            "zh": "队长",
+            "pinyin": "",
+            "meaning": "trưởng nhóm"
+        },
+        {
+            "zh": "方向",
+            "pinyin": "",
+            "meaning": "phương hướng"
+        },
+        {
+            "zh": "改变",
+            "pinyin": "",
+            "meaning": "Thay đổi"
+        },
+        {
+            "zh": "干杯",
+            "pinyin": "",
+            "meaning": "Chúc mừng!"
+        },
+        {
+            "zh": "感到",
+            "pinyin": "",
+            "meaning": "cảm thấy"
+        },
+        {
+            "zh": "关机",
+            "pinyin": "",
+            "meaning": "Tắt nguồn"
+        },
+        {
+            "zh": "关心",
+            "pinyin": "",
+            "meaning": "chăm sóc"
+        },
+        {
+            "zh": "过去（动）",
+            "pinyin": "",
+            "meaning": "Quá khứ (động từ)"
+        },
+        {
+            "zh": "好像",
+            "pinyin": "",
+            "meaning": "giống"
+        },
+        {
+            "zh": "机会",
+            "pinyin": "",
+            "meaning": "Cơ hội"
+        },
+        {
+            "zh": "健康",
+            "pinyin": "",
+            "meaning": "khỏe mạnh"
+        },
+        {
+            "zh": "讲话",
+            "pinyin": "",
+            "meaning": "Lời nói"
+        },
+        {
+            "zh": "交",
+            "pinyin": "",
+            "meaning": "chi trả"
+        },
+        {
+            "zh": "角",
+            "pinyin": "",
+            "meaning": "còi"
+        },
+        {
+            "zh": "脚",
+            "pinyin": "",
+            "meaning": "chân"
+        },
+        {
+            "zh": "教室",
+            "pinyin": "",
+            "meaning": "lớp học"
+        },
+        {
+            "zh": "今后",
+            "pinyin": "",
+            "meaning": "từ bây giờ trở đi"
+        },
+        {
+            "zh": "经过",
+            "pinyin": "",
+            "meaning": "đi qua"
+        },
+        {
+            "zh": "经理",
+            "pinyin": "",
+            "meaning": "giám đốc"
+        },
+        {
+            "zh": "句",
+            "pinyin": "",
+            "meaning": "câu"
+        },
+        {
+            "zh": "筷子",
+            "pinyin": "",
+            "meaning": "Đũa"
+        },
+        {
+            "zh": "拉",
+            "pinyin": "",
+            "meaning": "sự lôi kéo"
+        },
+        {
+            "zh": "例如",
+            "pinyin": "",
+            "meaning": "Ví dụ"
+        },
+        {
+            "zh": "例子",
+            "pinyin": "",
+            "meaning": "ví dụ"
+        },
+        {
+            "zh": "亮",
+            "pinyin": "",
+            "meaning": "Sáng"
+        },
+        {
+            "zh": "流",
+            "pinyin": "",
+            "meaning": "chảy"
+        },
+        {
+            "zh": "旅行",
+            "pinyin": "",
+            "meaning": "du lịch"
+        },
+        {
+            "zh": "满",
+            "pinyin": "",
+            "meaning": "Đầy"
+        },
+        {
+            "zh": "猫",
+            "pinyin": "",
+            "meaning": "con mèo"
+        },
+        {
+            "zh": "那（连）",
+            "pinyin": "",
+            "meaning": "Đó (Lian)"
+        }
     ],
-    11: [
-        { q: "Từ 'Hát' trong tiếng Trung là gì?", a: ['听', '跳舞', '唱歌', '读'], correct: 2, vocab: "唱歌 (chànggē) - Hát - Ví dụ: 我不喜欢唱歌。" },
-        { q: "Tính từ 'Nam ' tiếng Trung là gì?", a: ['女', '男', '老', '少'], correct: 1, vocab: "男 (nán) - thuộc về nam giới - Ví dụ: 他是我男朋友。" },
-        { q: "Tính từ 'Nữ ' tiếng Trung viết là gì?", a: ['男', '女', '阴', '阳'], correct: 1, vocab: "女 (nǚ) - thuộc về nữ giới - Ví dụ: 她不是我女朋友。" },
-        { q: "Từ 'Trẻ em, trẻ con' trong tiếng Trung là gì?", a: ['大人', '父母', '孩子', '学生'], correct: 2, vocab: "孩子 (háizi) - trẻ em, trẻ con - Ví dụ: 那个孩子又聪明又漂亮。" },
-        { q: "Từ 'Bên phải' tiếng Trung là gì?", a: ['左边', '右边', '前面', '后面'], correct: 1, vocab: "右边 (yòubian) - bên phải - Ví dụ: 我学校在银行的右边。" },
-        { q: "Giới từ dùng trong so sánh 'Hơn, so với' là gì?", a: ['从', '离', '给', '比'], correct: 3, vocab: "比 (bǐ) - hơn (dùng trong cấu trúc so sánh) - Ví dụ: 他比我高得多。" },
-        { q: "Tính từ 'Rẻ' tiếng Trung là gì?", a: ['贵', '少', '便宜', '错'], correct: 2, vocab: "便宜 (piányi) - rẻ - Ví dụ: 这件衣服很便宜。" },
-        { q: "Từ 'Nói chuyện' trong tiếng Trung là gì?", a: ['听', '说话', '故事', '读'], correct: 1, vocab: "说话 (shuō huà) - nói chuyện - Ví dụ: 前边说话的那个人是我的老师。" },
-        { q: "'Có thể, có lẽ' tiếng Trung viết là gì?", a: ['可以', '觉得', '可能', '知道'], correct: 2, vocab: "可能 (kěnéng) - có thể, có lẽ - Ví dụ: 你可能不认识他。" },
-        { q: "Từ 'Năm ngoái' tiếng Trung là gì?", a: ['明天', '今年', '明年', '去年'], correct: 3, vocab: "去年 (qùnián) - năm ngoái - Ví dụ: 去年我跟父母去中国旅游。" }
+    "Công việc & Nghề nghiệp": [
+        {
+            "zh": "教",
+            "pinyin": "jiāo",
+            "meaning": "dạy"
+        },
+        {
+            "zh": "办",
+            "pinyin": "",
+            "meaning": "làm"
+        },
+        {
+            "zh": "办公室",
+            "pinyin": "",
+            "meaning": "văn phòng"
+        },
+        {
+            "zh": "报名",
+            "pinyin": "",
+            "meaning": "Đăng ký"
+        },
+        {
+            "zh": "成（动）",
+            "pinyin": "",
+            "meaning": "Trở thành (động từ)"
+        },
+        {
+            "zh": "成绩",
+            "pinyin": "",
+            "meaning": "thành tích"
+        },
+        {
+            "zh": "打印",
+            "pinyin": "",
+            "meaning": "In"
+        },
+        {
+            "zh": "分（动）",
+            "pinyin": "",
+            "meaning": "Chia (phong trào)"
+        },
+        {
+            "zh": "感觉",
+            "pinyin": "",
+            "meaning": "Cảm thấy"
+        },
+        {
+            "zh": "更",
+            "pinyin": "",
+            "meaning": "Thậm chí"
+        },
+        {
+            "zh": "红",
+            "pinyin": "",
+            "meaning": "màu đỏ"
+        },
+        {
+            "zh": "画儿",
+            "pinyin": "",
+            "meaning": "Bức vẽ"
+        },
+        {
+            "zh": "黄",
+            "pinyin": "",
+            "meaning": "màu vàng"
+        },
+        {
+            "zh": "鸡",
+            "pinyin": "",
+            "meaning": "thịt gà"
+        },
+        {
+            "zh": "加",
+            "pinyin": "",
+            "meaning": "thêm vào"
+        },
+        {
+            "zh": "检查",
+            "pinyin": "",
+            "meaning": "nghiên cứu"
+        },
+        {
+            "zh": "见到",
+            "pinyin": "",
+            "meaning": "Nhìn thấy"
+        },
+        {
+            "zh": "见过",
+            "pinyin": "",
+            "meaning": "Tôi đã thấy"
+        },
+        {
+            "zh": "角度",
+            "pinyin": "",
+            "meaning": "góc"
+        },
+        {
+            "zh": "叫作",
+            "pinyin": "",
+            "meaning": "Gọi điện"
+        },
+        {
+            "zh": "接着",
+            "pinyin": "",
+            "meaning": "sau đó"
+        },
+        {
+            "zh": "节（名、量）",
+            "pinyin": "",
+            "meaning": "Phần (tên, số lượng)"
+        },
+        {
+            "zh": "节日",
+            "pinyin": "",
+            "meaning": "lễ hội"
+        },
+        {
+            "zh": "考生",
+            "pinyin": "",
+            "meaning": "Ứng viên"
+        },
+        {
+            "zh": "老（副）",
+            "pinyin": "",
+            "meaning": "Ông (Phó)"
+        },
+        {
+            "zh": "路边",
+            "pinyin": "",
+            "meaning": "ven đường"
+        },
+        {
+            "zh": "满意",
+            "pinyin": "",
+            "meaning": "thỏa mãn"
+        },
+        {
+            "zh": "面前",
+            "pinyin": "",
+            "meaning": "trước"
+        },
+        {
+            "zh": "名称",
+            "pinyin": "",
+            "meaning": "tên"
+        },
+        {
+            "zh": "名单",
+            "pinyin": "",
+            "meaning": "Danh sách"
+        },
+        {
+            "zh": "拿出",
+            "pinyin": "",
+            "meaning": "Mang ra"
+        }
     ],
-    12: [
-        { q: "Trợ từ chỉ kết quả, mức độ đứng sau động từ là gì?", a: ['的', '得', '地', '了'], correct: 1, vocab: "得 (de) - trợ từ chỉ mức độ/kết quả" },
-        { q: "Từ 'Vợ' tiếng Trung là gì?", a: ['丈夫', '妈妈', '妻子', '姐姐'], correct: 2, vocab: "妻子 (qīzi) - Vợ - Ví dụ: 我妻子比我做得好。" },
-        { q: "Từ 'Tuyết' tiếng Trung viết là gì?", a: ['雨', '阴', '雪', '晴'], correct: 2, vocab: "雪 (xuě) - Tuyết - Ví dụ: 外面下雪了。" },
-        { q: "'Số không ' tiếng Trung là gì?", a: ['一', '十', '百', '零'], correct: 3, vocab: "零 (líng) - số không - Ví dụ: 今天零下10度。" },
-        { q: "Từ 'Độ' trong tiếng Trung là gì?", a: ['度', '米', '公斤', '小时'], correct: 0, vocab: "度 (dù) - độ - Ví dụ: 今天天气高达35度。" },
-        { q: "Động từ 'Mặc, mang ' tiếng Trung là gì?", a: ['洗', '穿', '脱', '买'], correct: 1, vocab: "穿 (chuān) - mặc, mang - Ví dụ: 你穿得太少了。" },
-        { q: "Động từ 'Vào' tiếng Trung viết là gì?", a: ['出', '回', '走', '进'], correct: 3, vocab: "进 (jìn) - vào - Ví dụ: 请您进教室。" },
-        { q: "Từ 'Em trai' tiếng Trung là gì?", a: ['哥哥', '弟弟', '妹妹', '姐姐'], correct: 1, vocab: "弟弟 (dìdi) - em trai - Ví dụ: 我弟弟非常喜欢打篮球。" },
-        { q: "Tính từ 'Gần' tiếng Trung là gì?", a: ['远', '近', '长', '短'], correct: 1, vocab: "近 (jìn) - gần - Ví dụ: 我家离学校很近。" },
-        { q: "Câu 'Bạn mặc ít quá' tiếng Trung nói thế nào?", a: ['你买得太少了', '你穿得太少了', '你穿得太小了', '你吃得太少了'], correct: 1, vocab: "你穿得太少了 (nǐ chuān de tài shǎo le)" }
+    "Miêu tả & Đánh giá": [
+        {
+            "zh": "白色",
+            "pinyin": "báisè",
+            "meaning": "Trắng"
+        },
+        {
+            "zh": "不错",
+            "pinyin": "búcuò",
+            "meaning": "Tốt"
+        },
+        {
+            "zh": "长",
+            "pinyin": "cháng",
+            "meaning": "dài"
+        },
+        {
+            "zh": "错",
+            "pinyin": "cuò",
+            "meaning": "sai"
+        },
+        {
+            "zh": "高",
+            "pinyin": "gāo",
+            "meaning": "cao"
+        },
+        {
+            "zh": "好像",
+            "pinyin": "hǎoxiàng",
+            "meaning": "giống"
+        },
+        {
+            "zh": "黑色",
+            "pinyin": "hēisè",
+            "meaning": "đen"
+        },
+        {
+            "zh": "红色",
+            "pinyin": "hóngsè",
+            "meaning": "màu đỏ"
+        },
+        {
+            "zh": "坏",
+            "pinyin": "huài",
+            "meaning": "xấu"
+        },
+        {
+            "zh": "快",
+            "pinyin": "kuài",
+            "meaning": "nhanh"
+        },
+        {
+            "zh": "绿色",
+            "pinyin": "lǜsè",
+            "meaning": "màu xanh lá"
+        },
+        {
+            "zh": "慢",
+            "pinyin": "màn",
+            "meaning": "chậm"
+        },
+        {
+            "zh": "没意思",
+            "pinyin": "méi yìsi",
+            "meaning": "nhàm chán"
+        },
+        {
+            "zh": "晴",
+            "pinyin": "qíng",
+            "meaning": "trời nắng"
+        },
+        {
+            "zh": "完",
+            "pinyin": "wán",
+            "meaning": "hoàn thành, xong"
+        },
+        {
+            "zh": "颜色",
+            "pinyin": "yánsè",
+            "meaning": "màu sắc"
+        },
+        {
+            "zh": "阴",
+            "pinyin": "yīn",
+            "meaning": "nhiều mây"
+        },
+        {
+            "zh": "有意思",
+            "pinyin": "yǒu yìsi",
+            "meaning": "hay, hấp dẫn, thú vị"
+        },
+        {
+            "zh": "安静",
+            "pinyin": "",
+            "meaning": "Im lặng"
+        },
+        {
+            "zh": "安全",
+            "pinyin": "",
+            "meaning": "Sự an toàn"
+        },
+        {
+            "zh": "白色",
+            "pinyin": "",
+            "meaning": "Trắng"
+        },
+        {
+            "zh": "边",
+            "pinyin": "",
+            "meaning": "bên"
+        },
+        {
+            "zh": "变",
+            "pinyin": "",
+            "meaning": "Thay đổi"
+        },
+        {
+            "zh": "表",
+            "pinyin": "",
+            "meaning": "biểu hiện, cho thấy"
+        },
+        {
+            "zh": "表示",
+            "pinyin": "",
+            "meaning": "thể hiện"
+        },
+        {
+            "zh": "不错",
+            "pinyin": "",
+            "meaning": "Tốt"
+        },
+        {
+            "zh": "不够",
+            "pinyin": "",
+            "meaning": "không đủ"
+        },
+        {
+            "zh": "不满",
+            "pinyin": "",
+            "meaning": "không hài lòng"
+        },
+        {
+            "zh": "不少",
+            "pinyin": "",
+            "meaning": "Nhiều"
+        },
+        {
+            "zh": "不同",
+            "pinyin": "",
+            "meaning": "khác biệt"
+        },
+        {
+            "zh": "查",
+            "pinyin": "",
+            "meaning": "kiểm tra"
+        },
+        {
+            "zh": "差不多",
+            "pinyin": "",
+            "meaning": "hầu hết"
+        },
+        {
+            "zh": "长",
+            "pinyin": "",
+            "meaning": "dài"
+        },
+        {
+            "zh": "常见",
+            "pinyin": "",
+            "meaning": "thông thường, thường gặp"
+        },
+        {
+            "zh": "常用",
+            "pinyin": "",
+            "meaning": "Thường được sử dụng"
+        },
+        {
+            "zh": "大大",
+            "pinyin": "",
+            "meaning": "To To"
+        },
+        {
+            "zh": "大声",
+            "pinyin": "",
+            "meaning": "ồn ào"
+        },
+        {
+            "zh": "大小",
+            "pinyin": "",
+            "meaning": "kích cỡ"
+        },
+        {
+            "zh": "灯",
+            "pinyin": "",
+            "meaning": "đèn"
+        },
+        {
+            "zh": "等于",
+            "pinyin": "",
+            "meaning": "bình đẳng"
+        },
+        {
+            "zh": "低",
+            "pinyin": "",
+            "meaning": "Thấp"
+        },
+        {
+            "zh": "短",
+            "pinyin": "",
+            "meaning": "ngắn"
+        },
+        {
+            "zh": "对（介、动）",
+            "pinyin": "",
+            "meaning": "(truyền thông, hành động)"
+        },
+        {
+            "zh": "多数",
+            "pinyin": "",
+            "meaning": "hầu hết"
+        },
+        {
+            "zh": "分钟",
+            "pinyin": "",
+            "meaning": "phút"
+        },
+        {
+            "zh": "份",
+            "pinyin": "",
+            "meaning": "chia sẻ"
+        },
+        {
+            "zh": "感动",
+            "pinyin": "",
+            "meaning": "di chuyển"
+        },
+        {
+            "zh": "干活儿",
+            "pinyin": "",
+            "meaning": "công việc"
+        },
+        {
+            "zh": "个子",
+            "pinyin": "",
+            "meaning": "Chiều cao"
+        },
+        {
+            "zh": "国际",
+            "pinyin": "",
+            "meaning": "tính quốc tế"
+        },
+        {
+            "zh": "过来",
+            "pinyin": "",
+            "meaning": "đến đây"
+        },
+        {
+            "zh": "海边",
+            "pinyin": "",
+            "meaning": "bờ biển"
+        },
+        {
+            "zh": "喊",
+            "pinyin": "",
+            "meaning": "gọi"
+        },
+        {
+            "zh": "好处",
+            "pinyin": "",
+            "meaning": "lợi ích"
+        },
+        {
+            "zh": "好久",
+            "pinyin": "",
+            "meaning": "lâu rồi"
+        },
+        {
+            "zh": "好人",
+            "pinyin": "",
+            "meaning": "những người tốt"
+        },
+        {
+            "zh": "好事",
+            "pinyin": "",
+            "meaning": "Điều tốt"
+        },
+        {
+            "zh": "后来",
+            "pinyin": "",
+            "meaning": "sau đó"
+        },
+        {
+            "zh": "花（动）",
+            "pinyin": "",
+            "meaning": "Hoa (chuyển động)"
+        },
+        {
+            "zh": "花园",
+            "pinyin": "",
+            "meaning": "vườn"
+        },
+        {
+            "zh": "机会",
+            "pinyin": "",
+            "meaning": "Cơ hội"
+        },
+        {
+            "zh": "举",
+            "pinyin": "",
+            "meaning": "Thang máy"
+        },
+        {
+            "zh": "举行",
+            "pinyin": "",
+            "meaning": "Giữ"
+        },
+        {
+            "zh": "靠",
+            "pinyin": "",
+            "meaning": "Tùy thuộc vào"
+        },
+        {
+            "zh": "科",
+            "pinyin": "",
+            "meaning": "phân công"
+        },
+        {
+            "zh": "可怕",
+            "pinyin": "",
+            "meaning": "tệ hại"
+        },
+        {
+            "zh": "克",
+            "pinyin": "",
+            "meaning": "gram"
+        },
+        {
+            "zh": "拉",
+            "pinyin": "",
+            "meaning": "sự lôi kéo"
+        },
+        {
+            "zh": "蓝色",
+            "pinyin": "",
+            "meaning": "màu xanh da trời"
+        },
+        {
+            "zh": "理想",
+            "pinyin": "",
+            "meaning": "lý tưởng"
+        },
+        {
+            "zh": "例如",
+            "pinyin": "",
+            "meaning": "Ví dụ"
+        },
+        {
+            "zh": "例子",
+            "pinyin": "",
+            "meaning": "ví dụ"
+        },
+        {
+            "zh": "练",
+            "pinyin": "",
+            "meaning": "luyện tập"
+        },
+        {
+            "zh": "留",
+            "pinyin": "",
+            "meaning": "Giữ"
+        },
+        {
+            "zh": "米（量）",
+            "pinyin": "",
+            "meaning": "Gạo (số lượng)"
+        },
+        {
+            "zh": "面¹（名、量）",
+            "pinyin": "",
+            "meaning": "Bề mặt¹ (tên, số lượng)"
+        },
+        {
+            "zh": "面²（名）",
+            "pinyin": "",
+            "meaning": "Face² (tên)"
+        },
+        {
+            "zh": "面前",
+            "pinyin": "",
+            "meaning": "trước"
+        },
+        {
+            "zh": "明星",
+            "pinyin": "",
+            "meaning": "ngôi sao"
+        },
+        {
+            "zh": "目的",
+            "pinyin": "",
+            "meaning": "Mục đích"
+        },
+        {
+            "zh": "拿出",
+            "pinyin": "",
+            "meaning": "Mang ra"
+        },
+        {
+            "zh": "那（连）",
+            "pinyin": "",
+            "meaning": "Đó (Lian)"
+        }
     ],
-    13: [
-        { q: "Trợ từ chỉ trạng thái đang diễn ra là gì?", a: ['了', '过', '着', '呢'], correct: 2, vocab: "着 (zhe) - trợ từ chỉ trạng thái - Ví dụ: 门开着呢。" },
-        { q: "Từ 'Tay' trong tiếng Trung là gì?", a: ['脚', '眼睛', '手', '嘴巴'], correct: 2, vocab: "手 (shǒu) - tay - Ví dụ: 他受伤了，手很疼。" },
-        { q: "Động từ 'Cầm, lấy' tiếng Trung là gì?", a: ['送', '给', '买', '拿'], correct: 3, vocab: "拿 (ná) - cầm - Ví dụ: 你帮我拿书包过来吧。" },
-        { q: "Từ 'Bút chì' tiếng Trung viết là gì?", a: ['报纸', '铅笔', '书包', '手表'], correct: 1, vocab: "铅笔 (qiānbǐ) - bút chì - Ví dụ: 你能借我一只铅笔吗？" },
-        { q: "Từ 'Lớp học' trong tiếng Trung là gì?", a: ['学校', '公司', '班', '医院'], correct: 2, vocab: "班 (bān) - lớp học - Ví dụ: 你是几班的学生？" },
-        { q: "Động từ 'Lớn lên, phát triển' tiếng Trung là gì?", a: ['长', '生', '做', '玩'], correct: 0, vocab: "长 (zhǎng) - sinh ra, mọc - Ví dụ: 他在上海长大的。" },
-        { q: "Động từ 'Cười' tiếng Trung viết là gì?", a: ['哭', '叫', '问', '笑'], correct: 3, vocab: "笑 (xiào) - cười - Ví dụ: 他总是笑着跟别人说话。" },
-        { q: "Từ 'Khách sạn' tiếng Trung là gì?", a: ['饭店', '商店', '宾馆', '医院'], correct: 2, vocab: "宾馆 (bīnguǎn) - Khách sạn - Ví dụ: 宾馆在银行的旁边。" },
-        { q: "Phó từ 'Thẳng, liên tục' tiếng Trung là gì?", a: ['已经', '非常', '一起', '一直'], correct: 3, vocab: "一直 (yǐzhí) - thẳng - Ví dụ: 从这儿一直往前走。" },
-        { q: "Giới từ 'Về phía, hướng về' tiếng Trung là gì?", a: ['从', '离', '往', '到'], correct: 2, vocab: "往 (wǎng) - về phía - Ví dụ: 你从这儿往前走。" }
+    "Số lượng & Đo lường": [
+        {
+            "zh": "次",
+            "pinyin": "cì",
+            "meaning": "lần, lượt"
+        },
+        {
+            "zh": "间",
+            "pinyin": "jiān",
+            "meaning": "lượng từ dùng cho căn phòng"
+        },
+        {
+            "zh": "名",
+            "pinyin": "míng",
+            "meaning": "lượng từ dùng cho người\ntên"
+        },
+        {
+            "zh": "条",
+            "pinyin": "tiáo",
+            "meaning": "lượng từ cho những vật dài, hẹp hoặc những thứ sợi"
+        },
+        {
+            "zh": "万",
+            "pinyin": "wàn",
+            "meaning": "vạn, mười nghìn"
+        },
+        {
+            "zh": "位",
+            "pinyin": "wèi",
+            "meaning": "Lượng từ dành cho người"
+        },
+        {
+            "zh": "不如",
+            "pinyin": "",
+            "meaning": "Tốt hơn"
+        },
+        {
+            "zh": "不一会儿",
+            "pinyin": "",
+            "meaning": "Một lát sau"
+        },
+        {
+            "zh": "层",
+            "pinyin": "",
+            "meaning": "tầng, lớp"
+        },
+        {
+            "zh": "大部分",
+            "pinyin": "",
+            "meaning": "hầu hết"
+        },
+        {
+            "zh": "大多数",
+            "pinyin": "",
+            "meaning": "hầu hết"
+        },
+        {
+            "zh": "大量",
+            "pinyin": "",
+            "meaning": "số lượng lớn"
+        },
+        {
+            "zh": "单位",
+            "pinyin": "",
+            "meaning": "đơn vị"
+        },
+        {
+            "zh": "得",
+            "pinyin": "",
+            "meaning": "phải"
+        },
+        {
+            "zh": "懂得",
+            "pinyin": "",
+            "meaning": "biết"
+        },
+        {
+            "zh": "度",
+            "pinyin": "",
+            "meaning": "độ"
+        },
+        {
+            "zh": "对话",
+            "pinyin": "",
+            "meaning": "đối thoại"
+        },
+        {
+            "zh": "方便面",
+            "pinyin": "",
+            "meaning": "mì ăn liền"
+        },
+        {
+            "zh": "方法",
+            "pinyin": "",
+            "meaning": "phương pháp"
+        },
+        {
+            "zh": "方面",
+            "pinyin": "",
+            "meaning": "diện mạo"
+        },
+        {
+            "zh": "放下",
+            "pinyin": "",
+            "meaning": "nằm xuống"
+        },
+        {
+            "zh": "放心",
+            "pinyin": "",
+            "meaning": "yên tâm"
+        },
+        {
+            "zh": "刚刚",
+            "pinyin": "",
+            "meaning": "chỉ"
+        },
+        {
+            "zh": "高级",
+            "pinyin": "",
+            "meaning": "trình độ cao"
+        },
+        {
+            "zh": "公斤",
+            "pinyin": "",
+            "meaning": "Kilogram"
+        },
+        {
+            "zh": "过年",
+            "pinyin": "",
+            "meaning": "Tết Nguyên Đán Trung Quốc"
+        },
+        {
+            "zh": "画",
+            "pinyin": "",
+            "meaning": "bức vẽ"
+        },
+        {
+            "zh": "会（名）",
+            "pinyin": "",
+            "meaning": "Hiệp hội (tên)"
+        },
+        {
+            "zh": "活动",
+            "pinyin": "",
+            "meaning": "Hoạt động"
+        },
+        {
+            "zh": "急",
+            "pinyin": "",
+            "meaning": "cấp bách"
+        },
+        {
+            "zh": "家庭",
+            "pinyin": "",
+            "meaning": "gia đình"
+        },
+        {
+            "zh": "讲话",
+            "pinyin": "",
+            "meaning": "Lời nói"
+        },
+        {
+            "zh": "交通",
+            "pinyin": "",
+            "meaning": "vận tải"
+        },
+        {
+            "zh": "今后",
+            "pinyin": "",
+            "meaning": "từ bây giờ trở đi"
+        },
+        {
+            "zh": "科",
+            "pinyin": "",
+            "meaning": "phân công"
+        },
+        {
+            "zh": "刻（量）",
+            "pinyin": "",
+            "meaning": "Thang đo (đo lường)"
+        },
+        {
+            "zh": "课堂",
+            "pinyin": "",
+            "meaning": "lớp học"
+        },
+        {
+            "zh": "空气",
+            "pinyin": "",
+            "meaning": "Không khí"
+        },
+        {
+            "zh": "快餐",
+            "pinyin": "",
+            "meaning": "thức ăn nhanh"
+        },
+        {
+            "zh": "离开",
+            "pinyin": "",
+            "meaning": "rời khỏi"
+        },
+        {
+            "zh": "理想",
+            "pinyin": "",
+            "meaning": "lý tưởng"
+        },
+        {
+            "zh": "脸",
+            "pinyin": "",
+            "meaning": "Khuôn mặt"
+        },
+        {
+            "zh": "练习",
+            "pinyin": "",
+            "meaning": "luyện tập"
+        },
+        {
+            "zh": "两（量）",
+            "pinyin": "",
+            "meaning": "Hai (số lượng)"
+        },
+        {
+            "zh": "旅客",
+            "pinyin": "",
+            "meaning": "Hành khách"
+        },
+        {
+            "zh": "旅游",
+            "pinyin": "",
+            "meaning": "du lịch"
+        },
+        {
+            "zh": "卖",
+            "pinyin": "",
+            "meaning": "Bán"
+        },
+        {
+            "zh": "猫",
+            "pinyin": "",
+            "meaning": "con mèo"
+        },
+        {
+            "zh": "面²（名）",
+            "pinyin": "",
+            "meaning": "Face² (tên)"
+        },
+        {
+            "zh": "目的",
+            "pinyin": "",
+            "meaning": "Mục đích"
+        },
+        {
+            "zh": "拿到",
+            "pinyin": "",
+            "meaning": "Lấy"
+        }
     ],
-    14: [
-        { q: "Tính từ 'Thú vị, hấp dẫn' tiếng Trung là gì?", a: ['快乐', '有意思', '不错', '漂亮'], correct: 1, vocab: "有意思 (yǒu yìsi) - hấp dẫn - Ví dụ: 这部电影的内容很有意思。" },
-        { q: "Liên từ 'Nhưng' tiếng Trung viết là gì?", a: ['所以', '因为', '虽然', '但是'], correct: 3, vocab: "但是 (dànshì) - nhưng - Ví dụ: 他是一个优秀的学生，但是……" },
-        { q: "Từ 'Mặc dù, tuy' trong tiếng Trung là gì?", a: ['虽然', '因为', '所以', '但是'], correct: 0, vocab: "虽然 (suīrán) - mặc dù, tuy - Ví dụ: 虽然他很忙，但是还……" },
-        { q: "Lượng từ 'Lần' tiếng Trung là gì?", a: ['件', '块', '次', '本'], correct: 2, vocab: "次 (cì) - lần - Ví dụ: 我去过河内好几次。" },
-        { q: "Từ 'Chơi, chơi đùa' trong tiếng Trung là gì?", a: ['学习', '休息', '玩儿', '工作'], correct: 2, vocab: "玩儿 (wánr) - chơi, chơi đùa - Ví dụ: 我们出去玩儿玩儿吧。" },
-        { q: "Tính từ 'Nắng, trời quang' tiếng Trung là gì?", a: ['阴', '雨', '雪', '晴'], correct: 3, vocab: "晴 (qíng) - có nắng, nắng ráo - Ví dụ: 晴天让人的心情特别好。" },
-        { q: "'Một trăm' tiếng Trung viết là gì?", a: ['千', '百', '万', '十'], correct: 1, vocab: "百 (bǎi) - một trăm, trăm - Ví dụ: 两百块还可以。" },
-        { q: "Cấu trúc 'Tuy... nhưng...' tiếng Trung là gì?", a: ['因为... 所以...', '虽然... 但是...', '从... 到...', '离... 远...'], correct: 1, vocab: "虽然...但是... (suīrán...dànshì...)" },
-        { q: "Từ 'Phim, điện ảnh' tiếng Trung là gì?", a: ['电视', '电脑', '电影', '手机'], correct: 2, vocab: "电影 (diànyǐng) - Phim" },
-        { q: "Câu 'Bộ phim này rất thú vị' tiếng Trung nói thế nào?", a: ['这个电影很好看', '这个电影很有意思', '这个电视很有意思', '这个电影很不错'], correct: 1, vocab: "这部电影很有意思 (zhè bù diànyǐng hěn yǒu yìsi)" }
+    "Ngữ pháp & Cấu trúc": [
+        {
+            "zh": "啊",
+            "pinyin": "a",
+            "meaning": "à"
+        },
+        {
+            "zh": "比",
+            "pinyin": "bǐ",
+            "meaning": "So sánh"
+        },
+        {
+            "zh": "别",
+            "pinyin": "bié",
+            "meaning": "Đừng"
+        },
+        {
+            "zh": "词",
+            "pinyin": "cí",
+            "meaning": "từ"
+        },
+        {
+            "zh": "从",
+            "pinyin": "cóng",
+            "meaning": "từ"
+        },
+        {
+            "zh": "但",
+            "pinyin": "dàn",
+            "meaning": "Nhưng"
+        },
+        {
+            "zh": "但是",
+            "pinyin": "dànshì",
+            "meaning": "Nhưng"
+        },
+        {
+            "zh": "地",
+            "pinyin": "de",
+            "meaning": "Dùng trong cụm trạng ngữ"
+        },
+        {
+            "zh": "得",
+            "pinyin": "de",
+            "meaning": "Trợ từ (dùng giữa động từ/tính từ và bổ ngữ để chỉ kết quả hoặc mức độ)"
+        },
+        {
+            "zh": "给",
+            "pinyin": "gěi",
+            "meaning": "cho, đưa cho"
+        },
+        {
+            "zh": "跟",
+            "pinyin": "gēn",
+            "meaning": "cùng với\nvà"
+        },
+        {
+            "zh": "更",
+            "pinyin": "gèng",
+            "meaning": "Thậm chí"
+        },
+        {
+            "zh": "还是",
+            "pinyin": "háishi",
+            "meaning": "hay/ hoặc"
+        },
+        {
+            "zh": "好",
+            "pinyin": "hǎo",
+            "meaning": "rất, khá"
+        },
+        {
+            "zh": "就",
+            "pinyin": "jiù",
+            "meaning": "Ngay lập tức"
+        },
+        {
+            "zh": "可能",
+            "pinyin": "kěnéng",
+            "meaning": "có lẽ, có thể"
+        },
+        {
+            "zh": "每",
+            "pinyin": "měi",
+            "meaning": "Mỗi"
+        },
+        {
+            "zh": "那",
+            "pinyin": "nà",
+            "meaning": "Vậy, vậy thì"
+        },
+        {
+            "zh": "那么",
+            "pinyin": "nàme",
+            "meaning": "Vì thế"
+        },
+        {
+            "zh": "那样",
+            "pinyin": "nàyàng",
+            "meaning": "Cái đó"
+        },
+        {
+            "zh": "让",
+            "pinyin": "ràng",
+            "meaning": "cho phép"
+        },
+        {
+            "zh": "虽然",
+            "pinyin": "suīrán",
+            "meaning": "Mặc dù"
+        },
+        {
+            "zh": "所以",
+            "pinyin": "suǒyǐ",
+            "meaning": "Vì thế"
+        },
+        {
+            "zh": "为什么",
+            "pinyin": "wèi shénme",
+            "meaning": "Tại sao"
+        },
+        {
+            "zh": "一起",
+            "pinyin": "yìqǐ",
+            "meaning": "Cùng nhau"
+        },
+        {
+            "zh": "因为",
+            "pinyin": "yīnwèi",
+            "meaning": "bởi vì"
+        },
+        {
+            "zh": "有时",
+            "pinyin": "yǒushí",
+            "meaning": "Thỉnh thoảng"
+        },
+        {
+            "zh": "这么",
+            "pinyin": "zhème",
+            "meaning": "Như thế"
+        },
+        {
+            "zh": "这样",
+            "pinyin": "zhèyàng",
+            "meaning": "Vì thế"
+        },
+        {
+            "zh": "着",
+            "pinyin": "zhe",
+            "meaning": "dùng giữa động từ và tính từ để diễn tả hành động đang xảy ra"
+        },
+        {
+            "zh": "正",
+            "pinyin": "zhèng",
+            "meaning": "hành động đang xảy ra hoặc chỉ trạng thái tiếp diễn"
+        },
+        {
+            "zh": "自己",
+            "pinyin": "zìjǐ",
+            "meaning": "tự thân"
+        },
+        {
+            "zh": "最",
+            "pinyin": "zuì",
+            "meaning": "hầu hết"
+        },
+        {
+            "zh": "啊",
+            "pinyin": "",
+            "meaning": "à"
+        },
+        {
+            "zh": "比如",
+            "pinyin": "",
+            "meaning": "Ví dụ"
+        },
+        {
+            "zh": "比如说",
+            "pinyin": "",
+            "meaning": "Ví dụ"
+        },
+        {
+            "zh": "必须",
+            "pinyin": "",
+            "meaning": "phải"
+        },
+        {
+            "zh": "遍",
+            "pinyin": "",
+            "meaning": "lần, lượt"
+        },
+        {
+            "zh": "不但",
+            "pinyin": "",
+            "meaning": "Không chỉ"
+        },
+        {
+            "zh": "不过",
+            "pinyin": "",
+            "meaning": "Nhưng"
+        },
+        {
+            "zh": "不太",
+            "pinyin": "",
+            "meaning": "Không hẳn"
+        },
+        {
+            "zh": "部分",
+            "pinyin": "",
+            "meaning": "phần"
+        },
+        {
+            "zh": "才（副）",
+            "pinyin": "",
+            "meaning": "chỉ khi... mới..."
+        },
+        {
+            "zh": "超过",
+            "pinyin": "",
+            "meaning": "Quá"
+        },
+        {
+            "zh": "成为",
+            "pinyin": "",
+            "meaning": "trở nên"
+        },
+        {
+            "zh": "重复",
+            "pinyin": "",
+            "meaning": "lặp lại"
+        },
+        {
+            "zh": "重新",
+            "pinyin": "",
+            "meaning": "lại"
+        },
+        {
+            "zh": "春天",
+            "pinyin": "",
+            "meaning": "mùa xuân"
+        },
+        {
+            "zh": "带来",
+            "pinyin": "",
+            "meaning": "mang đến"
+        },
+        {
+            "zh": "但",
+            "pinyin": "",
+            "meaning": "Nhưng"
+        },
+        {
+            "zh": "但是",
+            "pinyin": "",
+            "meaning": "Nhưng"
+        },
+        {
+            "zh": "当",
+            "pinyin": "",
+            "meaning": "khi"
+        },
+        {
+            "zh": "当时",
+            "pinyin": "",
+            "meaning": "sau đó"
+        },
+        {
+            "zh": "倒",
+            "pinyin": "",
+            "meaning": "ngược lại"
+        },
+        {
+            "zh": "到处",
+            "pinyin": "",
+            "meaning": "khắp mọi nơi"
+        },
+        {
+            "zh": "得",
+            "pinyin": "",
+            "meaning": "phải"
+        },
+        {
+            "zh": "的话",
+            "pinyin": "",
+            "meaning": "Nếu như"
+        },
+        {
+            "zh": "等（助、名）",
+            "pinyin": "",
+            "meaning": "vân vân"
+        },
+        {
+            "zh": "等到",
+            "pinyin": "",
+            "meaning": "đợi đến khi"
+        },
+        {
+            "zh": "掉",
+            "pinyin": "",
+            "meaning": "rơi, rớt"
+        },
+        {
+            "zh": "短信",
+            "pinyin": "",
+            "meaning": "Tin nhắn ngắn"
+        },
+        {
+            "zh": "多（副）",
+            "pinyin": "",
+            "meaning": "Nhiều (cặp)"
+        },
+        {
+            "zh": "分数",
+            "pinyin": "",
+            "meaning": "Phân số"
+        },
+        {
+            "zh": "画儿",
+            "pinyin": "",
+            "meaning": "Bức vẽ"
+        },
+        {
+            "zh": "坏人",
+            "pinyin": "",
+            "meaning": "kẻ xấu"
+        },
+        {
+            "zh": "假期",
+            "pinyin": "",
+            "meaning": "ngày lễ"
+        },
+        {
+            "zh": "脚",
+            "pinyin": "",
+            "meaning": "chân"
+        },
+        {
+            "zh": "接",
+            "pinyin": "",
+            "meaning": "nắm lấy"
+        },
+        {
+            "zh": "斤",
+            "pinyin": "",
+            "meaning": "mèo"
+        },
+        {
+            "zh": "开心",
+            "pinyin": "",
+            "meaning": "vui mừng"
+        },
+        {
+            "zh": "开学",
+            "pinyin": "",
+            "meaning": "Trường học bắt đầu"
+        },
+        {
+            "zh": "快餐",
+            "pinyin": "",
+            "meaning": "thức ăn nhanh"
+        },
+        {
+            "zh": "筷子",
+            "pinyin": "",
+            "meaning": "Đũa"
+        },
+        {
+            "zh": "篮球",
+            "pinyin": "",
+            "meaning": "bóng rổ"
+        },
+        {
+            "zh": "练",
+            "pinyin": "",
+            "meaning": "luyện tập"
+        },
+        {
+            "zh": "练习",
+            "pinyin": "",
+            "meaning": "luyện tập"
+        },
+        {
+            "zh": "绿",
+            "pinyin": "",
+            "meaning": "màu xanh lá"
+        },
+        {
+            "zh": "满",
+            "pinyin": "",
+            "meaning": "Đầy"
+        },
+        {
+            "zh": "面¹（名、量）",
+            "pinyin": "",
+            "meaning": "Bề mặt¹ (tên, số lượng)"
+        },
+        {
+            "zh": "明星",
+            "pinyin": "",
+            "meaning": "ngôi sao"
+        },
+        {
+            "zh": "那（连）",
+            "pinyin": "",
+            "meaning": "Đó (Lian)"
+        },
+        {
+            "zh": "那会儿",
+            "pinyin": "",
+            "meaning": "Hồi đó"
+        }
     ],
-    15: [
-        { q: "Từ 'Ngày' tiếng Trung là gì?", a: ['号', '角', '日', '月'], correct: 2, vocab: "日 (rì) - ngày - Ví dụ: 你的生日是几月几日？" },
-        { q: "Từ 'Năm mới, Tết' trong tiếng Trung là gì?", a: ['去年', '今年', '明年', '新年'], correct: 3, vocab: "新年 (xīnnián) - năm mới, Tết - Ví dụ: 祝大家新年快乐。" },
-        { q: "Từ 'Vé' tiếng Trung viết là gì?", a: ['钱', '票', '纸', '报纸'], correct: 1, vocab: "票 (piào) - vé - Ví dụ: 你买火车票了吗？" },
-        { q: "'Ga tàu hỏa' tiếng Trung là gì?", a: ['机场', '车站', '火车站', '地铁站'], correct: 2, vocab: "火车站 (huǒchēzhàn) - ga tàu hoả - Ví dụ: 我在火车站等你。" },
-        { q: "Từ 'Mọi người' trong tiếng Trung là gì?", a: ['大家庭', '大家', '朋友', '班'], correct: 1, vocab: "大家 (dàjiā) - Mọi người - Ví dụ: 祝大家新年快乐。" },
-        { q: "Phó từ 'Càng, hơn nữa' tiếng Trung là gì?", a: ['最', '很', '更', '太'], correct: 2, vocab: "更 (gèng) - càng, hơn nữa - Ví dụ: 希望我们的公司明年更好。" },
-        { q: "Từ 'Em gái' tiếng Trung viết là gì?", a: ['姐姐', '妹妹', '哥哥', '弟弟'], correct: 1, vocab: "妹妹 (mèimei) - em gái - Ví dụ: 你妹妹多大了？" },
-        { q: "Tính từ 'Râm, u ám, nhiều mây' tiếng Trung là gì?", a: ['晴', '阴', '雨', '雪'], correct: 1, vocab: "阴 (yīn) - u ám, nhiều mây - Ví dụ: 天阴了，我要回去了。" },
-        { q: "Câu 'Năm mới sắp đến rồi' tiếng Trung nói thế nào?", a: ['新年要来了', '新年就要到了', '已经新年了', '新年到了'], correct: 1, vocab: "新年就要到了 (xīnnián jiù yào dào le)" },
-        { q: "Chúc 'Mọi người năm mới vui vẻ' tiếng Trung nói thế nào?", a: ['祝大家生日快乐', '祝大家新年好', '祝大家新年快乐', '祝你新年快乐'], correct: 2, vocab: "祝大家新年快乐 (zhù dàjiā xīnnián kuàilè)" }
+    "Tự nhiên & Môi trường": [
+        {
+            "zh": "鸟",
+            "pinyin": "niǎo",
+            "meaning": "chim"
+        },
+        {
+            "zh": "草",
+            "pinyin": "",
+            "meaning": "Cỏ"
+        },
+        {
+            "zh": "草地",
+            "pinyin": "",
+            "meaning": "đồng cỏ"
+        },
+        {
+            "zh": "大海",
+            "pinyin": "",
+            "meaning": "biển"
+        },
+        {
+            "zh": "大自然",
+            "pinyin": "",
+            "meaning": "Thiên nhiên"
+        },
+        {
+            "zh": "动物",
+            "pinyin": "",
+            "meaning": "động vật"
+        },
+        {
+            "zh": "对面",
+            "pinyin": "",
+            "meaning": "đối diện"
+        },
+        {
+            "zh": "公交车",
+            "pinyin": "",
+            "meaning": "xe buýt"
+        },
+        {
+            "zh": "好（副）",
+            "pinyin": "",
+            "meaning": "Tốt (tệ)"
+        },
+        {
+            "zh": "合适",
+            "pinyin": "",
+            "meaning": "thích hợp"
+        },
+        {
+            "zh": "黑",
+            "pinyin": "",
+            "meaning": "đen"
+        },
+        {
+            "zh": "换",
+            "pinyin": "",
+            "meaning": "Thay đổi"
+        },
+        {
+            "zh": "近",
+            "pinyin": "",
+            "meaning": "đóng"
+        },
+        {
+            "zh": "靠",
+            "pinyin": "",
+            "meaning": "Tùy thuộc vào"
+        },
+        {
+            "zh": "科学",
+            "pinyin": "",
+            "meaning": "khoa học"
+        },
+        {
+            "zh": "可怕",
+            "pinyin": "",
+            "meaning": "tệ hại"
+        },
+        {
+            "zh": "客人",
+            "pinyin": "",
+            "meaning": "khách mời"
+        },
+        {
+            "zh": "老（老王）",
+            "pinyin": "",
+            "meaning": "Ông Vương"
+        },
+        {
+            "zh": "凉快",
+            "pinyin": "",
+            "meaning": "Mát mẻ"
+        },
+        {
+            "zh": "留下",
+            "pinyin": "",
+            "meaning": "Rời khỏi"
+        }
     ]
 };

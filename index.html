@@ -7,6 +7,7 @@
     <meta name="google" content="notranslate">
     <title>HSK 2: Ai Là Triệu Phú - Chinh Phục Từ Vựng</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="js/questions.js"></script>
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👑</text></svg>">
 </head>
@@ -20,9 +21,11 @@
                 2</p>
             <p
                 style="text-align: center; color: var(--text-muted); margin-top: 1rem; max-width: 600px; margin-left: auto; margin-right: auto;">
-                Chinh phục 10 câu hỏi từ vựng để giành lấy danh hiệu Triệu Phú HSK 2. Bạn đã sẵn sàng thử thách kiến
+                Chinh phục 15 câu hỏi từ vựng để giành lấy danh hiệu Triệu Phú HSK 2. Bạn đã sẵn sàng thử thách kiến
                 thức của mình?
             </p>
+            <button id="musicToggle" class="btn-secondary" onclick="toggleMusic()"
+                style="position: fixed; top: 2rem; right: 2rem; z-index: 1001; padding: 0.8rem; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">🔊</button>
         </header>
 
         <section class="lesson-selection" style="width: 100%;">
@@ -42,12 +45,20 @@
             <h2
                 style="margin-bottom: 1.5rem; color: var(--secondary); font-family: 'Playfair Display', serif; font-size: 2rem;">
                 Luật Chơi Triệu Phú</h2>
-            <div style="text-align: left; margin-bottom: 2rem; line-height: 1.8; color: #e2e8f0;">
-                <p>💎 Có 10 câu hỏi. Trả lời đúng cả 10 câu để chiến thắng.</p>
-                <p>📍 Mốc số 5 là <strong>Mốc An Toàn</strong>. Nếu sai sau mốc này, bạn vẫn giữ được điểm thưởng mốc 5.
+            <div style="text-align: left; margin-bottom: 2rem; line-height: 1.8; color: #e2e8f0; font-size: 0.95rem;">
+                <p>💎 <strong>15 Câu Hỏi:</strong> Chinh phục 15 câu hỏi từ vựng để giành lấy danh hiệu Triệu Phú HSK 2.
                 </p>
-                <p>💡 Bạn có <strong>1 Quyền trợ giúp 50/50</strong> (loại bỏ 2 phương án sai).</p>
-                <p>🛑 Bạn có thể <strong>Dừng cuộc chơi</strong> bất cứ lúc nào để bảo toàn số điểm đang có.</p>
+                <p>📍 <strong>Mốc An Toàn:</strong> Câu 5 và Câu 10 là mốc quan trọng. Nếu sai sau các mốc này, bạn giữ
+                    được tiền thưởng mốc đó.</p>
+                <p>💡 <strong>Quyền Trợ Giúp:</strong>
+                    <br>• <strong>50/50:</strong> Loại bỏ 2 phương án sai.
+                    <br>• <strong>Khán giả:</strong> Xem biểu đồ tỉ lệ bình chọn từ 100 khán giả.
+                    <br>• <strong>Chuyên gia:</strong> Nhận tư vấn trực tiếp từ chuyên gia HSK.
+                </p>
+                <p>🛑 <strong>Dừng Cuộc Chơi:</strong> Bạn có quyền dừng lại bất cứ lúc nào để bảo toàn số tiền thưởng
+                    đang có.</p>
+                <p>⏰ <strong>Thời Gian:</strong> Bạn có 45 giây suy nghĩ cho mỗi câu hỏi. Đừng để thời gian trôi qua vô
+                    ích!</p>
             </div>
             <button class="btn-secondary" onclick="closeInstructions()"
                 style="padding: 1rem 3rem; font-size: 1.1rem;">BẮT ĐẦU NGAY</button>
@@ -58,29 +69,51 @@
         bgMusic.loop = true;
 
         const grid = document.getElementById('lessonGrid');
-        for (let i = 1; i <= 15; i++) {
+        const topics = Object.keys(hsk2Vocab);
+
+        topics.forEach(topic => {
             const card = document.createElement('div');
             card.className = 'glass lesson-card';
             card.innerHTML = `
-                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">CẤP ĐỘ</div>
-                <h3>BÀI ${i}</h3>
-                <p style="color: var(--text-muted); font-size: 0.9rem;">HSK 2 Lesson ${i}</p>
+                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">CHỦ ĐỀ</div>
+                <h3 style="font-size: 1.1rem; line-height: 1.2;">${topic}</h3>
+                <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.5rem;">${hsk2Vocab[topic].length} từ vựng</p>
             `;
             card.onclick = () => {
                 card.style.transform = 'scale(0.95)';
                 setTimeout(() => {
-                    window.location.href = `game.html?lesson=${i}`;
+                    window.location.href = `game.html?topic=${encodeURIComponent(topic)}`;
                 }, 150);
             };
             grid.appendChild(card);
-        }
+        });
 
         function closeInstructions() {
-            bgMusic.play().catch(e => console.log("Autoplay blocked:", e));
+            if (localStorage.getItem('musicEnabled') !== 'false') {
+                bgMusic.play().catch(e => console.log("Autoplay blocked:", e));
+            }
             document.getElementById('instructionModal').style.filter = 'opacity(0)';
             setTimeout(() => {
                 document.getElementById('instructionModal').style.display = 'none';
             }, 300);
+        }
+
+        function toggleMusic() {
+            const btn = document.getElementById('musicToggle');
+            if (bgMusic.paused) {
+                bgMusic.play();
+                btn.textContent = '🔊';
+                localStorage.setItem('musicEnabled', 'true');
+            } else {
+                bgMusic.pause();
+                btn.textContent = '🔇';
+                localStorage.setItem('musicEnabled', 'false');
+            }
+        }
+
+        // Initialize music state
+        if (localStorage.getItem('musicEnabled') === 'false') {
+            document.getElementById('musicToggle').textContent = '🔇';
         }
     </script>
 </body>
