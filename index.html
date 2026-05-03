@@ -57,7 +57,7 @@
                 </p>
                 <p>🛑 <strong>Dừng Cuộc Chơi:</strong> Bạn có quyền dừng lại bất cứ lúc nào để bảo toàn số tiền thưởng
                     đang có.</p>
-                <p>⏰ <strong>Thời Gian:</strong> Bạn có 45 giây suy nghĩ cho mỗi câu hỏi. Đừng để thời gian trôi qua vô
+                <p>⏰ <strong>Thời Gian:</strong> Bạn có 15 giây suy nghĩ cho mỗi câu hỏi. Đừng để thời gian trôi qua vô
                     ích!</p>
             </div>
             <button class="btn-secondary" onclick="closeInstructions()"
@@ -71,7 +71,7 @@
         const grid = document.getElementById('lessonGrid');
         const topics = Object.keys(hsk2Vocab);
 
-        topics.forEach(topic => {
+        topics.forEach((topic, index) => {
             const card = document.createElement('div');
             card.className = 'glass lesson-card';
             card.innerHTML = `
@@ -82,7 +82,7 @@
             card.onclick = () => {
                 card.style.transform = 'scale(0.95)';
                 setTimeout(() => {
-                    window.location.href = `game.html?topic=${encodeURIComponent(topic)}`;
+                    window.location.href = `game.html?topic=chude${index + 1}`;
                 }, 150);
             };
             grid.appendChild(card);

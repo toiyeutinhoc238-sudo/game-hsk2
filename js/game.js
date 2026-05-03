@@ -1,6 +1,14 @@
 document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
-    const topicName = params.get('topic');
+    const topicParam = params.get('topic');
+    const topics = Object.keys(hsk2Vocab);
+    let topicName = topicParam;
+
+    if (topicParam && topicParam.startsWith('chude')) {
+        const idx = parseInt(topicParam.replace('chude', '')) - 1;
+        topicName = topics[idx];
+    }
+
     const vocabPool = hsk2Vocab[topicName];
 
     if (!vocabPool || vocabPool.length === 0) {
@@ -63,7 +71,7 @@ document.addEventListener('DOMContentLoaded', () => {
     bgMusic.loop = true;
 
     // Music State Management
-    window.toggleMusic = function() {
+    window.toggleMusic = function () {
         const btn = document.getElementById('musicToggle');
         if (bgMusic.paused) {
             bgMusic.play();
@@ -137,14 +145,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function startTimer() {
+    function startTimer(isResume = false) {
         clearInterval(timerInterval);
-        timeLeft = 45;
-        timerBar.style.width = '100%';
-        
+        if (!isResume) {
+            timeLeft = 15;
+            timerBar.style.width = '100%';
+        }
+
         timerInterval = setInterval(() => {
             timeLeft -= 0.1;
-            const percentage = (timeLeft / 45) * 100;
+            const percentage = (timeLeft / 15) * 100;
             timerBar.style.width = `${percentage}%`;
 
             if (timeLeft <= 0) {
@@ -154,6 +164,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }, 100);
     }
+
+    window.pauseTimer = function () {
+        clearInterval(timerInterval);
+    };
+
+    window.resumeTimer = function () {
+        if (!isGameOver) {
+            startTimer(true);
+        }
+    };
+
+    window.closeHelpModal = function (modalId) {
+        document.getElementById(modalId).style.display = 'none';
+        window.resumeTimer();
+    };
 
     function startCountdown() {
         let count = 3;
@@ -201,14 +226,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleChoice(idx) {
         if (isGameOver) return;
         clearInterval(timerInterval); // Stop timer on choice
-        
+
         const q = questions[currentIdx];
         const buttons = optionsGrid.querySelectorAll('.option-btn');
-        
+
         // Highlight selection
         buttons[idx].classList.add('selected');
         statusMsg.textContent = 'Đang kiểm tra...';
-        
+
         // Suspend clicks
         buttons.forEach(b => b.disabled = true);
 
@@ -219,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 buttons[idx].classList.remove('selected');
                 buttons[idx].classList.add('correct');
                 currentScore = ladderValues[currentIdx];
-                
+
                 // Set safe haven
                 if (currentIdx === 4) safeScore = ladderValues[4];
                 if (currentIdx === 9) safeScore = ladderValues[9];
@@ -246,56 +271,75 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 3000);
     }
 
-    window.use5050 = function() {
+    window.use5050 = function () {
         if (isGameOver) return;
+        window.pauseTimer();
         helpSound.play();
+
         const q = questions[currentIdx];
         const buttons = optionsGrid.querySelectorAll('.option-btn');
-        let removed = 0;
         const helpBtn = document.getElementById('help5050');
         helpBtn.disabled = true;
         helpBtn.style.opacity = '0.3';
         helpBtn.style.cursor = 'not-allowed';
 
-        const indices = [0, 1, 2, 3].sort(() => Math.random() - 0.5);
-        for (let i = 0; i < indices.length && removed < 2; i++) {
-            if (indices[i] !== q.correct) {
-                buttons[indices[i]].style.visibility = 'hidden';
-                buttons[indices[i]].disabled = true;
-                removed++;
+        let count = 5;
+        const originalStatus = statusMsg.textContent;
+        statusMsg.textContent = `Hệ thống đang tính toán (${count}s)...`;
+
+        const interval = setInterval(() => {
+            count--;
+            if (count > 0) {
+                statusMsg.textContent = `Hệ thống đang tính toán (${count}s)...`;
+            } else {
+                clearInterval(interval);
+                let removed = 0;
+                const indices = [0, 1, 2, 3].sort(() => Math.random() - 0.5);
+                for (let i = 0; i < indices.length && removed < 2; i++) {
+                    if (indices[i] !== q.correct) {
+                        buttons[indices[i]].style.visibility = 'hidden';
+                        buttons[indices[i]].disabled = true;
+                        removed++;
+                    }
+                }
+                statusMsg.textContent = 'Hệ thống đã loại bỏ 2 phương án sai.';
+                setTimeout(() => {
+                    statusMsg.textContent = 'Tiếp tục suy nghĩ...';
+                    window.resumeTimer();
+                }, 1000);
             }
-        }
-        statusMsg.textContent = 'Hệ thống đã loại bỏ 2 phương án sai.';
+        }, 1000);
     };
 
-    window.useAudience = function() {
+    window.useAudience = function () {
         if (isGameOver) return;
+        window.pauseTimer();
         helpSound.play();
         const q = questions[currentIdx];
         const helpBtn = document.getElementById('helpAudience');
         helpBtn.disabled = true;
         helpBtn.style.opacity = '0.3';
-        
+
         const modal = document.getElementById('audienceModal');
         modal.style.display = 'flex';
         const chart = document.getElementById('audienceChart');
         const closeBtn = document.getElementById('closeAudienceBtn');
         closeBtn.style.display = 'none';
-        
+
         let status = document.getElementById('audienceStatus');
         if (status) status.remove();
         status = document.createElement('p');
         status.id = 'audienceStatus';
         status.style.marginBottom = '1rem';
-        status.textContent = 'Khán giả đang bình chọn (15s)...';
+        status.textContent = 'Khán giả đang bình chọn (5s)...';
         modal.querySelector('.modal-content').insertBefore(status, chart);
-        
+
         const labels = ['A', 'B', 'C', 'D'];
-        let duration = 15000; // 15 seconds
+        let duration = 5000; // 5 seconds
         const interval = setInterval(() => {
             duration -= 100;
-            status.textContent = `Khán giả đang bình chọn (${Math.ceil(duration/1000)}s)...`;
-            
+            status.textContent = `Khán giả đang bình chọn (${Math.ceil(duration / 1000)}s)...`;
+
             // Random fluctuating bars
             chart.innerHTML = '';
             labels.forEach(() => {
@@ -314,14 +358,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 clearInterval(interval);
                 status.textContent = 'KẾT QUẢ BÌNH CHỌN CHÍNH THỨC:';
                 closeBtn.style.display = 'inline-block';
-                
+
                 // Final percentages
                 let percs = [0, 0, 0, 0];
                 let remaining = 100;
                 const correctPerc = Math.floor(Math.random() * 30) + 55; // 55-85%
                 percs[q.correct] = correctPerc;
                 remaining -= correctPerc;
-                
+
                 const others = [0, 1, 2, 3].filter(i => i !== q.correct);
                 others.forEach((idx, i) => {
                     if (i === others.length - 1) {
@@ -332,7 +376,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         remaining -= p;
                     }
                 });
-                
+
                 chart.innerHTML = '';
                 percs.forEach((p, i) => {
                     const container = document.createElement('div');
@@ -348,34 +392,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 100);
     };
 
-    window.useExpert = function() {
+    window.useExpert = function () {
         if (isGameOver) return;
+        window.pauseTimer();
         helpSound.play();
         const q = questions[currentIdx];
         const helpBtn = document.getElementById('helpExpert');
         helpBtn.disabled = true;
         helpBtn.style.opacity = '0.3';
-        
+
         const modal = document.getElementById('expertModal');
         const thinking = document.getElementById('expertThinking');
         const answer = document.getElementById('expertAnswer');
-        const timerBar = document.getElementById('expertTimerBar');
+        const timerBarExpert = document.getElementById('expertTimerBar');
         const closeBtn = document.getElementById('closeExpertBtn');
-        
+
         modal.style.display = 'flex';
         thinking.style.display = 'block';
         answer.style.display = 'none';
         closeBtn.style.display = 'none';
-        
-        let timeLeft = 15000; // 15 seconds
-        const totalTime = 15000;
-        const step = 100;
+
+        let timeLeftExpert = 5000; // 5 seconds
+        const totalTimeExpert = 5000;
+        const stepExpert = 100;
         const interval = setInterval(() => {
-            timeLeft -= step;
-            timerBar.style.width = (timeLeft / totalTime * 100) + '%';
-            thinking.querySelector('p').textContent = `Chuyên gia đang suy nghĩ (${Math.ceil(timeLeft/1000)}s)...`;
-            
-            if (timeLeft <= 0) {
+            timeLeftExpert -= stepExpert;
+            timerBarExpert.style.width = (timeLeftExpert / totalTimeExpert * 100) + '%';
+            thinking.querySelector('p').textContent = `Chuyên gia đang suy nghĩ (${Math.ceil(timeLeftExpert / 1000)}s)...`;
+
+            if (timeLeftExpert <= 0) {
                 clearInterval(interval);
                 thinking.style.display = 'none';
                 answer.style.display = 'block';
@@ -383,15 +428,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const prefixes = ['A', 'B', 'C', 'D'];
                 answer.innerHTML = `<strong>Chuyên gia tư vấn:</strong><br><br>Sau khi cân nhắc kỹ, tôi khá chắc chắn đáp án đúng là <strong>${prefixes[q.correct]}</strong>: "${q.a[q.correct]}".`;
             }
-        }, step);
+        }, stepExpert);
     };
 
-    window.stopGamePrompt = function() {
+    window.stopGamePrompt = function () {
         if (isGameOver) return;
         document.getElementById('stopModal').style.display = 'flex';
     };
 
-    window.confirmStop = function() {
+    window.confirmStop = function () {
         document.getElementById('stopModal').style.display = 'none';
         endGame(false, true);
     };
@@ -401,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
         clearInterval(timerInterval);
         bgMusic.pause(); // Pause music on game over
         resultModal.style.display = 'flex';
-        
+
         // Generate vocab review table
         reviewList.innerHTML = `
             <table class="review-table">
@@ -429,7 +474,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 zh = parts[0];
                 meaning = parts[1] || '';
             }
-            
+
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${zh}</td>
