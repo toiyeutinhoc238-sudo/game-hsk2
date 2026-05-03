@@ -1,7 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
     const topicParam = params.get('topic');
-    const topics = Object.keys(hsk2Vocab);
+    const allTopicKeys = Object.keys(hsk2Vocab);
+    const topics = allTopicKeys.filter(t => hsk2Vocab[t].length >= 9);
     let topicName = topicParam;
 
     if (topicParam && topicParam.startsWith('chude')) {

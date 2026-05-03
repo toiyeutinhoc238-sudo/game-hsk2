@@ -72,8 +72,7 @@
         const allTopics = Object.keys(hsk2Vocab);
         const filteredTopics = allTopics.filter(topic => hsk2Vocab[topic].length >= 9);
 
-        filteredTopics.forEach((topic) => {
-            const index = allTopics.indexOf(topic);
+        filteredTopics.forEach((topic, idx) => {
             const card = document.createElement('div');
             card.className = 'glass lesson-card';
             card.innerHTML = `
@@ -84,7 +83,7 @@
             card.onclick = () => {
                 card.style.transform = 'scale(0.95)';
                 setTimeout(() => {
-                    window.location.href = `game.html?topic=chude${index + 1}`;
+                    window.location.href = `game.html?topic=chude${idx + 1}`;
                 }, 150);
             };
             grid.appendChild(card);
