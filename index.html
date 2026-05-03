@@ -69,9 +69,11 @@
         bgMusic.loop = true;
 
         const grid = document.getElementById('lessonGrid');
-        const topics = Object.keys(hsk2Vocab);
+        const allTopics = Object.keys(hsk2Vocab);
+        const filteredTopics = allTopics.filter(topic => hsk2Vocab[topic].length >= 9);
 
-        topics.forEach((topic, index) => {
+        filteredTopics.forEach((topic) => {
+            const index = allTopics.indexOf(topic);
             const card = document.createElement('div');
             card.className = 'glass lesson-card';
             card.innerHTML = `

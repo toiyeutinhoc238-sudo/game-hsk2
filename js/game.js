@@ -10,9 +10,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const vocabPool = hsk2Vocab[topicName];
-
-    if (!vocabPool || vocabPool.length === 0) {
-        alert('Chủ đề không tồn tại hoặc không có từ vựng!');
+    if (!vocabPool || vocabPool.length < 9) {
+        alert('Chủ đề này không đủ số lượng từ vựng để tổ chức trò chơi (tối thiểu 9 từ)!');
         window.location.href = 'index.html';
         return;
     }
@@ -21,11 +20,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let questions = [];
     const allMeanings = [];
     const allZh = [];
-    Object.values(hsk2Vocab).forEach(pool => {
-        pool.forEach(v => {
-            allMeanings.push(v.meaning);
-            allZh.push(v.zh);
-        });
+    Object.keys(hsk2Vocab).forEach(topic => {
+        const pool = hsk2Vocab[topic];
+        if (pool.length >= 9) {
+            pool.forEach(v => {
+                allMeanings.push(v.meaning);
+                allZh.push(v.zh);
+            });
+        }
     });
 
     const shuffledVocab = [...vocabPool].sort(() => Math.random() - 0.5);
