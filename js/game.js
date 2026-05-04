@@ -31,10 +31,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const shuffledVocab = [...vocabPool].sort(() => Math.random() - 0.5);
+    // Create a pool of all possible questions for the chosen topic
+    let possibleQuestions = [];
+    vocabPool.forEach(v => {
+        possibleQuestions.push({ wordObj: v, isZhToVi: true });
+        possibleQuestions.push({ wordObj: v, isZhToVi: false });
+    });
+
+    // Shuffle and pick 15 unique question templates
+    possibleQuestions.sort(() => Math.random() - 0.5);
+    const selectedQuestions = possibleQuestions.slice(0, 15);
+
     for (let i = 0; i < 15; i++) {
-        const wordObj = shuffledVocab[i % shuffledVocab.length];
-        const isZhToVi = Math.random() > 0.5;
+        const qTemplate = selectedQuestions[i];
+        const wordObj = qTemplate.wordObj;
+        const isZhToVi = qTemplate.isZhToVi;
         let qText, correctAns, options;
 
         if (isZhToVi) {
@@ -71,6 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const wrongSound = new Audio('traloisai.mp3');
     const bgMusic = new Audio('choigame.mp3');
     const helpSound = new Audio('chonquyentrogiup.mp3');
+    const clapSound = new Audio('votay.mp3');
     bgMusic.loop = true;
 
     // Music State Management
@@ -105,6 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Game State
     let currentIdx = 0;
     let isGameOver = false;
+    let isProcessing = false;
     let used5050 = false;
     let currentScore = "0";
     let safeScore = "0";
@@ -162,8 +175,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (timeLeft <= 0) {
                 clearInterval(timerInterval);
-                statusMsg.textContent = 'Hết giờ rồi!';
-                setTimeout(() => endGame(false), 1000);
+                isProcessing = true;
+                statusMsg.textContent = 'Hết giờ rồi! Bạn đã mất trắng.';
+                
+                const q = questions[currentIdx];
+                const buttons = optionsGrid.querySelectorAll('.option-btn');
+                buttons.forEach(b => b.disabled = true);
+                if (buttons[q.correct]) {
+                    buttons[q.correct].classList.add('correct');
+                }
+                
+                wrongSound.play();
+                
+                currentScore = "0";
+                safeScore = "0";
+                
+                setTimeout(() => endGame(false, false, true), 3000);
             }
         }, 100);
     }
@@ -227,7 +254,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function handleChoice(idx) {
-        if (isGameOver) return;
+        if (isGameOver || isProcessing) return;
+        isProcessing = true;
         clearInterval(timerInterval); // Stop timer on choice
 
         const q = questions[currentIdx];
@@ -255,6 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 statusMsg.textContent = 'Chính xác! Đang chuẩn bị câu hỏi tiếp theo...';
                 correctSound.onended = () => {
                     currentIdx++;
+                    isProcessing = false;
                     if (currentIdx < 15) {
                         loadQuestion();
                     } else {
@@ -275,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.use5050 = function () {
-        if (isGameOver) return;
+        if (isGameOver || isProcessing) return;
         window.pauseTimer();
         helpSound.play();
 
@@ -315,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.useAudience = function () {
-        if (isGameOver) return;
+        if (isGameOver || isProcessing) return;
         window.pauseTimer();
         helpSound.play();
         const q = questions[currentIdx];
@@ -396,7 +425,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.useExpert = function () {
-        if (isGameOver) return;
+        if (isGameOver || isProcessing) return;
         window.pauseTimer();
         helpSound.play();
         const q = questions[currentIdx];
@@ -444,7 +473,7 @@ document.addEventListener('DOMContentLoaded', () => {
         endGame(false, true);
     };
 
-    function endGame(isWin, stoppedManually = false) {
+    function endGame(isWin, stoppedManually = false, isTimeout = false) {
         isGameOver = true;
         clearInterval(timerInterval);
         bgMusic.pause(); // Pause music on game over
@@ -491,15 +520,21 @@ document.addEventListener('DOMContentLoaded', () => {
             resultTitle.textContent = 'CHÚC MỪNG CHIẾN THẮNG!';
             resultTitle.style.color = 'var(--secondary)';
             resultMessage.textContent = `Bạn đã trở thành Triệu Phú HSK 2 với 500.000.000 VNĐ!`;
+            clapSound.play();
         } else if (stoppedManually) {
             resultTitle.textContent = 'BẢO TOÀN THÀNH CÔNG';
             resultTitle.style.color = 'var(--secondary)';
             resultMessage.textContent = `Bạn đã dừng cuộc chơi. Số tiền bạn mang về là: ${currentScore} VNĐ.`;
+            clapSound.play();
         } else {
             resultTitle.textContent = 'KẾT THÚC TRẬN ĐẤU';
             resultTitle.style.color = 'var(--error)';
-            const finalPrize = (currentIdx >= 10) ? safeScore : (currentIdx >= 5 ? ladderValues[4] : "0");
-            resultMessage.textContent = `Bạn đã dừng lại tại câu số ${currentIdx + 1}. Số tiền thưởng: ${finalPrize} VNĐ.`;
+            if (isTimeout) {
+                resultMessage.textContent = `Hết thời gian! Bạn đã trắng tay. Số tiền thưởng: 0 VNĐ.`;
+            } else {
+                const finalPrize = (currentIdx >= 10) ? safeScore : (currentIdx >= 5 ? ladderValues[4] : "0");
+                resultMessage.textContent = `Bạn đã trả lời sai tại câu số ${currentIdx + 1}. Số tiền thưởng: ${finalPrize} VNĐ.`;
+            }
         }
     }
 
