@@ -104,9 +104,23 @@
     </div>
 
     <!-- Countdown Overlay -->
-    <div id="countdownOverlay" class="modal" style="display: none; background: rgba(0,0,0,0.9); z-index: 2000; flex-direction: column; justify-content: center; align-items: center;">
-        <div style="color: var(--secondary); font-size: 1.5rem; margin-bottom: 2rem; font-weight: 600; letter-spacing: 2px;">CHUẨN BỊ</div>
-        <div id="countdownNumber" style="font-size: 12rem; color: #fff; font-weight: 900; text-shadow: 0 0 30px var(--secondary);">3</div>
+    <div id="countdownOverlay" class="modal" style="display: none; background: rgba(0,0,0,0.95); z-index: 2000; flex-direction: column; justify-content: center; align-items: center; padding: 2rem;">
+        <div id="instructionContent" class="glass modal-content" style="max-width: 600px; text-align: center;">
+            <h2 style="margin-bottom: 1.5rem; color: var(--secondary); font-size: 2rem; font-family: 'Playfair Display', serif;">LUẬT CHƠI</h2>
+            <div style="text-align: left; margin-bottom: 2rem; line-height: 1.8; color: #e2e8f0; font-size: 0.95rem;">
+                <p>💎 <strong>15 Câu Hỏi:</strong> Chinh phục 15 câu hỏi từ vựng HSK 2.</p>
+                <p>📍 <strong>Mốc An Toàn:</strong> Câu 5 và Câu 10 là các mốc quan trọng.</p>
+                <p>💡 <strong>Quyền Trợ Giúp:</strong> 50/50, Khán giả, Chuyên gia.</p>
+                <p>🛑 <strong>Dừng Cuộc Chơi:</strong> Có thể dừng lại bất cứ lúc nào để bảo toàn tiền thưởng.</p>
+                <p>⏰ <strong>Thời Gian:</strong> 15 giây cho mỗi câu hỏi.</p>
+            </div>
+            <button class="btn-secondary" onclick="beginActualCountdown()" style="padding: 1rem 3rem; font-size: 1.1rem;">SẴN SÀNG</button>
+        </div>
+        
+        <div id="countdownRunning" style="display: none; flex-direction: column; align-items: center;">
+            <div style="color: var(--secondary); font-size: 1.5rem; margin-bottom: 2rem; font-weight: 600; letter-spacing: 2px;">CHUẨN BỊ</div>
+            <div id="countdownNumber" style="font-size: 12rem; color: #fff; font-weight: 900; text-shadow: 0 0 30px var(--secondary);">3</div>
+        </div>
     </div>
 
     <script src="js/questions.js"></script>

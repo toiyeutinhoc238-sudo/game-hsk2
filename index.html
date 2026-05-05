@@ -39,31 +39,6 @@
         </footer>
     </div>
 
-    <!-- Instructions Modal -->
-    <div id="instructionModal" class="modal" style="display: flex;">
-        <div class="glass modal-content">
-            <h2
-                style="margin-bottom: 1.5rem; color: var(--secondary); font-family: 'Playfair Display', serif; font-size: 2rem;">
-                Luật Chơi Triệu Phú</h2>
-            <div style="text-align: left; margin-bottom: 2rem; line-height: 1.8; color: #e2e8f0; font-size: 0.95rem;">
-                <p>💎 <strong>15 Câu Hỏi:</strong> Chinh phục 15 câu hỏi từ vựng để giành lấy danh hiệu Triệu Phú HSK 2.
-                </p>
-                <p>📍 <strong>Mốc An Toàn:</strong> Câu 5 và Câu 10 là mốc quan trọng. Nếu sai sau các mốc này, bạn giữ
-                    được tiền thưởng mốc đó.</p>
-                <p>💡 <strong>Quyền Trợ Giúp:</strong>
-                    <br>• <strong>50/50:</strong> Loại bỏ 2 phương án sai.
-                    <br>• <strong>Khán giả:</strong> Xem biểu đồ tỉ lệ bình chọn từ 100 khán giả.
-                    <br>• <strong>Chuyên gia:</strong> Nhận tư vấn trực tiếp từ chuyên gia HSK.
-                </p>
-                <p>🛑 <strong>Dừng Cuộc Chơi:</strong> Bạn có quyền dừng lại bất cứ lúc nào để bảo toàn số tiền thưởng
-                    đang có.</p>
-                <p>⏰ <strong>Thời Gian:</strong> Bạn có 15 giây suy nghĩ cho mỗi câu hỏi. Đừng để thời gian trôi qua vô
-                    ích!</p>
-            </div>
-            <button class="btn-secondary" onclick="closeInstructions()"
-                style="padding: 1rem 3rem; font-size: 1.1rem;">BẮT ĐẦU NGAY</button>
-        </div>
-    </div>
     <script>
         const bgMusic = new Audio('ailatrieuphu.mp3');
         bgMusic.loop = true;
@@ -89,16 +64,6 @@
             grid.appendChild(card);
         });
 
-        function closeInstructions() {
-            if (localStorage.getItem('musicEnabled') !== 'false') {
-                bgMusic.play().catch(e => console.log("Autoplay blocked:", e));
-            }
-            document.getElementById('instructionModal').style.filter = 'opacity(0)';
-            setTimeout(() => {
-                document.getElementById('instructionModal').style.display = 'none';
-            }, 300);
-        }
-
         function toggleMusic() {
             const btn = document.getElementById('musicToggle');
             if (bgMusic.paused) {
@@ -116,6 +81,13 @@
         if (localStorage.getItem('musicEnabled') === 'false') {
             document.getElementById('musicToggle').textContent = '🔇';
         }
+
+        // Start music on first interaction
+        document.addEventListener('click', () => {
+            if (localStorage.getItem('musicEnabled') !== 'false' && bgMusic.paused) {
+                bgMusic.play().catch(e => console.log("Autoplay blocked:", e));
+            }
+        }, { once: true });
     </script>
 </body>
 

@@ -211,8 +211,22 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function startCountdown() {
-        let count = 3;
         countdownOverlay.style.display = 'flex';
+        document.getElementById('instructionContent').style.display = 'block';
+        document.getElementById('countdownRunning').style.display = 'none';
+    }
+
+    window.beginActualCountdown = function() {
+        // Ensure music plays on interaction
+        if (localStorage.getItem('musicEnabled') !== 'false' && bgMusic.paused) {
+            bgMusic.play().catch(e => console.log("Autoplay blocked:", e));
+        }
+
+        document.getElementById('instructionContent').style.display = 'none';
+        const countdownRunning = document.getElementById('countdownRunning');
+        countdownRunning.style.display = 'flex';
+        
+        let count = 3;
         countdownNumber.textContent = count;
 
         const interval = setInterval(() => {
@@ -225,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadQuestion();
             }
         }, 1000);
-    }
+    };
 
     function loadQuestion() {
         if (currentIdx >= 15) {
