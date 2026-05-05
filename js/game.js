@@ -465,6 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.stopGamePrompt = function () {
         if (isGameOver) return;
+        window.pauseTimer();
         document.getElementById('stopModal').style.display = 'flex';
     };
 
@@ -525,7 +526,11 @@ document.addEventListener('DOMContentLoaded', () => {
             resultTitle.textContent = 'BẢO TOÀN THÀNH CÔNG';
             resultTitle.style.color = 'var(--secondary)';
             resultMessage.textContent = `Bạn đã dừng cuộc chơi. Số tiền bạn mang về là: ${currentScore} VNĐ.`;
-            clapSound.play();
+            if (currentScore === "0") {
+                wrongSound.play();
+            } else {
+                clapSound.play();
+            }
         } else {
             resultTitle.textContent = 'KẾT THÚC TRẬN ĐẤU';
             resultTitle.style.color = 'var(--error)';
