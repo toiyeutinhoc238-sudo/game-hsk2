@@ -47,21 +47,46 @@
         const allTopics = Object.keys(hsk2Vocab);
         const filteredTopics = allTopics.filter(topic => hsk2Vocab[topic].length >= 9);
 
-        filteredTopics.forEach((topic, idx) => {
-            const card = document.createElement('div');
-            card.className = 'glass lesson-card';
-            card.innerHTML = `
-                <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">CHỦ ĐỀ</div>
-                <h3 style="font-size: 1.1rem; line-height: 1.2;">${topic}</h3>
-                <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.5rem;">${hsk2Vocab[topic].length} từ vựng</p>
-            `;
-            card.onclick = () => {
-                card.style.transform = 'scale(0.95)';
-                setTimeout(() => {
-                    window.location.href = `game.html?topic=chude${idx + 1}`;
-                }, 150);
-            };
-            grid.appendChild(card);
+        // Group topics by base name to handle parts
+        const groups = [];
+        const groupMap = new Map();
+
+        filteredTopics.forEach(topic => {
+            const match = topic.match(/^(.*?)\s*\(Phần\s*(\d+)\)$/);
+            const baseName = match ? match[1] : topic;
+            const partNum = match ? parseInt(match[2]) : null;
+
+            if (!groupMap.has(baseName)) {
+                const group = { baseName, items: [] };
+                groupMap.set(baseName, group);
+                groups.push(group);
+            }
+            groupMap.get(baseName).items.push({ name: topic, part: partNum });
+        });
+
+        groups.forEach((group, gIdx) => {
+            group.items.forEach((item, iIdx) => {
+                const card = document.createElement('div');
+                card.className = 'glass lesson-card';
+                card.innerHTML = `
+                    <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem;">CHỦ ĐỀ</div>
+                    <h3 style="font-size: 1.1rem; line-height: 1.2;">${item.name}</h3>
+                    <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.5rem;">${hsk2Vocab[item.name].length} từ vựng</p>
+                `;
+
+                let linkId = `chude${gIdx + 1}`;
+                if (group.items.length > 1) {
+                    linkId += `_phan${item.part || (iIdx + 1)}`;
+                }
+
+                card.onclick = () => {
+                    card.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        window.location.href = `game.html?topic=${linkId}`;
+                    }, 150);
+                };
+                grid.appendChild(card);
+            });
         });
 
         function toggleMusic() {

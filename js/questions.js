@@ -222,7 +222,7 @@ const hsk2Vocab = {
             "meaning": "hay, hấp dẫn, thú vị"
         }
     ],
-    "Đời sống sinh hoạt": [
+    "Đời sống sinh hoạt (Phần 1)": [
         {
             "zh": "爱情片",
             "pinyin": "àiqíngpiàn",
@@ -299,6 +299,13 @@ const hsk2Vocab = {
             "meaning": "Làm bài kiểm tra; kiểm tra"
         },
         {
+            "zh": "包",
+            "pinyin": "bāo",
+            "meaning": "gói lại"
+        }
+    ],
+    "Đời sống sinh hoạt (Phần 2)": [
+        {
             "zh": "旅游",
             "pinyin": "lǚyóu",
             "meaning": "du lịch"
@@ -372,11 +379,6 @@ const hsk2Vocab = {
             "zh": "花",
             "pinyin": "huā",
             "meaning": "tiêu, tốn"
-        },
-        {
-            "zh": "包",
-            "pinyin": "bāo",
-            "meaning": "gói lại"
         }
     ],
     "Đồ vật & Công cụ": [
@@ -573,7 +575,7 @@ const hsk2Vocab = {
             "meaning": "trạm (xe, tàu)"
         }
     ],
-    "Giao thông & Di chuyển": [
+    "Giao thông & Di chuyển (Phần 1)": [
         {
             "zh": "出国",
             "pinyin": "chūguó",
@@ -653,7 +655,9 @@ const hsk2Vocab = {
             "zh": "进",
             "pinyin": "jìn",
             "meaning": "Đi vào"
-        },
+        }
+    ],
+    "Giao thông & Di chuyển (Phần 2)": [
         {
             "zh": "进来",
             "pinyin": "jìnlái",

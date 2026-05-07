@@ -2,12 +2,39 @@ document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
     const topicParam = params.get('topic');
     const allTopicKeys = Object.keys(hsk2Vocab);
-    const topics = allTopicKeys.filter(t => hsk2Vocab[t].length >= 9);
+    const filteredTopics = allTopicKeys.filter(t => hsk2Vocab[t].length >= 9);
+
+    // Group topics by base name to handle parts (must match index.html logic)
+    const groups = [];
+    const groupMap = new Map();
+    filteredTopics.forEach(topic => {
+        const match = topic.match(/^(.*?)\s*\(Phần\s*(\d+)\)$/);
+        const baseName = match ? match[1] : topic;
+        const partNum = match ? parseInt(match[2]) : null;
+        if (!groupMap.has(baseName)) {
+            const group = { baseName, items: [] };
+            groupMap.set(baseName, group);
+            groups.push(group);
+        }
+        groupMap.get(baseName).items.push({ name: topic, part: partNum });
+    });
+
     let topicName = topicParam;
 
     if (topicParam && topicParam.startsWith('chude')) {
-        const idx = parseInt(topicParam.replace('chude', '')) - 1;
-        topicName = topics[idx];
+        const parts = topicParam.replace('chude', '').split('_phan');
+        const gIdx = parseInt(parts[0]) - 1;
+        const pNum = parts.length > 1 ? parseInt(parts[1]) : null;
+
+        if (groups[gIdx]) {
+            if (pNum !== null) {
+                // Find by part number or fallback to index
+                const item = groups[gIdx].items.find(it => it.part === pNum) || groups[gIdx].items[pNum - 1];
+                topicName = item ? item.name : groups[gIdx].items[0].name;
+            } else {
+                topicName = groups[gIdx].items[0].name;
+            }
+        }
     }
 
     const vocabPool = hsk2Vocab[topicName];
@@ -17,19 +44,35 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // Generate 15 random questions
-    let questions = [];
-    const allMeanings = [];
-    const allZh = [];
-    Object.keys(hsk2Vocab).forEach(topic => {
-        const pool = hsk2Vocab[topic];
-        if (pool.length >= 9) {
-            pool.forEach(v => {
-                allMeanings.push(v.meaning);
-                allZh.push(v.zh);
-            });
+    // Improve randomization and fix ambiguity
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
         }
+        return array;
+    }
+
+    const zhToMeanings = new Map();
+    const meaningToZhs = new Map();
+    const allMeaningsSet = new Set();
+    const allZhSet = new Set();
+
+    Object.keys(hsk2Vocab).forEach(topic => {
+        hsk2Vocab[topic].forEach(v => {
+            if (!zhToMeanings.has(v.zh)) zhToMeanings.set(v.zh, new Set());
+            zhToMeanings.get(v.zh).add(v.meaning);
+
+            if (!meaningToZhs.has(v.meaning)) meaningToZhs.set(v.meaning, new Set());
+            meaningToZhs.get(v.meaning).add(v.zh);
+
+            allMeaningsSet.add(v.meaning);
+            allZhSet.add(v.zh);
+        });
     });
+
+    const uniqueMeanings = Array.from(allMeaningsSet);
+    const uniqueZhs = Array.from(allZhSet);
 
     // Create a pool of all possible questions for the chosen topic
     let possibleQuestions = [];
@@ -39,9 +82,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Shuffle and pick 15 unique question templates
-    possibleQuestions.sort(() => Math.random() - 0.5);
+    shuffle(possibleQuestions);
     const selectedQuestions = possibleQuestions.slice(0, 15);
 
+    let questions = [];
     for (let i = 0; i < 15; i++) {
         const qTemplate = selectedQuestions[i];
         const wordObj = qTemplate.wordObj;
@@ -49,23 +93,35 @@ document.addEventListener('DOMContentLoaded', () => {
         let qText, correctAns, options;
 
         if (isZhToVi) {
+            // Zh -> Vi: What does "Zh" mean?
             qText = `Từ "${wordObj.zh}" có nghĩa là gì?`;
             correctAns = wordObj.meaning;
+            const targetZhMeanings = zhToMeanings.get(wordObj.zh);
+            
             const distractors = [];
             while (distractors.length < 3) {
-                const rand = allMeanings[Math.floor(Math.random() * allMeanings.length)];
-                if (rand !== correctAns && !distractors.includes(rand)) distractors.push(rand);
+                const rand = uniqueMeanings[Math.floor(Math.random() * uniqueMeanings.length)];
+                // Ensure distractor is not one of the correct meanings for this word
+                if (!targetZhMeanings.has(rand) && !distractors.includes(rand)) {
+                    distractors.push(rand);
+                }
             }
-            options = [correctAns, ...distractors].sort(() => Math.random() - 0.5);
+            options = shuffle([correctAns, ...distractors]);
         } else {
+            // Vi -> Zh: Which word means "Vi"?
             qText = `Từ nào sau đây có nghĩa là "${wordObj.meaning}"?`;
             correctAns = wordObj.zh;
+            const targetMeaningWords = meaningToZhs.get(wordObj.meaning);
+
             const distractors = [];
             while (distractors.length < 3) {
-                const rand = allZh[Math.floor(Math.random() * allZh.length)];
-                if (rand !== correctAns && !distractors.includes(rand)) distractors.push(rand);
+                const rand = uniqueZhs[Math.floor(Math.random() * uniqueZhs.length)];
+                // Ensure distractor word doesn't have the same target meaning
+                if (!targetMeaningWords.has(rand) && !distractors.includes(rand)) {
+                    distractors.push(rand);
+                }
             }
-            options = [correctAns, ...distractors].sort(() => Math.random() - 0.5);
+            options = shuffle([correctAns, ...distractors]);
         }
 
         const pinyinDisplay = wordObj.pinyin ? ` (${wordObj.pinyin})` : '';
