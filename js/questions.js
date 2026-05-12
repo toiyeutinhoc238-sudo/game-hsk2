@@ -38,7 +38,7 @@ const hsk2Vocab = {
         {
             "zh": "姓名",
             "pinyin": "xìngmíng",
-            "meaning": "tên"
+            "meaning": "họ tên"
         },
         {
             "zh": "爷爷",
