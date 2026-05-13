@@ -18,7 +18,7 @@ const hsk2Vocab = {
         {
             "zh": "女孩儿",
             "pinyin": "nǚháir",
-            "meaning": "Con gái"
+            "meaning": "con gái"
         },
         {
             "zh": "妻子",
@@ -55,7 +55,7 @@ const hsk2Vocab = {
         {
             "zh": "白色",
             "pinyin": "báisè",
-            "meaning": "Trắng"
+            "meaning": "trắng"
         },
         {
             "zh": "帮",
@@ -115,7 +115,7 @@ const hsk2Vocab = {
         {
             "zh": "眼睛",
             "pinyin": "yǎnjing",
-            "meaning": "Mắt"
+            "meaning": "mắt"
         },
         {
             "zh": "药",
@@ -142,12 +142,12 @@ const hsk2Vocab = {
         {
             "zh": "不错",
             "pinyin": "búcuò",
-            "meaning": "Tốt"
+            "meaning": "tốt"
         },
         {
             "zh": "不好意思",
             "pinyin": "bù hǎoyìsi",
-            "meaning": "Xin lỗi khi thấy ngại (làm việc gì đó)"
+            "meaning": "xin lỗi khi thấy ngại (làm việc gì đó)"
         },
         {
             "zh": "坏",
@@ -167,7 +167,7 @@ const hsk2Vocab = {
         {
             "zh": "舒服",
             "pinyin": "shūfu",
-            "meaning": "Thoải mái"
+            "meaning": "thoải mái"
         },
         {
             "zh": "希望",
@@ -189,12 +189,12 @@ const hsk2Vocab = {
         {
             "zh": "懂",
             "pinyin": "dǒng",
-            "meaning": "Hiểu"
+            "meaning": "hiểu"
         },
         {
             "zh": "记得",
             "pinyin": "jìde",
-            "meaning": "Nhớ"
+            "meaning": "nhớ"
         },
         {
             "zh": "事情",
@@ -241,7 +241,7 @@ const hsk2Vocab = {
         {
             "zh": "笔",
             "pinyin": "bǐ",
-            "meaning": "Cái bút"
+            "meaning": "cái bút"
         },
         {
             "zh": "打",
@@ -251,7 +251,7 @@ const hsk2Vocab = {
         {
             "zh": "打开",
             "pinyin": "dǎkāi",
-            "meaning": "Mở"
+            "meaning": "mở"
         },
         {
             "zh": "蛋糕",
@@ -261,7 +261,7 @@ const hsk2Vocab = {
         {
             "zh": "等",
             "pinyin": "děng",
-            "meaning": "Chờ đợi"
+            "meaning": "chờ đợi"
         },
         {
             "zh": "点",
@@ -271,7 +271,7 @@ const hsk2Vocab = {
         {
             "zh": "告诉",
             "pinyin": "gàosu",
-            "meaning": "Kể"
+            "meaning": "kể"
         },
         {
             "zh": "画",
@@ -296,7 +296,7 @@ const hsk2Vocab = {
         {
             "zh": "考试",
             "pinyin": "kǎoshì",
-            "meaning": "Làm bài kiểm tra; kiểm tra"
+            "meaning": "làm bài kiểm tra; kiểm tra"
         },
         {
             "zh": "包",
@@ -323,7 +323,7 @@ const hsk2Vocab = {
         {
             "zh": "肉",
             "pinyin": "ròu",
-            "meaning": "Thịt"
+            "meaning": "thịt"
         },
         {
             "zh": "试",
@@ -338,12 +338,12 @@ const hsk2Vocab = {
         {
             "zh": "踢",
             "pinyin": "tī",
-            "meaning": "Đá"
+            "meaning": "đá"
         },
         {
             "zh": "跳舞",
             "pinyin": "tiàowǔ",
-            "meaning": "Nhảy"
+            "meaning": "nhảy"
         },
         {
             "zh": "洗",
@@ -373,7 +373,7 @@ const hsk2Vocab = {
         {
             "zh": "准备",
             "pinyin": "zhǔnbèi",
-            "meaning": "Chuẩn bị"
+            "meaning": "chuẩn bị"
         },
         {
             "zh": "花",
@@ -395,7 +395,7 @@ const hsk2Vocab = {
         {
             "zh": "笔",
             "pinyin": "bǐ",
-            "meaning": "Cái bút"
+            "meaning": "cái bút"
         },
         {
             "zh": "床",
@@ -425,7 +425,7 @@ const hsk2Vocab = {
         {
             "zh": "机票",
             "pinyin": "jīpiào",
-            "meaning": "Vé máy bay"
+            "meaning": "vé máy bay"
         },
         {
             "zh": "咖啡",
@@ -435,7 +435,7 @@ const hsk2Vocab = {
         {
             "zh": "裤子",
             "pinyin": "kùzi",
-            "meaning": "Quần dài"
+            "meaning": "quần dài"
         },
         {
             "zh": "篮球",
@@ -445,17 +445,17 @@ const hsk2Vocab = {
         {
             "zh": "礼物",
             "pinyin": "lǐwù",
-            "meaning": "Quà"
+            "meaning": "quà"
         },
         {
             "zh": "门",
             "pinyin": "mén",
-            "meaning": "Cửa"
+            "meaning": "cửa"
         },
         {
             "zh": "门票",
             "pinyin": "ménpiào",
-            "meaning": "Vé"
+            "meaning": "vé"
         },
         {
             "zh": "面",
@@ -517,7 +517,7 @@ const hsk2Vocab = {
         {
             "zh": "机场",
             "pinyin": "jīchǎng",
-            "meaning": "Sân bay"
+            "meaning": "sân bay"
         },
         {
             "zh": "教室",
@@ -542,12 +542,12 @@ const hsk2Vocab = {
         {
             "zh": "路上",
             "pinyin": "lùshang",
-            "meaning": "Trên đường"
+            "meaning": "trên đường"
         },
         {
             "zh": "门口",
             "pinyin": "ménkǒu",
-            "meaning": "Lối vào"
+            "meaning": "lối vào"
         },
         {
             "zh": "商场",
@@ -562,7 +562,7 @@ const hsk2Vocab = {
         {
             "zh": "洗手间",
             "pinyin": "xǐshǒujiān",
-            "meaning": "Nhà vệ sinh"
+            "meaning": "nhà vệ sinh"
         },
         {
             "zh": "药店",
@@ -579,12 +579,12 @@ const hsk2Vocab = {
         {
             "zh": "出国",
             "pinyin": "chūguó",
-            "meaning": "Đi nước ngoài"
+            "meaning": "đi nước ngoài"
         },
         {
             "zh": "出门",
             "pinyin": "chūmén",
-            "meaning": "Đi ra ngoài"
+            "meaning": "đi ra ngoài"
         },
         {
             "zh": "出去",
@@ -619,7 +619,7 @@ const hsk2Vocab = {
         {
             "zh": "过",
             "pinyin": "guò",
-            "meaning": "Vượt qua"
+            "meaning": "vượt qua"
         },
         {
             "zh": "过来",
@@ -654,7 +654,7 @@ const hsk2Vocab = {
         {
             "zh": "进",
             "pinyin": "jìn",
-            "meaning": "Đi vào"
+            "meaning": "đi vào"
         }
     ],
     "Giao thông & Di chuyển (Phần 2)": [
@@ -666,17 +666,17 @@ const hsk2Vocab = {
         {
             "zh": "进去",
             "pinyin": "jìnqù",
-            "meaning": "Đi vào"
+            "meaning": "đi vào"
         },
         {
             "zh": "离",
             "pinyin": "lí",
-            "meaning": "Rời khỏi"
+            "meaning": "rời khỏi"
         },
         {
             "zh": "路上",
             "pinyin": "lùshang",
-            "meaning": "Trên đường"
+            "meaning": "trên đường"
         },
         {
             "zh": "跑",
@@ -691,12 +691,12 @@ const hsk2Vocab = {
         {
             "zh": "上来",
             "pinyin": "shànglái",
-            "meaning": "Lên đây nào"
+            "meaning": "lên đây nào"
         },
         {
             "zh": "上去",
             "pinyin": "shàngqù",
-            "meaning": "Đi lên"
+            "meaning": "đi lên"
         },
         {
             "zh": "上网",
@@ -716,7 +716,7 @@ const hsk2Vocab = {
         {
             "zh": "下去",
             "pinyin": "xiàqù",
-            "meaning": "Đi xuống"
+            "meaning": "đi xuống"
         },
         {
             "zh": "站",
@@ -763,7 +763,7 @@ const hsk2Vocab = {
         {
             "zh": "门口",
             "pinyin": "ménkǒu",
-            "meaning": "Lối vào"
+            "meaning": "lối vào"
         },
         {
             "zh": "旁边",
@@ -773,7 +773,7 @@ const hsk2Vocab = {
         {
             "zh": "前面",
             "pinyin": "qiánmiàn",
-            "meaning": "Đằng trước"
+            "meaning": "đằng trước"
         },
         {
             "zh": "上面",
@@ -783,12 +783,12 @@ const hsk2Vocab = {
         {
             "zh": "外面",
             "pinyin": "wàimiàn",
-            "meaning": "Ngoài"
+            "meaning": "ngoài"
         },
         {
             "zh": "网上",
             "pinyin": "wǎngshang",
-            "meaning": "Trực tuyến"
+            "meaning": "trực tuyến"
         },
         {
             "zh": "下面",
@@ -798,7 +798,7 @@ const hsk2Vocab = {
         {
             "zh": "右",
             "pinyin": "yòu",
-            "meaning": "Phải"
+            "meaning": "phải"
         },
         {
             "zh": "右边",
@@ -808,24 +808,24 @@ const hsk2Vocab = {
         {
             "zh": "远",
             "pinyin": "yuǎn",
-            "meaning": "Xa"
+            "meaning": "xa"
         },
         {
             "zh": "左",
             "pinyin": "zuǒ",
-            "meaning": "Bên trái"
+            "meaning": "bên trái"
         },
         {
             "zh": "右边",
             "pinyin": "zuǒbian",
-            "meaning": "Phải"
+            "meaning": "phải"
         }
     ],
     "Thời gian": [
         {
             "zh": "从小",
             "pinyin": "cóngxiǎo",
-            "meaning": "Từ thời thơ ấu"
+            "meaning": "từ thời thơ ấu"
         },
         {
             "zh": "过年",
@@ -840,7 +840,7 @@ const hsk2Vocab = {
         {
             "zh": "就",
             "pinyin": "jiù",
-            "meaning": "Ngay lập tức"
+            "meaning": "ngay lập tức"
         },
         {
             "zh": "开始",
@@ -860,7 +860,7 @@ const hsk2Vocab = {
         {
             "zh": "生日",
             "pinyin": "shēngrì",
-            "meaning": "Sinh nhật"
+            "meaning": "sinh nhật"
         },
         {
             "zh": "时",
@@ -880,7 +880,7 @@ const hsk2Vocab = {
         {
             "zh": "一会儿",
             "pinyin": "yíhuìr",
-            "meaning": "Một lúc"
+            "meaning": "một lúc"
         },
         {
             "zh": "已经",
@@ -890,7 +890,7 @@ const hsk2Vocab = {
         {
             "zh": "有时",
             "pinyin": "yǒushí",
-            "meaning": "Thỉnh thoảng"
+            "meaning": "thỉnh thoảng"
         },
         {
             "zh": "周",
@@ -919,12 +919,12 @@ const hsk2Vocab = {
         {
             "zh": "白色",
             "pinyin": "báisè",
-            "meaning": "Trắng"
+            "meaning": "trắng"
         },
         {
             "zh": "不错",
             "pinyin": "búcuò",
-            "meaning": "Tốt"
+            "meaning": "tốt"
         },
         {
             "zh": "长",
@@ -1009,7 +1009,7 @@ const hsk2Vocab = {
         {
             "zh": "远",
             "pinyin": "yuǎn",
-            "meaning": "Xa"
+            "meaning": "xa"
         }
     ],
     "Số lượng & Đo lường": [
@@ -1041,7 +1041,7 @@ const hsk2Vocab = {
         {
             "zh": "位",
             "pinyin": "wèi",
-            "meaning": "Lượng từ dành cho người"
+            "meaning": "lượng từ dành cho người"
         }
     ],
     "Công cụ ngữ pháp & Cấu trúc": [
@@ -1053,12 +1053,12 @@ const hsk2Vocab = {
         {
             "zh": "比",
             "pinyin": "bǐ",
-            "meaning": "So sánh"
+            "meaning": "so sánh"
         },
         {
             "zh": "别",
             "pinyin": "bié",
-            "meaning": "Đừng"
+            "meaning": "đừng"
         },
         {
             "zh": "词",
@@ -1078,27 +1078,27 @@ const hsk2Vocab = {
         {
             "zh": "从小",
             "pinyin": "cóngxiǎo",
-            "meaning": "Từ thời thơ ấu"
+            "meaning": "từ thời thơ ấu"
         },
         {
             "zh": "但",
             "pinyin": "dàn",
-            "meaning": "Nhưng"
+            "meaning": "nhưng"
         },
         {
             "zh": "但是",
             "pinyin": "dànshì",
-            "meaning": "Nhưng"
+            "meaning": "nhưng"
         },
         {
             "zh": "地",
             "pinyin": "de",
-            "meaning": "Dùng trong cụm trạng ngữ"
+            "meaning": "dùng trong cụm trạng ngữ"
         },
         {
             "zh": "得",
             "pinyin": "de",
-            "meaning": "Trợ từ (dùng giữa động từ/tính từ và bổ ngữ để chỉ kết quả hoặc mức độ)"
+            "meaning": "trợ từ (dùng giữa động từ/tính từ và bổ ngữ để chỉ kết quả hoặc mức độ)"
         },
         {
             "zh": "给",
@@ -1133,7 +1133,7 @@ const hsk2Vocab = {
         {
             "zh": "就",
             "pinyin": "jiù",
-            "meaning": "Ngay lập tức"
+            "meaning": "ngay lập tức"
         },
         {
             "zh": "可能",
@@ -1143,7 +1143,7 @@ const hsk2Vocab = {
         {
             "zh": "每",
             "pinyin": "měi",
-            "meaning": "Mỗi"
+            "meaning": "mỗi"
         },
         {
             "zh": "名",
@@ -1153,12 +1153,12 @@ const hsk2Vocab = {
         {
             "zh": "那",
             "pinyin": "nà",
-            "meaning": "Vậy, vậy thì"
+            "meaning": "vậy, vậy thì"
         },
         {
             "zh": "那么",
             "pinyin": "nàme",
-            "meaning": "Vì thế"
+            "meaning": "vì thế"
         },
         {
             "zh": "那样",
@@ -1173,12 +1173,12 @@ const hsk2Vocab = {
         {
             "zh": "虽然",
             "pinyin": "suīrán",
-            "meaning": "Mặc dù"
+            "meaning": "mặc dù"
         },
         {
             "zh": "所以",
             "pinyin": "suǒyǐ",
-            "meaning": "Vì thế"
+            "meaning": "vì thế"
         },
         {
             "zh": "条",
@@ -1193,17 +1193,17 @@ const hsk2Vocab = {
         {
             "zh": "为什么",
             "pinyin": "wèi shénme",
-            "meaning": "Tại sao"
+            "meaning": "tại sao"
         },
         {
             "zh": "位",
             "pinyin": "wèi",
-            "meaning": "Lượng từ dành cho người"
+            "meaning": "lượng từ dành cho người"
         },
         {
             "zh": "一起",
             "pinyin": "yìqǐ",
-            "meaning": "Cùng nhau"
+            "meaning": "cùng nhau"
         },
         {
             "zh": "已经",
@@ -1218,12 +1218,12 @@ const hsk2Vocab = {
         {
             "zh": "有时",
             "pinyin": "yǒushí",
-            "meaning": "Thỉnh thoảng"
+            "meaning": "thỉnh thoảng"
         },
         {
             "zh": "这么",
             "pinyin": "zhème",
-            "meaning": "Như thế"
+            "meaning": "như thế"
         },
         {
             "zh": "这样",
@@ -1275,7 +1275,7 @@ const hsk2Vocab = {
         {
             "zh": "肉",
             "pinyin": "ròu",
-            "meaning": "Thịt"
+            "meaning": "thịt"
         },
         {
             "zh": "阴",

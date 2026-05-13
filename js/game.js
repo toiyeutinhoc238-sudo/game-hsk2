@@ -60,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     Object.keys(hsk2Vocab).forEach(topic => {
         hsk2Vocab[topic].forEach(v => {
+            v.meaning = v.meaning.toLowerCase();
             if (!zhToMeanings.has(v.zh)) zhToMeanings.set(v.zh, new Set());
             zhToMeanings.get(v.zh).add(v.meaning);
 
