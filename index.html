@@ -5,10 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google" content="notranslate">
-    <title>HSK 2: Ai Là Triệu Phú - Chinh Phục Từ Vựng</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="css/style.css">
+    <script src="js/lms.js"></script>
     <script src="js/questions.js"></script>
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👑</text></svg>">
@@ -93,27 +95,43 @@
         function toggleMusic() {
             const btn = document.getElementById('musicToggle');
             if (bgMusic.paused) {
-                bgMusic.play();
+                window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(e => {});
                 btn.textContent = '🔊';
-                localStorage.setItem('musicEnabled', 'true');
+                safeStorage.setItem('musicEnabled', 'true');
             } else {
                 bgMusic.pause();
                 btn.textContent = '🔇';
-                localStorage.setItem('musicEnabled', 'false');
+                safeStorage.setItem('musicEnabled', 'false');
             }
         }
 
-        // Initialize music state
-        if (localStorage.getItem('musicEnabled') === 'false') {
-            document.getElementById('musicToggle').textContent = '🔇';
+        window.setMuted = function (isMuted) {
+            const btn = document.getElementById('musicToggle');
+            if (isMuted) {
+                bgMusic.pause();
+                if (btn) btn.textContent = '🔇';
+                safeStorage.setItem('musicEnabled', 'false');
+            } else {
+                window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(e => {});
+                if (btn) btn.textContent = '🔊';
+                safeStorage.setItem('musicEnabled', 'true');
+            }
+        };
+
+        // Initialize music state safely
+        if (safeStorage.getItem('musicEnabled') === 'false') {
+            const btn = document.getElementById('musicToggle');
+            if (btn) btn.textContent = '🔇';
         }
 
-        // Start music on first interaction
-        document.addEventListener('click', () => {
-            if (localStorage.getItem('musicEnabled') !== 'false' && bgMusic.paused) {
-                bgMusic.play().catch(e => console.log("Autoplay blocked:", e));
+        // Start music on first interaction (click or touch)
+        const unlockAudio = () => {
+            if (safeStorage.getItem('musicEnabled') !== 'false' && bgMusic.paused) {
+                window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(e => {});
             }
-        }, { once: true });
+        };
+        document.addEventListener('click', unlockAudio, { once: true });
+        document.addEventListener('touchend', unlockAudio, { once: true });
     </script>
 
 </body>

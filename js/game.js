@@ -37,11 +37,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    const vocabPool = hsk2Vocab[topicName];
+    let vocabPool = hsk2Vocab[topicName];
     if (!vocabPool || vocabPool.length < 9) {
-        alert('Chủ đề này không đủ số lượng từ vựng để tổ chức trò chơi (tối thiểu 9 từ)!');
-        window.location.href = 'index.html';
-        return;
+        // Fallback gracefully for LMS/SCORM launching game.html directly without topic param
+        if (filteredTopics.length > 0) {
+            topicName = filteredTopics[0];
+            vocabPool = hsk2Vocab[topicName];
+        } else {
+            console.error('Không tìm thấy dữ liệu từ vựng HSK 2!');
+            return;
+        }
     }
 
     // Improve randomization and fix ambiguity
@@ -146,23 +151,36 @@ document.addEventListener('DOMContentLoaded', () => {
     const clapSound = new Audio('votay.mp3');
     bgMusic.loop = true;
 
-    // Music State Management
+    // Music State Management (LMS-Safe Storage)
     window.toggleMusic = function () {
         const btn = document.getElementById('musicToggle');
         if (bgMusic.paused) {
-            bgMusic.play();
+            window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(e => {});
             btn.textContent = '🔊';
-            localStorage.setItem('musicEnabled', 'true');
+            safeStorage.setItem('musicEnabled', 'true');
         } else {
             bgMusic.pause();
             btn.textContent = '🔇';
-            localStorage.setItem('musicEnabled', 'false');
+            safeStorage.setItem('musicEnabled', 'false');
+        }
+    };
+
+    window.setMuted = function (isMuted) {
+        const btn = document.getElementById('musicToggle');
+        if (isMuted) {
+            bgMusic.pause();
+            if (btn) btn.textContent = '🔇';
+            safeStorage.setItem('musicEnabled', 'false');
+        } else {
+            window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(e => {});
+            if (btn) btn.textContent = '🔊';
+            safeStorage.setItem('musicEnabled', 'true');
         }
     };
 
     // Auto-play music if enabled
-    if (localStorage.getItem('musicEnabled') !== 'false') {
-        bgMusic.play().catch(e => console.log("Autoplay blocked:", e));
+    if (safeStorage.getItem('musicEnabled') !== 'false') {
+        window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(e => console.log("Autoplay blocked:", e));
     } else {
         const musicBtn = document.getElementById('musicToggle');
         if (musicBtn) musicBtn.textContent = '🔇';
@@ -246,7 +264,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     buttons[q.correct].classList.add('correct');
                 }
                 
-                wrongSound.play();
+                if (window.safePlayAudio) {
+                    window.safePlayAudio(wrongSound);
+                } else {
+                    wrongSound.play().catch(e => {});
+                }
                 
                 currentScore = "0";
                 safeScore = "0";
@@ -286,8 +308,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.beginActualCountdown = function() {
         // Ensure music plays on interaction
-        if (localStorage.getItem('musicEnabled') !== 'false' && bgMusic.paused) {
-            bgMusic.play().catch(e => console.log("Autoplay blocked:", e));
+        if (safeStorage.getItem('musicEnabled') !== 'false' && bgMusic.paused) {
+            window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(e => console.log("Autoplay blocked:", e));
         }
 
         document.getElementById('instructionContent').style.display = 'none';
@@ -362,6 +384,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (currentIdx === 4) safeScore = ladderValues[4];
                 if (currentIdx === 9) safeScore = ladderValues[9];
 
+                if (window.LMSBridge) {
+                    window.LMSBridge.reportProgress(currentIdx, true, currentScore);
+                }
+
                 statusMsg.textContent = 'Chính xác! Đang chuẩn bị câu hỏi tiếp theo...';
                 correctSound.onended = () => {
                     currentIdx++;
@@ -372,10 +398,13 @@ document.addEventListener('DOMContentLoaded', () => {
                         endGame(true);
                     }
                 };
-                correctSound.play();
+                window.safePlayAudio ? window.safePlayAudio(correctSound) : correctSound.play().catch(e => {});
             } else {
                 // Wrong
-                wrongSound.play();
+                window.safePlayAudio ? window.safePlayAudio(wrongSound) : wrongSound.play().catch(e => {});
+                if (window.LMSBridge) {
+                    window.LMSBridge.reportProgress(currentIdx, false, "0");
+                }
                 buttons[idx].classList.remove('selected');
                 buttons[idx].classList.add('wrong');
                 buttons[q.correct].classList.add('correct');
@@ -388,7 +417,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.use5050 = function () {
         if (isGameOver || isProcessing) return;
         window.pauseTimer();
-        helpSound.play();
+        window.safePlayAudio ? window.safePlayAudio(helpSound) : helpSound.play().catch(e => {});
 
         const q = questions[currentIdx];
         const buttons = optionsGrid.querySelectorAll('.option-btn');
@@ -428,7 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.useAudience = function () {
         if (isGameOver || isProcessing) return;
         window.pauseTimer();
-        helpSound.play();
+        window.safePlayAudio ? window.safePlayAudio(helpSound) : helpSound.play().catch(e => {});
         const q = questions[currentIdx];
         const helpBtn = document.getElementById('helpAudience');
         helpBtn.disabled = true;
@@ -509,7 +538,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.useExpert = function () {
         if (isGameOver || isProcessing) return;
         window.pauseTimer();
-        helpSound.play();
+        window.safePlayAudio ? window.safePlayAudio(helpSound) : helpSound.play().catch(e => {});
         const q = questions[currentIdx];
         const helpBtn = document.getElementById('helpExpert');
         helpBtn.disabled = true;
@@ -603,15 +632,15 @@ document.addEventListener('DOMContentLoaded', () => {
             resultTitle.textContent = 'CHÚC MỪNG CHIẾN THẮNG!';
             resultTitle.style.color = 'var(--secondary)';
             resultMessage.textContent = `Bạn đã trở thành Triệu Phú HSK 2 với 500.000.000 VNĐ!`;
-            clapSound.play();
+            window.safePlayAudio ? window.safePlayAudio(clapSound) : clapSound.play().catch(e => {});
         } else if (stoppedManually) {
             resultTitle.textContent = 'BẢO TOÀN THÀNH CÔNG';
             resultTitle.style.color = 'var(--secondary)';
             resultMessage.textContent = `Bạn đã dừng cuộc chơi. Số tiền bạn mang về là: ${currentScore} VNĐ.`;
             if (currentScore === "0") {
-                wrongSound.play();
+                window.safePlayAudio ? window.safePlayAudio(wrongSound) : wrongSound.play().catch(e => {});
             } else {
-                clapSound.play();
+                window.safePlayAudio ? window.safePlayAudio(clapSound) : clapSound.play().catch(e => {});
             }
         } else {
             resultTitle.textContent = 'KẾT THÚC TRẬN ĐẤU';
@@ -622,6 +651,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const finalPrize = (currentIdx >= 10) ? safeScore : (currentIdx >= 5 ? ladderValues[4] : "0");
                 resultMessage.textContent = `Bạn đã trả lời sai tại câu số ${currentIdx + 1}. Số tiền thưởng: ${finalPrize} VNĐ.`;
             }
+        }
+
+        // Report Game Results to LMS (SCORM and postMessage)
+        if (window.LMSBridge) {
+            const finalPrize = isWin ? "500.000.000" : (stoppedManually ? currentScore : ((currentIdx >= 10) ? safeScore : (currentIdx >= 5 ? ladderValues[4] : "0")));
+            window.LMSBridge.reportComplete(isWin, currentIdx, finalPrize, stoppedManually);
         }
     }
 
