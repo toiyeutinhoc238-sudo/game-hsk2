@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize Money Ladder
     function initLadder() {
-        moneyLadder.innerHTML = '';
+        moneyLadder.innerHTML = '<button class="ladder-close-drawer" onclick="toggleLadderDrawer()" title="Đóng">✕</button>';
         ladderValues.forEach((val, idx) => {
             const item = document.createElement('div');
             item.className = 'ladder-item' + (idx === 4 || idx === 9 ? ' safe' : '');
@@ -265,6 +265,13 @@ document.addEventListener('DOMContentLoaded', () => {
     window.closeHelpModal = function (modalId) {
         document.getElementById(modalId).style.display = 'none';
         window.resumeTimer();
+    };
+
+    window.toggleLadderDrawer = function () {
+        const ladder = document.getElementById('moneyLadder');
+        const backdrop = document.getElementById('ladderBackdrop');
+        if (ladder) ladder.classList.toggle('drawer-open');
+        if (backdrop) backdrop.classList.toggle('drawer-open');
     };
 
     function startCountdown() {

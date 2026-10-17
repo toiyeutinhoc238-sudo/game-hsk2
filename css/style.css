@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap');
+@import url('https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.1.0/style.css');
+
 :root {
     --primary: #0a0e28;
     --secondary: #d4af37; /* Gold */
@@ -8,15 +11,17 @@
     --text-muted: #94a3b8;
     --glass: rgba(255, 255, 255, 0.05);
     --glass-border: rgba(255, 255, 255, 0.1);
-}
 
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Playfair+Display:wght@700&display=swap');
+    /* Tiếng Việt dùng Be Vietnam Pro (chuẩn 100% không lỗi dấu), Tiếng Trung giữ nguyên Khải Thể (KaiTi) */
+    --font-main: 'Be Vietnam Pro', 'Montserrat', 'LXGW WenKai', 'KaiTi', 'STKaiti', 'Kaiti SC', '楷体', 'KaiTi_GB2312', serif, sans-serif;
+}
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Outfit', sans-serif;
+    font-family: var(--font-main);
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -26,6 +31,9 @@ body {
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
+    font-family: var(--font-main);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .glass {
@@ -42,14 +50,17 @@ body {
     width: 100%;
 }
 
+/* Header */
 header {
     text-align: center;
-    margin-bottom: 3rem;
+    margin-bottom: 2.5rem;
+    padding: 0 3.5rem;
+    position: relative;
 }
 
 h1 {
     font-family: 'Playfair Display', serif;
-    font-size: 3.5rem;
+    font-size: clamp(1.8rem, 5vw, 3.5rem);
     background: linear-gradient(to bottom, #fff, var(--secondary));
     -webkit-background-clip: text;
     background-clip: text;
@@ -57,9 +68,38 @@ h1 {
     text-transform: uppercase;
     letter-spacing: 2px;
     margin-bottom: 0.5rem;
+    line-height: 1.2;
 }
 
-/* Lesson Grid */
+.music-toggle-btn {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    z-index: 1001;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    padding: 0;
+    background: rgba(10, 14, 40, 0.75);
+    backdrop-filter: blur(10px);
+    border: 2px solid var(--secondary);
+    color: var(--secondary);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+}
+
+.music-toggle-btn:hover {
+    background: var(--secondary);
+    color: var(--primary);
+    transform: scale(1.08);
+}
+
+/* Lesson Grid (Home Page) */
 .lesson-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -67,7 +107,7 @@ h1 {
 }
 
 .lesson-card {
-    padding: 2rem;
+    padding: 2rem 1.5rem;
     text-align: center;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -76,65 +116,89 @@ h1 {
 }
 
 .lesson-card:hover {
-    transform: translateY(-10px);
+    transform: translateY(-8px);
     border-color: var(--secondary);
     background: rgba(212, 175, 55, 0.1);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 .lesson-card h3 {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
     color: var(--secondary);
     margin-bottom: 0.5rem;
+    line-height: 1.3;
 }
 
 /* Game Arena */
 .game-layout {
     display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 2rem;
+    grid-template-columns: 1fr 280px;
+    gap: 1.8rem;
+    align-items: stretch;
 }
 
 .question-container {
-    padding: 3rem;
+    padding: 2.5rem;
     position: relative;
-}
-
-.money-ladder {
-    padding: 1.5rem;
     display: flex;
-    flex-direction: column-reverse;
-    gap: 0.5rem;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 520px;
 }
 
-.ladder-item {
-    padding: 0.5rem 1rem;
-    border-radius: 10px;
-    font-weight: 600;
-    font-size: 0.9rem;
+/* Question Header Meta Bar */
+.question-header {
     display: flex;
     justify-content: space-between;
-    transition: all 0.3s ease;
-    color: var(--text-muted);
+    align-items: center;
+    margin-bottom: 1.5rem;
+    gap: 0.75rem;
+    width: 100%;
 }
 
-.ladder-item.active {
+.question-badge {
+    color: var(--secondary);
+    font-weight: 700;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+}
+
+.status-msg {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ladder-drawer-btn {
+    display: none;
+    background: rgba(212, 175, 55, 0.15);
+    border: 1.5px solid var(--secondary);
+    color: var(--secondary);
+    border-radius: 20px;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.ladder-drawer-btn:hover {
     background: var(--secondary);
     color: var(--primary);
-    transform: scale(1.05);
-}
-
-.ladder-item.safe {
-    color: #fff;
-    border: 1px solid var(--secondary);
 }
 
 .question-text {
-    font-size: 1.8rem;
+    font-size: clamp(1.3rem, 3.5vw, 1.85rem);
     text-align: center;
-    margin-bottom: 3rem;
-    line-height: 1.4;
+    margin-bottom: 2rem;
+    line-height: 1.45;
     font-weight: 600;
+    padding: 0 0.5rem;
 }
 
 /* Timer */
@@ -154,29 +218,35 @@ h1 {
     transition: width 0.1s linear;
 }
 
+/* Options */
 .options-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
+    gap: 1.2rem;
+    width: 100%;
 }
 
 .option-btn {
-    padding: 1.2rem 2rem;
+    padding: 1.1rem 1.6rem;
     font-size: 1.1rem;
     color: var(--text);
     background: rgba(255, 255, 255, 0.05);
     border: 2px solid rgba(255, 255, 255, 0.1);
     border-radius: 50px;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: all 0.25s ease;
     text-align: left;
     display: flex;
     align-items: center;
+    min-height: 58px;
+    line-height: 1.3;
+    word-break: break-word;
 }
 
 .option-btn:hover:not(:disabled) {
     background: rgba(212, 175, 55, 0.2);
     border-color: var(--secondary);
+    transform: translateY(-2px);
 }
 
 .option-btn.selected {
@@ -205,41 +275,91 @@ h1 {
 
 .option-btn::before {
     content: attr(data-prefix);
-    margin-right: 1rem;
+    margin-right: 0.75rem;
     color: var(--secondary);
     font-weight: 800;
+    flex-shrink: 0;
 }
 
 .option-btn.selected::before {
     color: var(--primary);
 }
 
-/* Controls */
+/* Lifeline Controls */
 .controls {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.8rem;
     margin-top: 2rem;
+    width: 100%;
 }
 
 .btn-secondary {
     background: transparent;
     border: 2px solid var(--secondary);
     color: var(--secondary);
-    padding: 0.8rem 2rem;
+    padding: 0.8rem 1.2rem;
     border-radius: 50px;
     cursor: pointer;
     font-weight: 600;
-    transition: all 0.3s;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    min-height: 48px;
+    line-height: 1.2;
 }
 
 .btn-secondary:hover:not(:disabled) {
     background: var(--secondary);
     color: var(--primary);
+    transform: translateY(-2px);
 }
 
 .btn-secondary:disabled {
     opacity: 0.3;
+}
+
+/* Money Ladder */
+.money-ladder {
+    padding: 1.2rem;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 0.35rem;
+    position: relative;
+}
+
+.ladder-item {
+    padding: 0.5rem 0.9rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.25s ease;
+    color: var(--text-muted);
+}
+
+.ladder-item.active {
+    background: var(--secondary);
+    color: var(--primary);
+    transform: scale(1.03);
+    font-weight: 700;
+}
+
+.ladder-item.safe {
+    color: #fff;
+    border: 1px solid var(--secondary);
+}
+
+.ladder-close-drawer {
+    display: none;
+}
+
+.ladder-backdrop {
+    display: none;
 }
 
 /* Modals */
@@ -249,19 +369,23 @@ h1 {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(5, 8, 26, 0.88);
+    backdrop-filter: blur(8px);
     display: none;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
-    padding: 2rem;
+    z-index: 2500;
+    padding: 1.5rem;
 }
 
 .modal-content {
     max-width: 600px;
     width: 100%;
-    padding: 3rem;
+    padding: 2.5rem;
     text-align: center;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 20px;
 }
 
 @keyframes pulse-green {
@@ -272,11 +396,11 @@ h1 {
 
 /* Review Section */
 .review-scroll {
-    max-height: 400px;
+    max-height: 380px;
     overflow-y: auto;
-    margin: 2rem 0;
+    margin: 1.5rem 0;
     text-align: left;
-    padding-right: 1rem;
+    padding-right: 0.5rem;
 }
 
 .review-item {
@@ -294,7 +418,7 @@ h1 {
 }
 
 .review-table th, .review-table td {
-    padding: 1rem;
+    padding: 0.8rem 0.6rem;
     text-align: left;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
@@ -314,14 +438,15 @@ h1 {
 .review-table td:first-child {
     font-weight: 600;
     color: #fff;
-    font-size: 1.1rem;
+    font-size: 1.15rem;
 }
 
 .review-table td:nth-child(2) {
     color: var(--text-muted);
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Be Vietnam Pro', sans-serif;
 }
 
+/* Audience Chart */
 .bar-container {
     display: flex;
     flex-direction: column;
@@ -348,12 +473,219 @@ h1 {
     font-weight: 600;
 }
 
-/* Responsive */
-@media (max-width: 900px) {
+/* ======================================================== */
+/* Responsive Breakpoints (Laptop -> Tablet -> Mobile)     */
+/* ======================================================== */
+
+/* 1. Laptops / Desktops Medium (1024px - 1200px) */
+@media (max-width: 1200px) {
+    .container {
+        padding: 1.5rem;
+    }
+    .game-layout {
+        grid-template-columns: 1fr 260px;
+        gap: 1.5rem;
+    }
+}
+
+/* 2. Tablets (768px - 1024px) */
+@media (max-width: 1024px) {
+    .game-layout {
+        grid-template-columns: 1fr 240px;
+        gap: 1.2rem;
+    }
+    .question-container {
+        padding: 2rem 1.5rem;
+    }
+    .controls .btn-secondary {
+        font-size: 0.88rem;
+        padding: 0.7rem 0.6rem;
+    }
+    .lesson-grid {
+        grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+        gap: 1.2rem;
+    }
+}
+
+/* 3. Small Tablets & Phones (<= 860px) */
+@media (max-width: 860px) {
+    .container {
+        padding: 1rem 0.75rem;
+    }
+    header {
+        margin-bottom: 1.5rem;
+        padding: 0 3rem;
+    }
+    .music-toggle-btn {
+        top: 0.75rem;
+        right: 0.75rem;
+        width: 42px;
+        height: 42px;
+        font-size: 1.15rem;
+    }
     .game-layout {
         grid-template-columns: 1fr;
+        gap: 1rem;
     }
+
+    /* Mobile Money Ladder Drawer */
+    .ladder-drawer-btn {
+        display: inline-flex;
+    }
+
     .money-ladder {
-        display: none; /* Hide ladder on small screens or move it */
+        position: fixed;
+        top: 0;
+        right: -320px;
+        width: 290px;
+        max-width: 85vw;
+        height: 100vh;
+        z-index: 2600;
+        background: rgba(10, 14, 40, 0.98);
+        backdrop-filter: blur(20px);
+        box-shadow: -5px 0 30px rgba(0, 0, 0, 0.9);
+        border-left: 1.5px solid var(--secondary);
+        transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        padding: 4rem 1.2rem 1.5rem;
+        overflow-y: auto;
+    }
+
+    .money-ladder.drawer-open {
+        right: 0;
+    }
+
+    .ladder-close-drawer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: transparent;
+        border: 1.5px solid var(--secondary);
+        color: var(--secondary);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        font-size: 1.1rem;
+        cursor: pointer;
+    }
+
+    .ladder-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.65);
+        backdrop-filter: blur(4px);
+        z-index: 2550;
+        display: none;
+    }
+
+    .ladder-backdrop.drawer-open {
+        display: block;
+    }
+
+    /* 2x2 Lifeline Controls */
+    .controls {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.65rem;
+        margin-top: 1.5rem;
+    }
+
+    .controls .btn-secondary {
+        padding: 0.7rem 0.5rem;
+        font-size: 0.88rem;
+        min-height: 44px;
+    }
+}
+
+/* 4. Smartphones (<= 640px) */
+@media (max-width: 640px) {
+    header {
+        padding: 0 2.5rem;
+    }
+
+    .question-container {
+        padding: 1.5rem 1rem 1.2rem;
+        min-height: auto;
+    }
+
+    .question-header {
+        margin-bottom: 1.2rem;
+    }
+
+    .question-badge {
+        font-size: 0.9rem;
+    }
+
+    .status-msg {
+        font-size: 0.8rem;
+    }
+
+    .options-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .option-btn {
+        padding: 0.85rem 1.2rem;
+        font-size: 1.05rem;
+        min-height: 50px;
+        border-radius: 30px;
+    }
+
+    .lesson-grid {
+        grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+        gap: 0.75rem;
+    }
+
+    .lesson-card {
+        padding: 1.2rem 0.75rem;
+    }
+
+    .lesson-card h3 {
+        font-size: 1rem;
+    }
+
+    .modal-content {
+        padding: 1.5rem 1rem;
+        width: 95%;
+        border-radius: 16px;
+    }
+
+    .review-table th, .review-table td {
+        padding: 0.55rem 0.35rem;
+        font-size: 0.85rem;
+    }
+
+    .review-table td:first-child {
+        font-size: 1.05rem;
+    }
+
+    .bar-container {
+        width: 48px;
+    }
+
+    .audience-bar {
+        width: 32px;
+    }
+}
+
+/* 5. Extra Small Smartphones (<= 360px) */
+@media (max-width: 360px) {
+    .controls .btn-secondary {
+        font-size: 0.78rem;
+        padding: 0.55rem 0.3rem;
+    }
+
+    .ladder-drawer-btn {
+        padding: 0.25rem 0.6rem;
+        font-size: 0.78rem;
+    }
+
+    .lesson-grid {
+        grid-template-columns: 1fr;
     }
 }

@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google" content="notranslate">
     <title>Ai Là Triệu Phú - HSK 2</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -14,16 +16,18 @@
         <header style="margin-bottom: 2rem;">
             <h1 style="font-size: 2.5rem; text-align: center;">AI LÀ TRIỆU PHÚ</h1>
             <div style="text-align: center; color: var(--secondary); font-size: 1.2rem; margin-bottom: 1rem;">CHỦ ĐỀ: <span id="lessonNum">...</span></div>
-            <button id="musicToggle" class="btn-secondary" onclick="toggleMusic()" style="position: fixed; top: 2rem; right: 2rem; z-index: 1001; padding: 0.8rem; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">🔊</button>
+            <button id="musicToggle" class="music-toggle-btn" onclick="toggleMusic()" title="Bật/Tắt âm thanh">🔊</button>
         </header>
 
         <div class="game-layout">
-            <!-- Main Question Area -->
-            <div class="glass question-container" style="display: flex; flex-direction: column; justify-content: center;">
-                <div id="questionNum" style="position: absolute; top: 1.5rem; left: 2rem; color: var(--secondary); font-weight: 600;">Câu 1/15</div>
-                <div id="statusMsg" style="position: absolute; top: 1.5rem; right: 2rem; color: var(--text-muted); font-size: 0.9rem;">Hãy chọn đáp án đúng</div>
+            <div class="glass question-container">
+                <div class="question-header">
+                    <div id="questionNum" class="question-badge">Câu 1/15</div>
+                    <button id="ladderDrawerBtn" class="ladder-drawer-btn" onclick="toggleLadderDrawer()">Thang điểm 🏆</button>
+                    <div id="statusMsg" class="status-msg">Hãy chọn đáp án đúng</div>
+                </div>
                 
-                <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 300px;">
+                <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 220px;">
                     <div id="questionText" class="question-text">Đang tải câu hỏi...</div>
                     <div class="timer-container" style="margin-bottom: 2rem;">
                         <div id="timerBar" class="timer-bar"></div>
@@ -45,6 +49,7 @@
             <div class="glass money-ladder" id="moneyLadder">
                 <!-- Ladder items generated here -->
             </div>
+            <div id="ladderBackdrop" class="ladder-backdrop" onclick="toggleLadderDrawer()"></div>
         </div>
     </div>
 

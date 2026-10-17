@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google" content="notranslate">
     <title>HSK 2: Ai Là Triệu Phú - Chinh Phục Từ Vựng</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="css/style.css">
     <script src="js/questions.js"></script>
     <link rel="icon"
@@ -24,8 +26,7 @@
                 Chinh phục 15 câu hỏi từ vựng để giành lấy danh hiệu Triệu Phú HSK 2. Bạn đã sẵn sàng thử thách kiến
                 thức của mình?
             </p>
-            <button id="musicToggle" class="btn-secondary" onclick="toggleMusic()"
-                style="position: fixed; top: 2rem; right: 2rem; z-index: 1001; padding: 0.8rem; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">🔊</button>
+            <button id="musicToggle" class="music-toggle-btn" onclick="toggleMusic()" title="Bật/Tắt âm thanh">🔊</button>
         </header>
 
         <section class="lesson-selection" style="width: 100%;">
@@ -114,6 +115,7 @@
             }
         }, { once: true });
     </script>
+
 </body>
 
 </html>
