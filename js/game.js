@@ -75,64 +75,68 @@ document.addEventListener('DOMContentLoaded', () => {
     const uniqueMeanings = Array.from(allMeaningsSet);
     const uniqueZhs = Array.from(allZhSet);
 
-    // Create a pool of all possible questions for the chosen topic
-    let possibleQuestions = [];
-    vocabPool.forEach(v => {
-        possibleQuestions.push({ wordObj: v, isZhToVi: true });
-        possibleQuestions.push({ wordObj: v, isZhToVi: false });
-    });
-
-    // Shuffle and pick 15 unique question templates
-    shuffle(possibleQuestions);
-    const selectedQuestions = possibleQuestions.slice(0, 15);
-
     let questions = [];
-    for (let i = 0; i < 15; i++) {
-        const qTemplate = selectedQuestions[i];
-        const wordObj = qTemplate.wordObj;
-        const isZhToVi = qTemplate.isZhToVi;
-        let qText, correctAns, options;
 
-        if (isZhToVi) {
-            // Zh -> Vi: What does "Zh" mean?
-            qText = `Từ "${wordObj.zh}" có nghĩa là gì?`;
-            correctAns = wordObj.meaning;
-            const targetZhMeanings = zhToMeanings.get(wordObj.zh);
-            
-            const distractors = [];
-            while (distractors.length < 3) {
-                const rand = uniqueMeanings[Math.floor(Math.random() * uniqueMeanings.length)];
-                // Ensure distractor is not one of the correct meanings for this word
-                if (!targetZhMeanings.has(rand) && !distractors.includes(rand)) {
-                    distractors.push(rand);
-                }
-            }
-            options = shuffle([correctAns, ...distractors]);
-        } else {
-            // Vi -> Zh: Which word means "Vi"?
-            qText = `Từ nào sau đây có nghĩa là "${wordObj.meaning}"?`;
-            correctAns = wordObj.zh;
-            const targetMeaningWords = meaningToZhs.get(wordObj.meaning);
-
-            const distractors = [];
-            while (distractors.length < 3) {
-                const rand = uniqueZhs[Math.floor(Math.random() * uniqueZhs.length)];
-                // Ensure distractor word doesn't have the same target meaning
-                if (!targetMeaningWords.has(rand) && !distractors.includes(rand)) {
-                    distractors.push(rand);
-                }
-            }
-            options = shuffle([correctAns, ...distractors]);
-        }
-
-        const pinyinDisplay = wordObj.pinyin ? ` (${wordObj.pinyin})` : '';
-        questions.push({
-            q: qText,
-            a: options,
-            correct: options.indexOf(correctAns),
-            vocab: `${wordObj.zh}${pinyinDisplay} - ${wordObj.meaning}`
+    function generateNewQuestions() {
+        // Create a pool of all possible questions for the chosen topic
+        let possibleQuestions = [];
+        vocabPool.forEach(v => {
+            possibleQuestions.push({ wordObj: v, isZhToVi: true });
+            possibleQuestions.push({ wordObj: v, isZhToVi: false });
         });
+
+        // Shuffle and pick 15 unique question templates
+        shuffle(possibleQuestions);
+        const selectedQuestions = possibleQuestions.slice(0, 15);
+
+        questions = [];
+        for (let i = 0; i < 15; i++) {
+            const qTemplate = selectedQuestions[i];
+            const wordObj = qTemplate.wordObj;
+            const isZhToVi = qTemplate.isZhToVi;
+            let qText, correctAns, options;
+
+            if (isZhToVi) {
+                // Zh -> Vi: What does "Zh" mean?
+                qText = `Từ "${wordObj.zh}" có nghĩa là gì?`;
+                correctAns = wordObj.meaning;
+                const targetZhMeanings = zhToMeanings.get(wordObj.zh);
+                
+                const distractors = [];
+                while (distractors.length < 3) {
+                    const rand = uniqueMeanings[Math.floor(Math.random() * uniqueMeanings.length)];
+                    if (!targetZhMeanings.has(rand) && !distractors.includes(rand)) {
+                        distractors.push(rand);
+                    }
+                }
+                options = shuffle([correctAns, ...distractors]);
+            } else {
+                // Vi -> Zh: Which word means "Vi"?
+                qText = `Từ nào sau đây có nghĩa là "${wordObj.meaning}"?`;
+                correctAns = wordObj.zh;
+                const targetMeaningWords = meaningToZhs.get(wordObj.meaning);
+
+                const distractors = [];
+                while (distractors.length < 3) {
+                    const rand = uniqueZhs[Math.floor(Math.random() * uniqueZhs.length)];
+                    if (!targetMeaningWords.has(rand) && !distractors.includes(rand)) {
+                        distractors.push(rand);
+                    }
+                }
+                options = shuffle([correctAns, ...distractors]);
+            }
+
+            const pinyinDisplay = wordObj.pinyin ? ` (${wordObj.pinyin})` : '';
+            questions.push({
+                q: qText,
+                a: options,
+                correct: options.indexOf(correctAns),
+                vocab: `${wordObj.zh}${pinyinDisplay} - ${wordObj.meaning}`
+            });
+        }
     }
+
+    generateNewQuestions();
 
     // Audio Elements
     const correctSound = new Audio('traloidung.mp3');
@@ -619,6 +623,93 @@ document.addEventListener('DOMContentLoaded', () => {
                 resultMessage.textContent = `Bạn đã trả lời sai tại câu số ${currentIdx + 1}. Số tiền thưởng: ${finalPrize} VNĐ.`;
             }
         }
+    }
+
+    // Comprehensive Game Restart Function
+    let isRestarting = false;
+    window.restartGame = function (e) {
+        if (e && e.preventDefault) e.preventDefault();
+        if (isRestarting) return;
+        isRestarting = true;
+        setTimeout(() => { isRestarting = false; }, 600);
+
+        try {
+            clearInterval(timerInterval);
+
+            // 1. Hide result modal and backdrop
+            if (resultModal) {
+                resultModal.style.display = 'none';
+            }
+            const backdrop = document.getElementById('ladderBackdrop');
+            if (backdrop) {
+                backdrop.classList.remove('drawer-open');
+            }
+            if (moneyLadder) {
+                moneyLadder.classList.remove('drawer-open');
+            }
+
+            // 2. Reset game state variables
+            currentIdx = 0;
+            isGameOver = false;
+            isProcessing = false;
+            used5050 = false;
+            currentScore = "0";
+            safeScore = "0";
+
+            // 3. Reset all lifelines
+            if (help5050Btn) {
+                help5050Btn.disabled = false;
+                help5050Btn.style.opacity = '1';
+            }
+            const helpAudienceBtn = document.getElementById('helpAudience');
+            if (helpAudienceBtn) {
+                helpAudienceBtn.disabled = false;
+                helpAudienceBtn.style.opacity = '1';
+            }
+            const helpExpertBtn = document.getElementById('helpExpert');
+            if (helpExpertBtn) {
+                helpExpertBtn.disabled = false;
+                helpExpertBtn.style.opacity = '1';
+            }
+
+            // 4. Close any open dialogs
+            ['stopModal', 'audienceModal', 'expertModal'].forEach(m => {
+                const el = document.getElementById(m);
+                if (el) el.style.display = 'none';
+            });
+
+            // 5. Generate fresh 15 questions
+            generateNewQuestions();
+
+            // 6. Rebuild ladder and launch countdown
+            initLadder();
+            startCountdown();
+            return;
+        } catch (err) {
+            console.error("In-memory restart error, falling back to reload:", err);
+        }
+
+        // Fallback for extreme cases (forcing cache bust)
+        try {
+            const url = new URL(window.location.href);
+            url.searchParams.set('_t', Date.now().toString());
+            window.location.replace(url.toString());
+        } catch (e) {
+            window.location.href = window.location.href;
+        }
+    };
+
+    // Explicitly bind click and touch events to restart button
+    const restartBtn = document.getElementById('restartBtn');
+    if (restartBtn) {
+        restartBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.restartGame();
+        });
+        restartBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            window.restartGame();
+        });
     }
 
     initLadder();
