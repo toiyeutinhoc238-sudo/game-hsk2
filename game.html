@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" translate="no">
+<html lang="vi" translate="no" class="game-html">
 
 <head>
     <meta charset="UTF-8">
@@ -13,7 +13,7 @@
     <script src="lms-adapter.js"></script>
 </head>
 
-<body>
+<body class="game-body">
     <!-- Top Control Bar (Fixed Top Right: Popout Tab, Fullscreen, Sound - based on HSK 4) -->
     <div class="top-controls">
         <button id="popout-btn" class="control-btn" onclick="LMSAdapter.openNewTab()" title="Mở trong tab mới (cho LMS/iFrame)" aria-label="Mở trong tab mới" style="display: none;">
@@ -30,10 +30,10 @@
     <!-- LMS Toast Notification -->
     <div id="lms-toast" class="lms-toast"></div>
 
-    <div class="container" style="flex: 1; display: flex; flex-direction: column;">
-        <header style="margin-bottom: 2rem;">
-            <h1 style="font-size: 2.5rem; text-align: center;">AI LÀ TRIỆU PHÚ</h1>
-            <div style="text-align: center; color: var(--secondary); font-size: 1.2rem; margin-bottom: 1rem;">CHỦ ĐỀ: <span id="lessonNum">...</span></div>
+    <div class="container game-screen">
+        <header class="game-header">
+            <h1 class="game-title">AI LÀ TRIỆU PHÚ</h1>
+            <div class="game-topic-badge">CHỦ ĐỀ: <span id="lessonNum">...</span></div>
         </header>
 
         <div class="game-layout">
@@ -44,9 +44,9 @@
                     <div id="statusMsg" class="status-msg">Hãy chọn đáp án đúng</div>
                 </div>
                 
-                <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; min-height: 220px;">
+                <div class="question-body">
                     <div id="questionText" class="question-text">Đang tải câu hỏi...</div>
-                    <div class="timer-container" style="margin-bottom: 2rem;">
+                    <div class="timer-container">
                         <div id="timerBar" class="timer-bar"></div>
                     </div>
                     <div id="optionsGrid" class="options-grid">
