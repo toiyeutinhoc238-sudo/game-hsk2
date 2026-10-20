@@ -84,6 +84,9 @@
 
                 card.onclick = () => {
                     card.style.transform = 'scale(0.95)';
+                    if (window.markInternalNavigation) {
+                        window.markInternalNavigation();
+                    }
                     setTimeout(() => {
                         window.location.href = `game.html?topic=${linkId}`;
                     }, 150);

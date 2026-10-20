@@ -735,3 +735,18 @@ body.embedded-lms h1 {
     }
 }
 
+/* Accessibility & Mobile LMS App WebView Enhancements */
+button, .option-btn, .lesson-card {
+    touch-action: manipulation;
+}
+
+button:focus-visible, .option-btn:focus-visible, .lesson-card:focus-visible {
+    outline: 3px solid var(--secondary);
+    outline-offset: 3px;
+}
+
+body {
+    overscroll-behavior-y: contain;
+}
+
+
