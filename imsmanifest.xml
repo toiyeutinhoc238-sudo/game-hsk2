@@ -24,6 +24,7 @@
       <file href="index.html" />
       <file href="game.html" />
       <file href="css/style.css" />
+      <file href="lms-adapter.js" />
       <file href="js/lms.js" />
       <file href="js/questions.js" />
       <file href="js/game.js" />

@@ -10,15 +10,30 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="css/style.css">
-    <script src="js/lms.js"></script>
+    <script src="lms-adapter.js"></script>
 </head>
 
 <body>
+    <!-- Top Control Bar (Fixed Top Right: Popout Tab, Fullscreen, Sound - based on HSK 4) -->
+    <div class="top-controls">
+        <button id="popout-btn" class="control-btn" onclick="LMSAdapter.openNewTab()" title="Mở trong tab mới (cho LMS/iFrame)" aria-label="Mở trong tab mới" style="display: none;">
+            <span class="icon">↗</span>
+        </button>
+        <button id="fullscreen-toggle" class="control-btn" onclick="LMSAdapter.toggleFullscreen()" title="Toàn màn hình (Phím F)" aria-label="Toàn màn hình">
+            <span class="icon">⛶</span>
+        </button>
+        <button id="musicToggle" class="control-btn sound-control" onclick="toggleMusic(event)" title="Bật/Tắt âm thanh" aria-label="Bật/Tắt âm thanh">
+            <span class="icon">🔊</span>
+        </button>
+    </div>
+
+    <!-- LMS Toast Notification -->
+    <div id="lms-toast" class="lms-toast"></div>
+
     <div class="container" style="flex: 1; display: flex; flex-direction: column;">
         <header style="margin-bottom: 2rem;">
             <h1 style="font-size: 2.5rem; text-align: center;">AI LÀ TRIỆU PHÚ</h1>
             <div style="text-align: center; color: var(--secondary); font-size: 1.2rem; margin-bottom: 1rem;">CHỦ ĐỀ: <span id="lessonNum">...</span></div>
-            <button id="musicToggle" class="music-toggle-btn" onclick="toggleMusic()" title="Bật/Tắt âm thanh">🔊</button>
         </header>
 
         <div class="game-layout">

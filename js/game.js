@@ -151,40 +151,53 @@ document.addEventListener('DOMContentLoaded', () => {
     const clapSound = new Audio('votay.mp3');
     bgMusic.loop = true;
 
-    // Music State Management (LMS-Safe Storage)
-    window.toggleMusic = function () {
-        const btn = document.getElementById('musicToggle');
-        if (bgMusic.paused) {
-            window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(e => {});
-            btn.textContent = '🔊';
-            safeStorage.setItem('musicEnabled', 'true');
-        } else {
-            bgMusic.pause();
-            btn.textContent = '🔇';
-            safeStorage.setItem('musicEnabled', 'false');
-        }
-    };
+    // Music State Management (LMS-Safe Storage based on HSK 4)
+    let isMuted = safeStorage.getItem('musicMuted') === 'true';
 
-    window.setMuted = function (isMuted) {
+    function updateAudioMuteState() {
         const btn = document.getElementById('musicToggle');
+        if (btn) {
+            const icon = btn.querySelector('.icon') || btn;
+            icon.textContent = isMuted ? '🔇' : '🔊';
+        }
+        bgMusic.muted = isMuted;
+        correctSound.muted = isMuted;
+        wrongSound.muted = isMuted;
+        helpSound.muted = isMuted;
+        clapSound.muted = isMuted;
+
         if (isMuted) {
             bgMusic.pause();
-            if (btn) btn.textContent = '🔇';
-            safeStorage.setItem('musicEnabled', 'false');
         } else {
-            window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(e => {});
-            if (btn) btn.textContent = '🔊';
-            safeStorage.setItem('musicEnabled', 'true');
+            if (bgMusic.paused) {
+                window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(e => {});
+            }
+        }
+    }
+
+    let lastToggleTime = 0;
+    window.toggleMusic = function (e) {
+        if (e && e.preventDefault) e.preventDefault();
+        const now = Date.now();
+        if (now - lastToggleTime < 250) return; // Prevent double trigger from touch+click
+        lastToggleTime = now;
+
+        isMuted = !isMuted;
+        safeStorage.setItem('musicMuted', isMuted ? 'true' : 'false');
+        updateAudioMuteState();
+        if (window.LMSAdapter && window.LMSAdapter.showToast) {
+            window.LMSAdapter.showToast(isMuted ? '🔇 Đã tắt âm thanh' : '🔊 Đã bật âm thanh');
         }
     };
 
-    // Auto-play music if enabled
-    if (safeStorage.getItem('musicEnabled') !== 'false') {
-        window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(e => console.log("Autoplay blocked:", e));
-    } else {
-        const musicBtn = document.getElementById('musicToggle');
-        if (musicBtn) musicBtn.textContent = '🔇';
-    }
+    window.setMuted = function (muted) {
+        isMuted = !!muted;
+        safeStorage.setItem('musicMuted', isMuted ? 'true' : 'false');
+        updateAudioMuteState();
+    };
+
+    // Initialize audio mute state
+    updateAudioMuteState();
 
     // Money Ladder Values
     const ladderValues = [
@@ -308,7 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.beginActualCountdown = function() {
         // Ensure music plays on interaction
-        if (safeStorage.getItem('musicEnabled') !== 'false' && bgMusic.paused) {
+        if (!isMuted && bgMusic.paused) {
             window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(e => console.log("Autoplay blocked:", e));
         }
 

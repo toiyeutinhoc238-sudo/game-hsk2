@@ -71,18 +71,25 @@ h1 {
     line-height: 1.2;
 }
 
-.music-toggle-btn {
+/* Top Controls Bar (Sound, Fullscreen, Popout Tab - based on HSK 4) */
+.top-controls {
     position: fixed;
-    top: 1.5rem;
-    right: 1.5rem;
+    top: clamp(10px, 2vw, 20px);
+    right: clamp(10px, 2vw, 20px);
+    display: flex;
+    align-items: center;
+    gap: clamp(6px, 1.2vw, 10px);
     z-index: 1001;
-    width: 48px;
-    height: 48px;
+}
+
+.control-btn, .music-toggle-btn {
+    width: clamp(40px, 4.5vw, 48px);
+    height: clamp(40px, 4.5vw, 48px);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.3rem;
+    font-size: clamp(1.1rem, 2vw, 1.3rem);
     padding: 0;
     background: rgba(10, 14, 40, 0.75);
     backdrop-filter: blur(10px);
@@ -91,12 +98,44 @@ h1 {
     cursor: pointer;
     transition: all 0.25s ease;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+    touch-action: manipulation;
 }
 
-.music-toggle-btn:hover {
+.control-btn:hover, .music-toggle-btn:hover {
     background: var(--secondary);
     color: var(--primary);
     transform: scale(1.08);
+}
+
+.control-btn:active, .music-toggle-btn:active {
+    transform: scale(0.94);
+}
+
+/* LMS Toast Notification */
+.lms-toast {
+    position: fixed;
+    bottom: clamp(15px, 3vw, 25px);
+    left: 50%;
+    transform: translateX(-50%) translateY(30px);
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid var(--secondary);
+    color: var(--text);
+    padding: 0.65rem 1.4rem;
+    border-radius: 999px;
+    font-size: clamp(0.85rem, 2vw, 0.95rem);
+    font-weight: 600;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(212, 175, 55, 0.3);
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.lms-toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
 }
 
 /* Lesson Grid (Home Page) */

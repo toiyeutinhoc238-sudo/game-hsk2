@@ -10,13 +10,29 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="css/style.css">
-    <script src="js/lms.js"></script>
+    <script src="lms-adapter.js"></script>
     <script src="js/questions.js"></script>
     <link rel="icon"
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>👑</text></svg>">
 </head>
 
 <body>
+    <!-- Top Control Bar (Fixed Top Right: Popout Tab, Fullscreen, Sound - based on HSK 4) -->
+    <div class="top-controls">
+        <button id="popout-btn" class="control-btn" onclick="LMSAdapter.openNewTab()" title="Mở trong tab mới (cho LMS/iFrame)" aria-label="Mở trong tab mới" style="display: none;">
+            <span class="icon">↗</span>
+        </button>
+        <button id="fullscreen-toggle" class="control-btn" onclick="LMSAdapter.toggleFullscreen()" title="Toàn màn hình (Phím F)" aria-label="Toàn màn hình">
+            <span class="icon">⛶</span>
+        </button>
+        <button id="musicToggle" class="control-btn sound-control" onclick="toggleMusic(event)" title="Bật/Tắt âm thanh" aria-label="Bật/Tắt âm thanh">
+            <span class="icon">🔊</span>
+        </button>
+    </div>
+
+    <!-- LMS Toast Notification -->
+    <div id="lms-toast" class="lms-toast"></div>
+
     <div class="container"
         style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
         <header>
@@ -28,7 +44,6 @@
                 Chinh phục 15 câu hỏi từ vựng để giành lấy danh hiệu Triệu Phú HSK 2. Bạn đã sẵn sàng thử thách kiến
                 thức của mình?
             </p>
-            <button id="musicToggle" class="music-toggle-btn" onclick="toggleMusic()" title="Bật/Tắt âm thanh">🔊</button>
         </header>
 
         <section class="lesson-selection" style="width: 100%;">
@@ -95,46 +110,59 @@
             });
         });
 
-        function toggleMusic() {
-            const btn = document.getElementById('musicToggle');
-            if (bgMusic.paused) {
-                window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(e => {});
-                btn.textContent = '🔊';
-                safeStorage.setItem('musicEnabled', 'true');
-            } else {
-                bgMusic.pause();
-                btn.textContent = '🔇';
-                safeStorage.setItem('musicEnabled', 'false');
-            }
-        }
+        // Audio Control (Based on HSK 4 architecture)
+        let isMuted = (safeStorage.getItem('musicMuted') === 'true');
 
-        window.setMuted = function (isMuted) {
+        function updateMusicUI() {
             const btn = document.getElementById('musicToggle');
+            if (btn) {
+                const icon = btn.querySelector('.icon') || btn;
+                icon.textContent = isMuted ? '🔇' : '🔊';
+            }
+            bgMusic.muted = isMuted;
             if (isMuted) {
                 bgMusic.pause();
-                if (btn) btn.textContent = '🔇';
-                safeStorage.setItem('musicEnabled', 'false');
             } else {
-                window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(e => {});
-                if (btn) btn.textContent = '🔊';
-                safeStorage.setItem('musicEnabled', 'true');
+                if (bgMusic.paused) {
+                    window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(e => {});
+                }
             }
+        }
+
+        let lastToggleTime = 0;
+        function toggleMusic(e) {
+            if (e && e.preventDefault) e.preventDefault();
+            const now = Date.now();
+            if (now - lastToggleTime < 250) return; // Prevent double trigger from touch+click
+            lastToggleTime = now;
+
+            isMuted = !isMuted;
+            safeStorage.setItem('musicMuted', isMuted ? 'true' : 'false');
+            updateMusicUI();
+            if (window.LMSAdapter && window.LMSAdapter.showToast) {
+                window.LMSAdapter.showToast(isMuted ? '🔇 Đã tắt âm thanh' : '🔊 Đã bật âm thanh');
+            }
+        }
+        window.toggleMusic = toggleMusic;
+
+        window.setMuted = function (muted) {
+            isMuted = !!muted;
+            safeStorage.setItem('musicMuted', isMuted ? 'true' : 'false');
+            updateMusicUI();
         };
 
-        // Initialize music state safely
-        if (safeStorage.getItem('musicEnabled') === 'false') {
-            const btn = document.getElementById('musicToggle');
-            if (btn) btn.textContent = '🔇';
-        }
+        // Initialize state
+        updateMusicUI();
 
         // Start music on first interaction (click or touch)
         const unlockAudio = () => {
-            if (safeStorage.getItem('musicEnabled') !== 'false' && bgMusic.paused) {
+            if (!isMuted && bgMusic.paused) {
                 window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(e => {});
             }
         };
-        document.addEventListener('click', unlockAudio, { once: true });
-        document.addEventListener('touchend', unlockAudio, { once: true });
+        ['click', 'touchstart'].forEach(evt => {
+            document.addEventListener(evt, unlockAudio, { once: true });
+        });
     </script>
 
 </body>
