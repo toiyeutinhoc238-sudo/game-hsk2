@@ -148,9 +148,6 @@
 
             if (this.isInIframe && document.body) {
                 document.body.classList.add('embedded-lms');
-                // Show popout button if in iframe
-                const popoutBtn = document.getElementById('popout-btn');
-                if (popoutBtn) popoutBtn.style.display = 'flex';
             }
 
             // 1. Detect SCORM
