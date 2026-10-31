@@ -14,8 +14,15 @@
 </head>
 
 <body class="game-body">
-    <!-- Top Control Bar (Fixed Top Right: Sound) -->
+    <!-- Top Control Bar (Fixed Top Right: Popout Window, Sound) -->
     <div class="top-controls">
+        <button id="popout-btn" class="control-btn" onclick="openGameInNewWindow(event)" title="Mở ở cửa sổ mới (Đồng bộ tiến trình)" aria-label="Mở ở cửa sổ mới">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+        </button>
         <button id="musicToggle" class="control-btn sound-control" onclick="toggleMusic(event)" title="Bật/Tắt âm thanh" aria-label="Bật/Tắt âm thanh">
             <span class="icon">🔊</span>
         </button>
@@ -61,6 +68,23 @@
                 <!-- Ladder items generated here -->
             </div>
             <div id="ladderBackdrop" class="ladder-backdrop" onclick="toggleLadderDrawer()"></div>
+        </div>
+    </div>
+
+    <!-- Popout Active Sync Overlay (When playing in separate window) -->
+    <div id="popoutActiveOverlay" class="modal" style="display: none; z-index: 2200;">
+        <div class="glass popout-sync-card">
+            <div style="font-size: 2.8rem; margin-bottom: 0.6rem; filter: drop-shadow(0 0 12px rgba(212,175,55,0.6));">🗗</div>
+            <h2 style="color: var(--secondary); margin-bottom: 0.75rem; font-size: clamp(1.3rem, 2.5vh, 1.65rem); font-family: 'Playfair Display', serif;">ĐANG CHƠI Ở CỬA SỔ MỚI</h2>
+            <p style="color: #e2e8f0; font-size: clamp(0.88rem, 1.6vh, 0.98rem); line-height: 1.6; margin-bottom: 0.75rem;">
+                Trò chơi đang diễn ra tại cửa sổ riêng biệt để bạn có tầm nhìn rộng rãi và tập trung nhất.
+            </p>
+            <p style="color: var(--text-muted); font-size: clamp(0.78rem, 1.4vh, 0.85rem); line-height: 1.5; margin-bottom: 1.5rem;">
+                💡 <em>Khi bạn đóng cửa sổ đó, màn hình LMS này sẽ tự động quay trở lại đúng khoảnh khắc bạn đang chơi.</em>
+            </p>
+            <button class="btn-secondary" onclick="resumeInLmsWindow()" style="padding: 0.65rem 1.8rem; font-size: 0.9rem; margin: 0 auto; min-height: 38px;">
+                Quay Lại Chơi Tại Đây
+            </button>
         </div>
     </div>
 

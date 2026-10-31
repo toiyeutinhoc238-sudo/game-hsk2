@@ -17,8 +17,15 @@
 </head>
 
 <body>
-    <!-- Top Control Bar (Fixed Top Right: Sound) -->
+    <!-- Top Control Bar (Fixed Top Right: Popout Window, Sound) -->
     <div class="top-controls">
+        <button id="popout-btn" class="control-btn" onclick="openGameInNewWindow(event)" title="Mở ở cửa sổ mới (Đồng bộ tiến trình)" aria-label="Mở ở cửa sổ mới">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+        </button>
         <button id="musicToggle" class="control-btn sound-control" onclick="toggleMusic(event)" title="Bật/Tắt âm thanh" aria-label="Bật/Tắt âm thanh">
             <span class="icon">🔊</span>
         </button>
@@ -97,7 +104,10 @@
                         window.markInternalNavigation();
                     }
                     setTimeout(() => {
-                        window.location.href = `game.html?topic=${linkId}`;
+                        const urlParams = new URLSearchParams(window.location.search);
+                        const isPop = urlParams.get('popout') === '1' || (window.opener && window.name === 'HSK2_Standalone_Game');
+                        const popoutSuffix = isPop ? '&popout=1' : '';
+                        window.location.href = `game.html?topic=${linkId}${popoutSuffix}`;
                     }, 150);
                 };
                 grid.appendChild(card);
@@ -157,6 +167,54 @@
         ['click', 'touchstart'].forEach(evt => {
             document.addEventListener(evt, unlockAudio, { once: true });
         });
+
+        const params = new URLSearchParams(window.location.search);
+        const isPopout = params.get('popout') === '1' || (window.opener && window.name === 'HSK2_Standalone_Game');
+
+        // Open standalone window for LMS index page
+        window.openGameInNewWindow = function (e) {
+            if (e && e.preventDefault) e.preventDefault();
+            if (isPopout) {
+                if (window.opener && !window.opener.closed) {
+                    try { window.opener.focus(); } catch (err) {}
+                }
+                window.close();
+                return;
+            }
+
+            const width = Math.min(1240, window.screen.availWidth - 40);
+            const height = Math.min(760, window.screen.availHeight - 60);
+            const left = Math.max(0, Math.floor((window.screen.availWidth - width) / 2));
+            const top = Math.max(0, Math.floor((window.screen.availHeight - height) / 2));
+            const features = `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`;
+            
+            const targetUrl = new URL(window.location.href);
+            targetUrl.searchParams.set('popout', '1');
+            const win = window.open(targetUrl.toString(), 'HSK2_Standalone_Game', features);
+            if (win) {
+                if (window.LMSAdapter && window.LMSAdapter.showToast) {
+                    window.LMSAdapter.showToast("🚀 Đang mở giao diện trong cửa sổ mới...");
+                }
+            } else {
+                if (window.LMSAdapter && window.LMSAdapter.showToast) {
+                    window.LMSAdapter.showToast("⚠️ Vui lòng cho phép popup trên trình duyệt của bạn!");
+                }
+            }
+        };
+
+        if (isPopout) {
+            const popBtn = document.getElementById('popout-btn');
+            if (popBtn) {
+                popBtn.title = "Quay về màn hình LMS (Đóng cửa sổ này)";
+                popBtn.setAttribute('aria-label', "Quay về màn hình LMS");
+                popBtn.innerHTML = `
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
+                        <polyline points="9 14 4 9 9 4"></polyline>
+                        <path d="M20 20v-7a4 4 0 0 0-4-4H4"></path>
+                    </svg>
+                `;
+            }
+        }
     </script>
 
 </body>

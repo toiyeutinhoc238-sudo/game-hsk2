@@ -127,6 +127,40 @@ h1 {
     transform: scale(0.94);
 }
 
+.control-btn svg {
+    width: clamp(18px, 2.2vw, 22px);
+    height: clamp(18px, 2.2vw, 22px);
+    stroke: currentColor;
+    display: block;
+    transition: transform 0.25s ease;
+}
+
+.control-btn:hover svg {
+    transform: scale(1.12);
+}
+
+/* Popout Active Sync Overlay */
+.popout-sync-card {
+    max-width: 520px;
+    width: 90%;
+    padding: clamp(1.4rem, 2.8vh, 2.2rem);
+    text-align: center;
+    border: 2px solid var(--secondary);
+    border-radius: 20px;
+    background: rgba(10, 14, 40, 0.95);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 25px rgba(212, 175, 55, 0.25);
+    animation: popoutPulseGlow 3s infinite ease-in-out;
+}
+
+@keyframes popoutPulseGlow {
+    0%, 100% {
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 15px rgba(212, 175, 55, 0.2);
+    }
+    50% {
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8), 0 0 30px rgba(212, 175, 55, 0.45);
+    }
+}
+
 /* LMS Toast Notification */
 .lms-toast {
     position: fixed;

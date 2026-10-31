@@ -468,19 +468,25 @@
         },
 
         /**
-         * Safely open game in standalone new tab (for narrow LMS iframes)
+         * Safely open game in standalone new window (with bidirectional state sync)
          */
         openNewTab() {
+            if (typeof window.openGameInNewWindow === 'function') {
+                window.openGameInNewWindow();
+                return;
+            }
             try {
-                const win = window.open(window.location.href, '_blank');
+                const targetUrl = new URL(window.location.href);
+                targetUrl.searchParams.set('popout', '1');
+                const win = window.open(targetUrl.toString(), 'HSK2_Standalone_Game', 'width=1200,height=750,resizable=yes');
                 if (win) {
-                    this.showToast("🚀 Đang mở game trong tab mới...");
+                    this.showToast("🚀 Đang mở trò chơi ở cửa sổ mới...");
                     return;
                 }
             } catch (e) {
                 console.warn("Popup blocked:", e);
             }
-            this.showToast("⛶ Trình duyệt đã chặn tab mới. Vui lòng cho phép popup.");
+            this.showToast("⚠️ Trình duyệt đã chặn cửa sổ mới. Vui lòng cho phép popup.");
         },
 
         /**

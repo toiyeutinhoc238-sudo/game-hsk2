@@ -1,6 +1,43 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const storage = window.safeStorage || {
+        getItem(k) { try { return localStorage.getItem(k); } catch(e) { return null; } },
+        setItem(k, v) { try { localStorage.setItem(k, v); } catch(e) {} }
+    };
+
     const params = new URLSearchParams(window.location.search);
-    const topicParam = params.get('topic');
+    const isPopout = params.get('popout') === '1' || (window.opener && window.opener !== window && window.name === 'HSK2_Standalone_Game');
+
+    let syncChannel = null;
+    try {
+        if ('BroadcastChannel' in window) {
+            syncChannel = new BroadcastChannel('hsk2_millionaire_sync');
+        }
+    } catch (e) {}
+
+    let latestSyncedState = null;
+    let childWin = null;
+    let popoutPollInterval = null;
+
+    // Check for existing state snapshot to resume
+    let initialSyncedState = null;
+    if (isPopout || params.get('resume_sync') === '1') {
+        try {
+            const raw = storage.getItem('hsk2_synced_state');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed && parsed.questions && parsed.questions.length === 15 && (Date.now() - parsed.timestamp < 7200000)) {
+                    initialSyncedState = parsed;
+                }
+            }
+        } catch (err) {}
+        try {
+            if (!initialSyncedState && window.opener && window.opener.__HSK2_LATEST_STATE__) {
+                initialSyncedState = window.opener.__HSK2_LATEST_STATE__;
+            }
+        } catch (e) {}
+    }
+
+    const topicParam = (initialSyncedState && initialSyncedState.topicName) ? initialSyncedState.topicName : params.get('topic');
     const allTopicKeys = Object.keys(hsk2Vocab);
     const filteredTopics = allTopicKeys.filter(t => hsk2Vocab[t].length >= 9);
 
@@ -141,7 +178,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    generateNewQuestions();
+    if (initialSyncedState && initialSyncedState.questions && initialSyncedState.questions.length === 15) {
+        questions = initialSyncedState.questions;
+    } else {
+        generateNewQuestions();
+    }
 
     // Audio Elements
     const correctSound = new Audio('traloidung.mp3');
@@ -258,12 +299,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isResume) {
             timeLeft = 15;
             timerBar.style.width = '100%';
+        } else {
+            const percentage = Math.max(0, Math.min(100, (timeLeft / 15) * 100));
+            timerBar.style.width = `${percentage}%`;
         }
 
         timerInterval = setInterval(() => {
             timeLeft -= 0.1;
-            const percentage = (timeLeft / 15) * 100;
+            const percentage = Math.max(0, (timeLeft / 15) * 100);
             timerBar.style.width = `${percentage}%`;
+
+            // Periodic sync every 1 second when in popout
+            if (isPopout && Math.abs(Math.round(timeLeft) - timeLeft) < 0.05) {
+                saveAndBroadcastState();
+            }
 
             if (timeLeft <= 0) {
                 clearInterval(timerInterval);
@@ -285,6 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 currentScore = "0";
                 safeScore = "0";
+                saveAndBroadcastState();
                 
                 setTimeout(() => endGame(false, false, true), 3000);
             }
@@ -368,6 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         startTimer();
+        saveAndBroadcastState();
     }
 
     function handleChoice(idx) {
@@ -384,6 +435,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Suspend clicks
         buttons.forEach(b => b.disabled = true);
+        saveAndBroadcastState();
 
         // Delay for suspense (3 seconds now)
         setTimeout(() => {
@@ -402,6 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 statusMsg.textContent = 'Chính xác! Đang chuẩn bị câu hỏi tiếp theo...';
+                saveAndBroadcastState();
                 correctSound.onended = () => {
                     currentIdx++;
                     isProcessing = false;
@@ -410,6 +463,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else {
                         endGame(true);
                     }
+                    saveAndBroadcastState();
                 };
                 window.safePlayAudio ? window.safePlayAudio(correctSound) : correctSound.play().catch(e => {});
             } else {
@@ -422,6 +476,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 buttons[idx].classList.add('wrong');
                 buttons[q.correct].classList.add('correct');
                 statusMsg.textContent = 'Tiếc quá! Bạn đã trả lời sai.';
+                saveAndBroadcastState();
                 setTimeout(() => endGame(false), 2000);
             }
         }, 3000);
@@ -459,6 +514,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
                 statusMsg.textContent = 'Hệ thống đã loại bỏ 2 phương án sai.';
+                used5050 = true;
+                saveAndBroadcastState();
                 setTimeout(() => {
                     statusMsg.textContent = 'Tiếp tục suy nghĩ...';
                     window.resumeTimer();
@@ -514,6 +571,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 clearInterval(interval);
                 status.textContent = 'KẾT QUẢ BÌNH CHỌN CHÍNH THỨC:';
                 closeBtn.style.display = 'inline-block';
+                saveAndBroadcastState();
 
                 // Final percentages
                 let percs = [0, 0, 0, 0];
@@ -581,6 +639,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 thinking.style.display = 'none';
                 answer.style.display = 'block';
                 closeBtn.style.display = 'inline-block';
+                saveAndBroadcastState();
                 const prefixes = ['A', 'B', 'C', 'D'];
                 answer.innerHTML = `<strong>Chuyên gia tư vấn:</strong><br><br>Sau khi cân nhắc kỹ, tôi khá chắc chắn đáp án đúng là <strong>${prefixes[q.correct]}</strong>: "${q.a[q.correct]}".`;
             }
@@ -596,6 +655,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.confirmStop = function () {
         document.getElementById('stopModal').style.display = 'none';
         endGame(false, true);
+        saveAndBroadcastState();
     };
 
     function endGame(isWin, stoppedManually = false, isTimeout = false) {
@@ -671,6 +731,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const finalPrize = isWin ? "500.000.000" : (stoppedManually ? currentScore : ((currentIdx >= 10) ? safeScore : (currentIdx >= 5 ? ladderValues[4] : "0")));
             window.LMSBridge.reportComplete(isWin, currentIdx, finalPrize, stoppedManually);
         }
+        saveAndBroadcastState();
     }
 
     // Comprehensive Game Restart Function
@@ -708,16 +769,19 @@ document.addEventListener('DOMContentLoaded', () => {
             if (help5050Btn) {
                 help5050Btn.disabled = false;
                 help5050Btn.style.opacity = '1';
+                help5050Btn.style.cursor = 'pointer';
             }
             const helpAudienceBtn = document.getElementById('helpAudience');
             if (helpAudienceBtn) {
                 helpAudienceBtn.disabled = false;
                 helpAudienceBtn.style.opacity = '1';
+                helpAudienceBtn.style.cursor = 'pointer';
             }
             const helpExpertBtn = document.getElementById('helpExpert');
             if (helpExpertBtn) {
                 helpExpertBtn.disabled = false;
                 helpExpertBtn.style.opacity = '1';
+                helpExpertBtn.style.cursor = 'pointer';
             }
 
             // 4. Close any open dialogs
@@ -732,6 +796,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 6. Rebuild ladder and launch countdown
             initLadder();
             startCountdown();
+            saveAndBroadcastState();
             return;
         } catch (err) {
             console.error("In-memory restart error, falling back to reload:", err);
@@ -760,6 +825,387 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ========================================================
+    // BIDIRECTIONAL LMS <-> POPOUT STATE SYNCHRONIZATION
+    // ========================================================
+
+    function getGameStateSnapshot() {
+        const hiddenOptions = [];
+        if (optionsGrid) {
+            const btns = optionsGrid.querySelectorAll('.option-btn');
+            btns.forEach((b, idx) => {
+                if (b.style.visibility === 'hidden') hiddenOptions.push(idx);
+            });
+        }
+
+        return {
+            version: '2.0',
+            timestamp: Date.now(),
+            topicName: topicName,
+            questions: questions,
+            currentIdx: currentIdx,
+            currentScore: currentScore,
+            safeScore: safeScore,
+            timeLeft: Math.max(0.1, Number(timeLeft.toFixed(1))),
+            isGameOver: isGameOver,
+            isProcessing: isProcessing,
+            used5050: used5050,
+            usedAudience: !!document.getElementById('helpAudience')?.disabled,
+            usedExpert: !!document.getElementById('helpExpert')?.disabled,
+            hiddenOptions: hiddenOptions,
+            countdownPassed: (countdownOverlay && countdownOverlay.style.display === 'none'),
+            statusMsg: statusMsg ? statusMsg.textContent : '',
+            reviewListHTML: reviewList ? reviewList.innerHTML : '',
+            resultModalOpen: (resultModal && resultModal.style.display === 'flex'),
+            resultTitleText: resultTitle ? resultTitle.textContent : '',
+            resultMessageText: resultMessage ? resultMessage.textContent : '',
+            resultTitleColor: resultTitle ? resultTitle.style.color : ''
+        };
+    }
+
+    function applyGameStateSnapshot(snapshot) {
+        if (!snapshot || !snapshot.questions || snapshot.questions.length === 0) return false;
+
+        questions = snapshot.questions;
+        if (snapshot.topicName) {
+            topicName = snapshot.topicName;
+            if (lessonNumDisp) lessonNumDisp.textContent = topicName;
+        }
+
+        currentIdx = snapshot.currentIdx || 0;
+        currentScore = snapshot.currentScore || "0";
+        safeScore = snapshot.safeScore || "0";
+        isGameOver = !!snapshot.isGameOver;
+        isProcessing = false;
+
+        initLadder();
+        updateLadder();
+
+        // Lifelines state
+        used5050 = !!snapshot.used5050;
+        if (help5050Btn) {
+            help5050Btn.disabled = used5050;
+            help5050Btn.style.opacity = used5050 ? '0.3' : '1';
+            help5050Btn.style.cursor = used5050 ? 'not-allowed' : 'pointer';
+        }
+        const helpAudienceBtn = document.getElementById('helpAudience');
+        if (helpAudienceBtn) {
+            helpAudienceBtn.disabled = !!snapshot.usedAudience;
+            helpAudienceBtn.style.opacity = snapshot.usedAudience ? '0.3' : '1';
+            helpAudienceBtn.style.cursor = snapshot.usedAudience ? 'not-allowed' : 'pointer';
+        }
+        const helpExpertBtn = document.getElementById('helpExpert');
+        if (helpExpertBtn) {
+            helpExpertBtn.disabled = !!snapshot.usedExpert;
+            helpExpertBtn.style.opacity = snapshot.usedExpert ? '0.3' : '1';
+            helpExpertBtn.style.cursor = snapshot.usedExpert ? 'not-allowed' : 'pointer';
+        }
+
+        // Countdown overlay
+        if (snapshot.countdownPassed) {
+            if (countdownOverlay) countdownOverlay.style.display = 'none';
+        } else {
+            startCountdown();
+        }
+
+        // Game status
+        if (isGameOver) {
+            clearInterval(timerInterval);
+            if (bgMusic) bgMusic.pause();
+            if (resultModal) {
+                resultModal.style.display = 'flex';
+                if (resultTitle) {
+                    resultTitle.textContent = snapshot.resultTitleText || 'KẾT THÚC';
+                    if (snapshot.resultTitleColor) resultTitle.style.color = snapshot.resultTitleColor;
+                }
+                if (resultMessage) resultMessage.textContent = snapshot.resultMessageText || '';
+                if (reviewList) {
+                    if (snapshot.reviewListHTML) {
+                        reviewList.innerHTML = snapshot.reviewListHTML;
+                    } else if (questions && questions.length > 0) {
+                        reviewList.innerHTML = `
+                            <table class="review-table">
+                                <thead><tr><th>Từ vựng</th><th>Phiên âm</th><th>Nghĩa</th></tr></thead>
+                                <tbody id="reviewTableBody"></tbody>
+                            </table>
+                        `;
+                        const tableBody = document.getElementById('reviewTableBody');
+                        questions.forEach(v => {
+                            const match = v.vocab.match(/^(.*?)\s*\((.*?)\)\s*-\s*(.*)$/);
+                            let zh = v.vocab, pinyin = '', meaning = '';
+                            if (match) { zh = match[1]; pinyin = match[2]; meaning = match[3]; }
+                            else { const parts = v.vocab.split(' - '); zh = parts[0]; meaning = parts[1] || ''; }
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `<td>${zh}</td><td>${pinyin}</td><td>${meaning}</td>`;
+                            tableBody.appendChild(tr);
+                        });
+                    }
+                }
+            }
+        } else {
+            if (resultModal) resultModal.style.display = 'none';
+
+            const q = questions[currentIdx];
+            if (q) {
+                questionNumNum.textContent = `Câu ${currentIdx + 1}/15`;
+                questionText.textContent = q.q;
+                optionsGrid.innerHTML = '';
+                statusMsg.textContent = snapshot.statusMsg || 'Suy nghĩ và chọn đáp án...';
+
+                const prefixes = ['A', 'B', 'C', 'D'];
+                q.a.forEach((opt, idx) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.setAttribute('data-prefix', `${prefixes[idx]}. `);
+                    btn.textContent = opt;
+                    btn.onclick = () => handleChoice(idx);
+                    if (snapshot.hiddenOptions && snapshot.hiddenOptions.includes(idx)) {
+                        btn.style.visibility = 'hidden';
+                        btn.disabled = true;
+                    }
+                    optionsGrid.appendChild(btn);
+                });
+
+                timeLeft = typeof snapshot.timeLeft === 'number' ? snapshot.timeLeft : 15;
+                startTimer(true);
+            }
+        }
+        return true;
+    }
+
+    function saveAndBroadcastState(customSnapshot = null, isClosing = false) {
+        const snapshot = customSnapshot || getGameStateSnapshot();
+        if (isClosing) snapshot.isPopoutClosing = true;
+        latestSyncedState = snapshot;
+        window.__HSK2_LATEST_STATE__ = snapshot;
+
+        try {
+            storage.setItem('hsk2_synced_state', JSON.stringify(snapshot));
+            if (isClosing) {
+                localStorage.setItem('hsk2_popout_closed', Date.now().toString());
+            }
+        } catch (e) {}
+
+        const msgType = isClosing ? 'HSK2_POPOUT_CLOSED' : 'HSK2_STATE_UPDATE';
+
+        if (syncChannel) {
+            try {
+                syncChannel.postMessage({ type: msgType, state: snapshot });
+            } catch (e) {}
+        }
+
+        if (isPopout && window.opener && !window.opener.closed) {
+            try {
+                window.opener.postMessage({ type: msgType, state: snapshot }, '*');
+            } catch (e) {}
+        } else if (childWin && !childWin.closed) {
+            try {
+                childWin.postMessage({ type: msgType, state: snapshot }, '*');
+            } catch (e) {}
+        }
+    }
+
+    function handleIncomingSync(data) {
+        if (!data || !data.state) return;
+        const { type, state } = data;
+
+        if (!isPopout) {
+            latestSyncedState = state;
+            window.__HSK2_LATEST_STATE__ = state;
+
+            // Report progress/completion to LMS SCORM in parent window
+            if (window.LMSBridge) {
+                if (state.isGameOver) {
+                    window.LMSBridge.reportComplete(
+                        state.isWin,
+                        state.currentIdx,
+                        state.currentScore,
+                        state.stoppedManually
+                    );
+                } else if (state.currentIdx > 0) {
+                    window.LMSBridge.reportProgress(state.currentIdx, true, state.currentScore);
+                }
+            }
+
+            if (type === 'HSK2_POPOUT_CLOSED' || state.isPopoutClosing) {
+                window.resumeInLmsWindow();
+            }
+        }
+    }
+
+    if (syncChannel) {
+        syncChannel.onmessage = (e) => {
+            handleIncomingSync(e.data);
+        };
+    }
+
+    window.addEventListener('message', (e) => {
+        handleIncomingSync(e.data);
+    });
+
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'hsk2_synced_state' && e.newValue) {
+            try {
+                const parsed = JSON.parse(e.newValue);
+                if (parsed) {
+                    handleIncomingSync({ type: parsed.isPopoutClosing ? 'HSK2_POPOUT_CLOSED' : 'HSK2_STATE_UPDATE', state: parsed });
+                }
+            } catch (err) {}
+        }
+    });
+
+    window.openGameInNewWindow = function (e) {
+        if (e && e.preventDefault) e.preventDefault();
+
+        if (isPopout) {
+            window.closePopoutAndReturnToLMS();
+            return;
+        }
+
+        window.pauseTimer();
+        if (bgMusic && !bgMusic.paused) {
+            bgMusic.pause();
+        }
+
+        const snapshot = getGameStateSnapshot();
+        snapshot.isLmsWaiting = true;
+        snapshot.syncSessionId = 'sync_' + Date.now();
+
+        try {
+            storage.setItem('hsk2_synced_state', JSON.stringify(snapshot));
+            storage.setItem('hsk2_active_session', snapshot.syncSessionId);
+        } catch (err) {}
+        window.__HSK2_LATEST_STATE__ = snapshot;
+
+        if (syncChannel) {
+            try {
+                syncChannel.postMessage({ type: 'HSK2_SYNC_INIT', state: snapshot });
+            } catch (e) {}
+        }
+
+        const overlay = document.getElementById('popoutActiveOverlay');
+        if (overlay) {
+            overlay.style.display = 'flex';
+        }
+
+        const targetUrl = new URL(window.location.href);
+        targetUrl.searchParams.set('topic', topicName);
+        targetUrl.searchParams.set('popout', '1');
+        targetUrl.searchParams.set('session', snapshot.syncSessionId);
+
+        const width = Math.min(1240, window.screen.availWidth - 40);
+        const height = Math.min(760, window.screen.availHeight - 60);
+        const left = Math.max(0, Math.floor((window.screen.availWidth - width) / 2));
+        const top = Math.max(0, Math.floor((window.screen.availHeight - height) / 2));
+        const windowFeatures = `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=no,status=no,toolbar=no,menubar=no,location=no`;
+
+        try {
+            childWin = window.open(targetUrl.toString(), 'HSK2_Standalone_Game', windowFeatures);
+        } catch (err) {
+            console.warn("window.open failed:", err);
+        }
+
+        if (!childWin || childWin.closed || typeof childWin.closed === 'undefined') {
+            if (overlay) overlay.style.display = 'none';
+            window.resumeTimer();
+            if (window.LMSAdapter && window.LMSAdapter.showToast) {
+                window.LMSAdapter.showToast("⚠️ Vui lòng cho phép popup trên trình duyệt của bạn!");
+            }
+            return;
+        }
+
+        if (window.LMSAdapter && window.LMSAdapter.showToast) {
+            window.LMSAdapter.showToast("🚀 Đang chơi tại cửa sổ mới! Màn hình LMS tạm dừng và chờ đồng bộ.");
+        }
+
+        clearInterval(popoutPollInterval);
+        popoutPollInterval = setInterval(() => {
+            if (!childWin || childWin.closed) {
+                clearInterval(popoutPollInterval);
+                popoutPollInterval = null;
+                window.resumeInLmsWindow();
+            }
+        }, 350);
+    };
+
+    window.resumeInLmsWindow = function () {
+        clearInterval(popoutPollInterval);
+        popoutPollInterval = null;
+
+        if (childWin && !childWin.closed) {
+            try { childWin.close(); } catch (e) {}
+        }
+        childWin = null;
+
+        const overlay = document.getElementById('popoutActiveOverlay');
+        if (overlay) {
+            overlay.style.display = 'none';
+        }
+
+        let stateToApply = latestSyncedState;
+        if (!stateToApply) {
+            try {
+                const raw = storage.getItem('hsk2_synced_state');
+                if (raw) stateToApply = JSON.parse(raw);
+            } catch (e) {}
+        }
+
+        if (stateToApply) {
+            applyGameStateSnapshot(stateToApply);
+            if (window.LMSAdapter && window.LMSAdapter.showToast) {
+                if (stateToApply.isGameOver) {
+                    window.LMSAdapter.showToast("🏆 Đã đồng bộ kết quả từ cửa sổ mới!");
+                } else {
+                    window.LMSAdapter.showToast(`🎮 Đã đồng bộ tiến trình! Tiếp tục câu ${stateToApply.currentIdx + 1}/15`);
+                }
+            }
+        } else {
+            window.resumeTimer();
+        }
+
+        if (!isMuted && !isGameOver) {
+            window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(e => {});
+        }
+    };
+
+    window.closePopoutAndReturnToLMS = function () {
+        saveAndBroadcastState(null, true);
+        if (window.opener && !window.opener.closed) {
+            try {
+                window.opener.focus();
+            } catch (e) {}
+        }
+        window.close();
+    };
+
+    if (isPopout) {
+        const popBtn = document.getElementById('popout-btn');
+        if (popBtn) {
+            popBtn.title = "Quay về màn hình LMS (Đóng cửa sổ này)";
+            popBtn.setAttribute('aria-label', "Quay về màn hình LMS");
+            popBtn.innerHTML = `
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
+                    <polyline points="9 14 4 9 9 4"></polyline>
+                    <path d="M20 20v-7a4 4 0 0 0-4-4H4"></path>
+                </svg>
+            `;
+            popBtn.onclick = function (e) {
+                if (e && e.preventDefault) e.preventDefault();
+                window.closePopoutAndReturnToLMS();
+            };
+        }
+
+        const handleUnload = () => {
+            saveAndBroadcastState(null, true);
+        };
+        window.addEventListener('beforeunload', handleUnload);
+        window.addEventListener('pagehide', handleUnload);
+    }
+
     initLadder();
-    startCountdown();
+    if (initialSyncedState) {
+        applyGameStateSnapshot(initialSyncedState);
+    } else {
+        startCountdown();
+    }
 });
