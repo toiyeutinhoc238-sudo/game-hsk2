@@ -450,8 +450,14 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
+    function isLmsOverlayActive() {
+        if (isPopout) return false;
+        const overlay = document.getElementById('sync-active-modal');
+        return !!(overlay && overlay.style.display !== 'none' && overlay.classList.contains('show'));
+    }
+
     function startTimer(isResume = false) {
-        if (isGameOver || isProcessing) return;
+        if (isGameOver || isProcessing || isLmsOverlayActive()) return;
         clearInterval(timerInterval);
         if (!isResume) {
             timeLeft = 15;
@@ -462,7 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         timerInterval = setInterval(() => {
-            if (isGameOver || isProcessing) {
+            if (isGameOver || isProcessing || isLmsOverlayActive()) {
                 clearInterval(timerInterval);
                 return;
             }
@@ -518,6 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.resumeTimer = function () {
+        if (isLmsOverlayActive()) return;
         if (!isGameOver && !isProcessing) {
             startTimer(true);
         }
@@ -928,7 +935,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        resultModal.style.display = 'flex';
+        if (resultModal && !isLmsOverlayActive()) {
+            resultModal.style.display = 'flex';
+        }
 
         // Report Game Results to LMS (SCORM and postMessage)
         if (window.LMSBridge) {
@@ -1169,7 +1178,9 @@ document.addEventListener('DOMContentLoaded', () => {
             clearInterval(timerInterval);
             if (bgMusic) bgMusic.pause();
             if (resultModal) {
-                resultModal.style.display = 'flex';
+                if (resultModal && !isLmsOverlayActive()) {
+            resultModal.style.display = 'flex';
+        }
                 if (resultTitle) {
                     const titleText = (snapshot.resultTitleText && snapshot.resultTitleText !== 'KẾT QUẢ')
                         ? snapshot.resultTitleText
@@ -1214,7 +1225,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 timeLeft = typeof snapshot.timeLeft === 'number' ? snapshot.timeLeft : 15;
-                startTimer(true);
+                if (!isLmsOverlayActive()) {
+                    startTimer(true);
+                }
             }
 
             // Resume audio continuation seamlessly if not muted and not in paused parent
@@ -1298,10 +1311,17 @@ document.addEventListener('DOMContentLoaded', () => {
         updateSyncOverlayInfo(snapshot);
     }
 
+    let lastChildMessageTime = 0;
+
     function handleIncomingSync(data) {
         if (!data) return;
+        lastChildMessageTime = Date.now();
         const type = data.type || data.action;
         const state = data.state;
+
+        if (type === 'HSK2_HEARTBEAT') {
+            return;
+        }
 
         // 1. Audio Synchronization
         if (type === 'HSK2_AUDIO_SYNC') {
@@ -1525,6 +1545,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 popoutPollInterval = null;
             }
 
+            lastChildMessageTime = Date.now();
+
             setTimeout(() => {
                 if (!childWin || childWin === true) return;
                 popoutPollInterval = setInterval(() => {
@@ -1535,13 +1557,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         isClosed = false;
                     }
                     if (isClosed) {
+                        // Crucial fix: In LMS iframes, Chromium/Edge marks childWin.closed = true prematurely.
+                        // If child sent a heartbeat/message within the last 5 seconds, it is still alive!
+                        if (Date.now() - lastChildMessageTime < 5000) {
+                            return; // Do NOT resume while child is actively playing
+                        }
                         clearInterval(popoutPollInterval);
                         popoutPollInterval = null;
                         childWin = null;
                         resumeInLmsWindow(false);
                     }
-                }, 500);
-            }, 1000);
+                }, 1000);
+            }, 3000);
         } else {
             if (overlay) {
                 overlay.classList.remove('show');
@@ -1677,6 +1704,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // UI Setup for Child Window
     if (isPopout) {
+        // Send continuous heartbeat to parent LMS window to prevent premature resume
+        setInterval(() => {
+            const hbMsg = { type: 'HSK2_HEARTBEAT', timestamp: Date.now() };
+            if (syncChannel) {
+                try { syncChannel.postMessage(hbMsg); } catch (e) {}
+            }
+            if (window.opener && !window.opener.closed) {
+                try { window.opener.postMessage(hbMsg, '*'); } catch (e) {}
+            }
+        }, 1500);
+
         const popBtn = document.getElementById('popout-btn');
         if (popBtn) {
             popBtn.title = "Quay về màn hình LMS (Đóng cửa sổ này)";
