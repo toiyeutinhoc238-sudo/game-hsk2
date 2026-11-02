@@ -295,22 +295,35 @@
                     } else if (typeof window.toggleMusic === 'function' && window.isMuted) {
                         window.toggleMusic();
                     }
+                } else if (action === 'HSK2_LMS_PROGRESS' && data.payload && this.isSCORM) {
+                    // Forward progress reported from child popup window to SCORM
+                    this.reportProgress(data.payload.questionIndex - 1, data.payload.isCorrect, data.payload.score);
+                } else if (action === 'HSK2_LMS_COMPLETE' && data.payload && this.isSCORM) {
+                    // Forward completion reported from child popup window to SCORM
+                    this.reportComplete(data.payload.won, data.payload.correctQuestions, data.payload.finalPrize, data.payload.stoppedManually);
                 }
             });
         },
 
         /**
-         * Broadcast events to parent LMS window
+         * Broadcast events to parent LMS window & opener if popup
          */
         sendPostMessage(action, payload = {}) {
+            const message = {
+                source: 'HSK2_MILLIONAIRE',
+                action: action,
+                payload: payload,
+                timestamp: Date.now()
+            };
             try {
                 if (window.parent && window.parent !== window) {
-                    window.parent.postMessage({
-                        source: 'HSK2_MILLIONAIRE',
-                        action: action,
-                        payload: payload,
-                        timestamp: Date.now()
-                    }, '*');
+                    window.parent.postMessage(message, '*');
+                }
+            } catch (e) {}
+
+            try {
+                if (window.opener && window.opener !== window && !window.opener.closed) {
+                    window.opener.postMessage(message, '*');
                 }
             } catch (e) {}
         },
@@ -468,17 +481,61 @@
         },
 
         /**
-         * Safely open game in standalone new window (with bidirectional state sync)
+         * Safely open game in standalone new window (with bidirectional state sync - matches HSK 4 architecture)
          */
         openNewTab() {
             if (typeof window.openGameInNewWindow === 'function') {
                 window.openGameInNewWindow();
                 return;
             }
+            if (typeof window.openStandaloneWindow === 'function') {
+                window.openStandaloneWindow();
+                return;
+            }
             try {
                 const targetUrl = new URL(window.location.href);
+                targetUrl.searchParams.delete('state');
+                targetUrl.hash = '';
                 targetUrl.searchParams.set('popout', '1');
-                const win = window.open(targetUrl.toString(), 'HSK2_Standalone_Game', 'width=1200,height=750,resizable=yes');
+
+                const scrWidth = (window.screen && window.screen.availWidth) || window.innerWidth || 1280;
+                const scrHeight = (window.screen && window.screen.availHeight) || window.innerHeight || 800;
+                const w = Math.min(1240, scrWidth - 40);
+                const h = Math.min(760, scrHeight - 60);
+                const left = Math.max(0, Math.floor((scrWidth - w) / 2));
+                const top = Math.max(0, Math.floor((scrHeight - h) / 2));
+                const windowFeatures = `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`;
+
+                let win = null;
+                // Strategy 1: Standalone Popup Window with features
+                try {
+                    win = window.open(targetUrl.toString(), 'HSK2_Standalone_Game', windowFeatures);
+                } catch (e) {}
+
+                // Strategy 2: Named Window without features
+                if (!win || win.closed || typeof win.closed === 'undefined') {
+                    try { win = window.open(targetUrl.toString(), 'HSK2_Standalone_Game'); } catch (e) {}
+                }
+
+                // Strategy 3: Standard New Tab (_blank)
+                if (!win || win.closed || typeof win.closed === 'undefined') {
+                    try { win = window.open(targetUrl.toString(), '_blank'); } catch (e) {}
+                }
+
+                // Strategy 4: Anchor Click Fallback
+                if (!win || win.closed || typeof win.closed === 'undefined') {
+                    try {
+                        const a = document.createElement('a');
+                        a.href = targetUrl.toString();
+                        a.target = '_blank';
+                        a.rel = 'noopener';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        win = true;
+                    } catch (e) {}
+                }
+
                 if (win) {
                     this.showToast("🚀 Đang mở trò chơi ở cửa sổ mới...");
                     return;

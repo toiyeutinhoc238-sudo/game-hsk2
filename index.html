@@ -34,6 +34,56 @@
     <!-- LMS Toast Notification -->
     <div id="lms-toast" class="lms-toast"></div>
 
+    <!-- Popout Active Sync Overlay (When playing in separate window - HSK 4 Architecture) -->
+    <div id="sync-active-modal" class="sync-modal" style="display: none; z-index: 2200;">
+        <div class="sync-modal-content glass">
+            <div class="sync-badge">
+                <span class="sync-dot"></span>
+                <span>ĐỒNG BỘ THỜI GIAN THỰC</span>
+            </div>
+            <div class="sync-icon-box">
+                <svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--secondary, #d4af37);">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                    <polyline points="15 3 21 3 21 9"></polyline>
+                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                </svg>
+            </div>
+
+            <h2 class="sync-title">Trò Chơi Đang Mở Ở Cửa Sổ Mới</h2>
+            <p class="sync-description">
+                Bạn đang chơi trên cửa sổ mới. Mọi tiến trình đang được tự động đồng bộ về LMS theo thời gian thực.
+            </p>
+
+            <div class="sync-status-card">
+                <div class="sync-info-item">
+                    <span class="sync-info-label">Chủ đề</span>
+                    <span id="sync-overlay-topic" class="sync-info-val">Đang chọn</span>
+                </div>
+                <div class="sync-info-item">
+                    <span class="sync-info-label">Câu hỏi</span>
+                    <span id="sync-overlay-question" class="sync-info-val">-</span>
+                </div>
+                <div class="sync-info-item">
+                    <span class="sync-info-label">Tiền thưởng</span>
+                    <span id="sync-overlay-score" class="sync-info-val">0 đ</span>
+                </div>
+            </div>
+
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.5rem; margin-bottom: 1.25rem;">
+                💡 <em>Khi bạn đóng cửa sổ đó, màn hình LMS này sẽ tự động quay trở lại đúng khoảnh khắc bạn đang chơi.</em>
+            </p>
+
+            <div class="sync-modal-actions">
+                <button class="btn-secondary sync-focus-btn" onclick="focusChildWindow()">
+                    🗗 Chuyển Sang Cửa Sổ Mới
+                </button>
+                <button class="btn-secondary sync-resume-btn" onclick="resumeInLmsWindow(true)">
+                    ▶ Tiếp Tục Chơi Tại Màn Hình Này
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div class="container"
         style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center;">
         <header>
@@ -114,8 +164,54 @@
             });
         });
 
-        // Audio Control (Based on HSK 4 architecture)
-        let isMuted = (safeStorage.getItem('musicMuted') === 'true');
+        // -------------------------------------------------------------
+        // Audio Control & Two-way Real-time Synchronization (HSK 4 architecture)
+        // -------------------------------------------------------------
+        const params = new URLSearchParams(window.location.search);
+        const isPopout = params.get('popout') === '1' || (window.opener && window.name === 'HSK2_Standalone_Game');
+        window.isChildWindow = isPopout;
+
+        if (isPopout) {
+            document.body.classList.add('is-child-window');
+        }
+
+        let syncChannel = null;
+        try {
+            if ('BroadcastChannel' in window) {
+                syncChannel = new BroadcastChannel('hsk2_millionaire_sync');
+            }
+        } catch (e) {}
+
+        let childWin = null;
+        let popoutPollInterval = null;
+        let latestChildState = null;
+
+        // Initialize Mute State from URL param or safeStorage
+        let isMuted = false;
+        if (params.has('muted')) {
+            isMuted = (params.get('muted') === '1');
+        } else {
+            isMuted = (safeStorage.getItem('musicMuted') === 'true');
+        }
+
+        // Initialize Audio Time from URL param
+        const initAudioTime = parseFloat(params.get('audioTime')) || 0;
+        if (initAudioTime > 0) {
+            const setSeek = () => {
+                try {
+                    if (bgMusic.duration && initAudioTime >= bgMusic.duration) {
+                        bgMusic.currentTime = initAudioTime % bgMusic.duration;
+                    } else {
+                        bgMusic.currentTime = initAudioTime;
+                    }
+                } catch (e) {}
+            };
+            if (bgMusic.readyState >= 1) {
+                setSeek();
+            } else {
+                bgMusic.addEventListener('loadedmetadata', setSeek, { once: true });
+            }
+        }
 
         function updateMusicUI() {
             const btn = document.getElementById('musicToggle');
@@ -127,9 +223,27 @@
             if (isMuted) {
                 bgMusic.pause();
             } else {
-                if (bgMusic.paused) {
+                if (bgMusic.paused && (!childWin || childWin.closed)) {
                     window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(e => {});
                 }
+            }
+        }
+
+        function broadcastAudioSync(customTime = null) {
+            const curTime = isFinite(customTime) && customTime !== null ? customTime : (bgMusic ? bgMusic.currentTime : 0);
+            const msg = {
+                type: 'HSK2_AUDIO_SYNC',
+                isMuted: isMuted,
+                audioCurrentTime: curTime,
+                audioPlaying: !isMuted && bgMusic && !bgMusic.paused
+            };
+            if (syncChannel) {
+                try { syncChannel.postMessage(msg); } catch (e) {}
+            }
+            if (isPopout && window.opener && !window.opener.closed) {
+                try { window.opener.postMessage(msg, '*'); } catch (e) {}
+            } else if (childWin && !childWin.closed) {
+                try { childWin.postMessage(msg, '*'); } catch (e) {}
             }
         }
 
@@ -137,7 +251,7 @@
         function toggleMusic(e) {
             if (e && e.preventDefault) e.preventDefault();
             const now = Date.now();
-            if (now - lastToggleTime < 250) return; // Prevent double trigger from touch+click
+            if (now - lastToggleTime < 250) return;
             lastToggleTime = now;
 
             isMuted = !isMuted;
@@ -146,6 +260,7 @@
             if (window.LMSAdapter && window.LMSAdapter.showToast) {
                 window.LMSAdapter.showToast(isMuted ? '🔇 Đã tắt âm thanh' : '🔊 Đã bật âm thanh');
             }
+            broadcastAudioSync();
         }
         window.toggleMusic = toggleMusic;
 
@@ -153,14 +268,15 @@
             isMuted = !!muted;
             safeStorage.setItem('musicMuted', isMuted ? 'true' : 'false');
             updateMusicUI();
+            broadcastAudioSync();
         };
 
-        // Initialize state
+        // Initialize UI
         updateMusicUI();
 
-        // Start music on first interaction (click or touch)
+        // Autoplay unlock
         const unlockAudio = () => {
-            if (!isMuted && bgMusic.paused) {
+            if (!isMuted && bgMusic.paused && (!childWin || childWin.closed)) {
                 window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(e => {});
             }
         };
@@ -168,45 +284,269 @@
             document.addEventListener(evt, unlockAudio, { once: true });
         });
 
-        const params = new URLSearchParams(window.location.search);
-        const isPopout = params.get('popout') === '1' || (window.opener && window.name === 'HSK2_Standalone_Game');
+        // -------------------------------------------------------------
+        // Cross-window Sync Message Handlers (postMessage, BroadcastChannel, storage)
+        // -------------------------------------------------------------
+        function handleIncomingSync(data) {
+            if (!data) return;
+            const type = data.type || data.action;
+            const state = data.state;
 
-        // Open standalone window for LMS index page
-        window.openGameInNewWindow = function (e) {
-            if (e && e.preventDefault) e.preventDefault();
-            if (isPopout) {
-                if (window.opener && !window.opener.closed) {
-                    try { window.opener.focus(); } catch (err) {}
+            // 1. Audio Sync
+            if (type === 'HSK2_AUDIO_SYNC') {
+                if (typeof data.isMuted === 'boolean') {
+                    isMuted = data.isMuted;
+                    safeStorage.setItem('musicMuted', isMuted ? 'true' : 'false');
+                    updateMusicUI();
+                    if (!isPopout && childWin && !childWin.closed) {
+                        bgMusic.pause();
+                    } else if (!isMuted) {
+                        if (isFinite(data.audioCurrentTime)) {
+                            try { bgMusic.currentTime = data.audioCurrentTime; } catch (e) {}
+                        }
+                        window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(() => {});
+                    }
                 }
-                window.close();
                 return;
             }
 
-            const width = Math.min(1240, window.screen.availWidth - 40);
-            const height = Math.min(760, window.screen.availHeight - 60);
-            const left = Math.max(0, Math.floor((window.screen.availWidth - width) / 2));
-            const top = Math.max(0, Math.floor((window.screen.availHeight - height) / 2));
-            const features = `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`;
-            
+            // 2. State update from Child
+            if (!isPopout) {
+                if (state) {
+                    latestChildState = state;
+                    window.__HSK2_LATEST_STATE__ = state;
+                    updateSyncOverlayInfo(state);
+                    const syncModal = document.getElementById('sync-active-modal');
+                    if (syncModal && (state.currentIdx > 0 || state.isGameOver || state.stage === 'playing')) {
+                        syncModal.classList.add('show');
+                        bgMusic.pause();
+                    }
+                }
+
+                if (type === 'HSK2_POPOUT_CLOSED' || (state && state.isPopoutClosing)) {
+                    resumeInLmsWindow(false);
+                }
+            } else {
+                // If child received parent resumed
+                if (type === 'HSK2_PARENT_RESUMED') {
+                    if (window.LMSAdapter && window.LMSAdapter.showToast) {
+                        window.LMSAdapter.showToast("👉 Đang tiếp tục chơi trên màn hình LMS.");
+                    }
+                }
+            }
+        }
+
+        if (syncChannel) {
+            syncChannel.onmessage = (e) => handleIncomingSync(e.data);
+        }
+        window.addEventListener('message', (e) => handleIncomingSync(e.data));
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'hsk2_synced_state' && e.newValue) {
+                try {
+                    const parsed = JSON.parse(e.newValue);
+                    if (parsed) {
+                        handleIncomingSync({
+                            type: parsed.isPopoutClosing ? 'HSK2_POPOUT_CLOSED' : 'HSK2_STATE_UPDATE',
+                            state: parsed
+                        });
+                    }
+                } catch (err) {}
+            }
+        });
+
+        function updateSyncOverlayInfo(state) {
+            if (!state) return;
+            const topicEl = document.getElementById('sync-overlay-topic');
+            const questionEl = document.getElementById('sync-overlay-question');
+            const scoreEl = document.getElementById('sync-overlay-score');
+
+            if (topicEl) topicEl.textContent = state.topicName || "Đang chọn";
+            if (questionEl) {
+                const cur = (typeof state.currentIdx === 'number' ? state.currentIdx + 1 : 1);
+                questionEl.textContent = `Câu ${cur} / 15`;
+            }
+            if (scoreEl) {
+                scoreEl.textContent = state.currentScore ? `${state.currentScore} đ` : '0 đ';
+            }
+        }
+
+        // -------------------------------------------------------------
+        // Multi-tier Window Opening & Management (Matching HSK 4)
+        // -------------------------------------------------------------
+        window.openGameInNewWindow = function (e) {
+            if (e && e.preventDefault) e.preventDefault();
+            if (isPopout) {
+                window.closePopoutAndReturnToLMS();
+                return;
+            }
+
+            // Capture audio position before pausing
+            const currentAudioTime = bgMusic ? Number(bgMusic.currentTime.toFixed(2)) : 0;
+            if (bgMusic && !bgMusic.paused) {
+                bgMusic.pause();
+            }
+
+            const scrWidth = (window.screen && window.screen.availWidth) || window.innerWidth || 1280;
+            const scrHeight = (window.screen && window.screen.availHeight) || window.innerHeight || 800;
+            const w = Math.min(1240, scrWidth - 40);
+            const h = Math.min(760, scrHeight - 60);
+            const left = Math.max(0, Math.floor((scrWidth - w) / 2));
+            const top = Math.max(0, Math.floor((scrHeight - h) / 2));
+            const windowFeatures = `width=${w},height=${h},left=${left},top=${top},resizable=yes,scrollbars=yes`;
+
             const targetUrl = new URL(window.location.href);
+            targetUrl.searchParams.delete('state');
+            targetUrl.hash = '';
             targetUrl.searchParams.set('popout', '1');
-            const win = window.open(targetUrl.toString(), 'HSK2_Standalone_Game', features);
-            if (win) {
+            targetUrl.searchParams.set('session', 'sync_' + Date.now());
+            targetUrl.searchParams.set('audioTime', currentAudioTime);
+            targetUrl.searchParams.set('muted', isMuted ? '1' : '0');
+
+            let child = null;
+            // Strategy 1: Standalone Popup Window with features
+            try {
+                child = window.open(targetUrl.toString(), 'HSK2_Standalone_Game', windowFeatures);
+            } catch (err) {
+                console.warn("[Popout] Strategy 1 failed:", err);
+            }
+
+            // Strategy 2: Named Window without features
+            if (!child || child.closed || typeof child.closed === 'undefined') {
+                try { child = window.open(targetUrl.toString(), 'HSK2_Standalone_Game'); } catch (err) {}
+            }
+
+            // Strategy 3: Standard New Tab (_blank)
+            if (!child || child.closed || typeof child.closed === 'undefined') {
+                try { child = window.open(targetUrl.toString(), '_blank'); } catch (err) {}
+            }
+
+            // Strategy 4: Anchor Click Fallback
+            if (!child || child.closed || typeof child.closed === 'undefined') {
+                try {
+                    const a = document.createElement('a');
+                    a.href = targetUrl.toString();
+                    a.target = '_blank';
+                    a.rel = 'noopener';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    child = true;
+                } catch (err) {}
+            }
+
+            if (child) {
+                if (child !== true) {
+                    childWin = child;
+                    try { child.focus(); } catch (err) {}
+                }
+
                 if (window.LMSAdapter && window.LMSAdapter.showToast) {
                     window.LMSAdapter.showToast("🚀 Đang mở giao diện trong cửa sổ mới...");
                 }
+
+                if (popoutPollInterval) clearInterval(popoutPollInterval);
+                popoutPollInterval = setInterval(() => {
+                    let isClosed = false;
+                    try {
+                        isClosed = !childWin || childWin.closed;
+                    } catch (err) {
+                        isClosed = false;
+                    }
+                    if (isClosed) {
+                        clearInterval(popoutPollInterval);
+                        popoutPollInterval = null;
+                        childWin = null;
+                        resumeInLmsWindow(false);
+                    }
+                }, 500);
             } else {
+                if (!isMuted && bgMusic.paused) {
+                    window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(() => {});
+                }
                 if (window.LMSAdapter && window.LMSAdapter.showToast) {
                     window.LMSAdapter.showToast("⚠️ Vui lòng cho phép popup trên trình duyệt của bạn!");
                 }
             }
         };
 
+        window.focusChildWindow = function () {
+            let isAlive = false;
+            if (childWin) {
+                try { isAlive = !childWin.closed; } catch (e) { isAlive = false; }
+            }
+            if (isAlive) {
+                try { childWin.focus(); return; } catch (e) {}
+            }
+            window.openGameInNewWindow();
+        };
+
+        window.resumeInLmsWindow = function (forceCloseChild = false) {
+            if (popoutPollInterval) {
+                clearInterval(popoutPollInterval);
+                popoutPollInterval = null;
+            }
+
+            if (childWin) {
+                try {
+                    if (!childWin.closed) childWin.close();
+                } catch (e) {}
+                childWin = null;
+            }
+
+            const syncModal = document.getElementById('sync-active-modal');
+            if (syncModal) syncModal.classList.remove('show');
+
+            let stateToApply = latestChildState;
+            if (!stateToApply) {
+                try {
+                    const raw = safeStorage.getItem('hsk2_synced_state');
+                    if (raw) stateToApply = JSON.parse(raw);
+                } catch (e) {}
+            }
+
+            // If child window started or played a game, navigate to game.html with state
+            if (stateToApply && stateToApply.topicName && (stateToApply.currentIdx > 0 || stateToApply.questions || stateToApply.isGameOver)) {
+                if (window.markInternalNavigation) window.markInternalNavigation();
+                window.location.href = `game.html?topic=${encodeURIComponent(stateToApply.topicName)}&resume_sync=1`;
+                return;
+            }
+
+            // Otherwise resume index music seamlessly
+            if (stateToApply && typeof stateToApply.isMuted === 'boolean') {
+                isMuted = stateToApply.isMuted;
+                safeStorage.setItem('musicMuted', isMuted ? 'true' : 'false');
+                updateMusicUI();
+            }
+
+            if (!isMuted) {
+                if (stateToApply && isFinite(stateToApply.audioCurrentTime)) {
+                    try { bgMusic.currentTime = stateToApply.audioCurrentTime; } catch (e) {}
+                }
+                window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(() => {});
+            }
+            if (window.LMSAdapter && window.LMSAdapter.showToast) {
+                window.LMSAdapter.showToast("🎮 Đã trở về màn hình LMS!");
+            }
+        };
+
+        window.closePopoutAndReturnToLMS = function () {
+            broadcastAudioSync(bgMusic ? bgMusic.currentTime : 0);
+            if (window.opener && !window.opener.closed) {
+                try { window.opener.focus(); } catch (e) {}
+            }
+            window.close();
+        };
+
+        // UI Setup for Child Window
         if (isPopout) {
             const popBtn = document.getElementById('popout-btn');
             if (popBtn) {
                 popBtn.title = "Quay về màn hình LMS (Đóng cửa sổ này)";
                 popBtn.setAttribute('aria-label', "Quay về màn hình LMS");
+                popBtn.onclick = function (e) {
+                    if (e && e.preventDefault) e.preventDefault();
+                    window.closePopoutAndReturnToLMS();
+                };
                 popBtn.innerHTML = `
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
                         <polyline points="9 14 4 9 9 4"></polyline>
@@ -214,6 +554,12 @@
                     </svg>
                 `;
             }
+
+            const handleUnload = () => {
+                broadcastAudioSync(bgMusic ? bgMusic.currentTime : 0);
+            };
+            window.addEventListener('beforeunload', handleUnload);
+            window.addEventListener('pagehide', handleUnload);
         }
     </script>
 
