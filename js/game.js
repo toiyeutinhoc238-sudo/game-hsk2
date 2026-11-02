@@ -223,11 +223,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const icon = btn.querySelector('.icon') || btn;
             icon.textContent = isMuted ? '🔇' : '🔊';
         }
+        // Chỉ tắt/bật nhạc nền, âm thanh nút bấm & hiệu ứng vẫn giữ nguyên
         bgMusic.muted = isMuted;
-        correctSound.muted = isMuted;
-        wrongSound.muted = isMuted;
-        helpSound.muted = isMuted;
-        clapSound.muted = isMuted;
+        correctSound.muted = false;
+        wrongSound.muted = false;
+        helpSound.muted = false;
+        clapSound.muted = false;
 
         if (isMuted) {
             bgMusic.pause();
@@ -267,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
         storage.setItem('musicMuted', isMuted ? 'true' : 'false');
         updateAudioMuteState();
         if (window.LMSAdapter && window.LMSAdapter.showToast) {
-            window.LMSAdapter.showToast(isMuted ? '🔇 Đã tắt âm thanh' : '🔊 Đã bật âm thanh');
+            window.LMSAdapter.showToast(isMuted ? '🔇 Đã tắt nhạc nền' : '🔊 Đã bật nhạc nền');
         }
         broadcastAudioSync();
     };
