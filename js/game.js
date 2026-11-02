@@ -406,8 +406,48 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateLadder() {
         document.querySelectorAll('.ladder-item').forEach(el => el.classList.remove('active'));
         if (currentIdx < 15) {
-            document.getElementById(`ladder-${currentIdx}`).classList.add('active');
+            const item = document.getElementById(`ladder-${currentIdx}`);
+            if (item) item.classList.add('active');
         }
+    }
+
+    function buildReviewTableHtml(qs) {
+        const qList = (qs && qs.length > 0) ? qs : (questions && questions.length > 0 ? questions : null);
+        let rows = '';
+        if (qList && qList.length > 0) {
+            qList.forEach(v => {
+                if (!v) return;
+                let zh = '', pinyin = '', meaning = '';
+                if (v.vocab) {
+                    const match = v.vocab.match(/^(.*?)\s*\((.*?)\)\s*-\s*(.*)$/);
+                    if (match) {
+                        zh = match[1];
+                        pinyin = match[2];
+                        meaning = match[3];
+                    } else {
+                        const parts = v.vocab.split(' - ');
+                        zh = parts[0];
+                        meaning = parts[1] || '';
+                    }
+                } else if (v.q) {
+                    zh = v.q;
+                    meaning = (v.a && v.correct !== undefined) ? v.a[v.correct] : '';
+                }
+                rows += `<tr><td>${zh}</td><td>${pinyin}</td><td>${meaning}</td></tr>`;
+            });
+        } else if (vocabPool && vocabPool.length > 0) {
+            vocabPool.forEach(w => {
+                if (!w) return;
+                rows += `<tr><td>${w.zh || ''}</td><td>${w.pinyin || ''}</td><td>${w.meaning || ''}</td></tr>`;
+            });
+        }
+        if (!rows) return '';
+        return `
+            <table class="review-table">
+                <thead><tr><th>Từ vựng</th><th>Phiên âm</th><th>Nghĩa</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+        `;
     }
 
     function startTimer(isResume = false) {
@@ -453,6 +493,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 currentScore = "0";
                 safeScore = "0";
+
+                // Pre-populate resultModal immediately so snapshot carries complete result
+                if (resultTitle) {
+                    resultTitle.textContent = 'KẾT THÚC TRẬN ĐẤU';
+                    resultTitle.style.color = 'var(--error)';
+                }
+                if (resultMessage) {
+                    resultMessage.textContent = 'Hết thời gian! Bạn đã trắng tay. Số tiền thưởng: 0 VNĐ.';
+                }
+                if (reviewList) {
+                    reviewList.innerHTML = buildReviewTableHtml(questions);
+                }
+
                 saveAndBroadcastState();
                 
                 setTimeout(() => endGame(false, false, true), 2000);
@@ -643,6 +696,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 buttons[idx].classList.add('wrong');
                 buttons[q.correct].classList.add('correct');
                 statusMsg.textContent = `Tiếc quá! Bạn đã trả lời sai. Điểm thưởng: ${finalPrize} VNĐ.`;
+
+                // Pre-populate resultModal immediately so snapshot carries complete result
+                if (resultTitle) {
+                    resultTitle.textContent = 'KẾT THÚC TRẬN ĐẤU';
+                    resultTitle.style.color = 'var(--error)';
+                }
+                if (resultMessage) {
+                    resultMessage.textContent = `Bạn đã trả lời sai tại câu số ${currentIdx + 1}. Số tiền thưởng: ${finalPrize} VNĐ.`;
+                }
+                if (reviewList) {
+                    reviewList.innerHTML = buildReviewTableHtml(questions);
+                }
+
                 saveAndBroadcastState();
                 setTimeout(() => endGame(false), 2000);
             }
@@ -825,46 +891,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function endGame(isWin, stoppedManually = false, isTimeout = false) {
         isGameOver = true;
+        isProcessing = false;
         clearInterval(timerInterval);
         bgMusic.pause(); // Pause music on game over
-        resultModal.style.display = 'flex';
+
+        const finalPrize = isWin ? "500.000.000" : (stoppedManually ? currentScore : ((currentIdx >= 10) ? safeScore : (currentIdx >= 5 ? ladderValues[4] : "0")));
+        currentScore = finalPrize;
 
         // Generate vocab review table
-        reviewList.innerHTML = `
-            <table class="review-table">
-                <thead>
-                    <tr>
-                        <th>Từ vựng</th>
-                        <th>Phiên âm</th>
-                        <th>Nghĩa</th>
-                    </tr>
-                </thead>
-                <tbody id="reviewTableBody"></tbody>
-            </table>
-        `;
-        const tableBody = document.getElementById('reviewTableBody');
-        questions.forEach(v => {
-            const match = v.vocab.match(/^(.*?)\s*\((.*?)\)\s*-\s*(.*)$/);
-            let zh = v.vocab, pinyin = '', meaning = '';
-            if (match) {
-                zh = match[1];
-                pinyin = match[2];
-                meaning = match[3];
-            } else {
-                // Fallback for cases without pinyin parentheses
-                const parts = v.vocab.split(' - ');
-                zh = parts[0];
-                meaning = parts[1] || '';
-            }
-
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${zh}</td>
-                <td>${pinyin}</td>
-                <td>${meaning}</td>
-            `;
-            tableBody.appendChild(tr);
-        });
+        if (reviewList) {
+            reviewList.innerHTML = buildReviewTableHtml(questions);
+        }
 
         if (isWin) {
             resultTitle.textContent = 'CHÚC MỪNG CHIẾN THẮNG!';
@@ -887,13 +924,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 resultMessage.textContent = `Hết thời gian! Bạn đã trắng tay. Số tiền thưởng: 0 VNĐ.`;
                 playSfx(wrongSound, 'wrong');
             } else {
-                const finalPrize = (currentIdx >= 10) ? safeScore : (currentIdx >= 5 ? ladderValues[4] : "0");
                 resultMessage.textContent = `Bạn đã trả lời sai tại câu số ${currentIdx + 1}. Số tiền thưởng: ${finalPrize} VNĐ.`;
             }
         }
 
-        const finalPrize = isWin ? "500.000.000" : (stoppedManually ? currentScore : ((currentIdx >= 10) ? safeScore : (currentIdx >= 5 ? ladderValues[4] : "0")));
-        currentScore = finalPrize;
+        resultModal.style.display = 'flex';
 
         // Report Game Results to LMS (SCORM and postMessage)
         if (window.LMSBridge) {
@@ -1010,11 +1045,32 @@ document.addEventListener('DOMContentLoaded', () => {
         const curAudioTime = bgMusic ? Number(bgMusic.currentTime.toFixed(2)) : 0;
         const isAudioPlaying = !isMuted && !isGameOver && bgMusic && !bgMusic.paused;
 
+        let rTitle = resultTitle ? resultTitle.textContent : '';
+        let rColor = resultTitle ? resultTitle.style.color : '';
+        let rMsg = resultMessage ? resultMessage.textContent : '';
+        let rHtml = reviewList ? reviewList.innerHTML : '';
+
+        // If game is over, synthesize complete result data so snapshot is never incomplete
+        if (isGameOver) {
+            if (!rTitle || rTitle === 'KẾT QUẢ') {
+                rTitle = 'KẾT THÚC TRẬN ĐẤU';
+            }
+            if (!rColor) {
+                rColor = 'var(--error)';
+            }
+            if (!rMsg) {
+                rMsg = `Bạn đã dừng cuộc chơi tại câu ${currentIdx + 1}. Số tiền thưởng: ${currentScore || "0"} VNĐ.`;
+            }
+            if (!rHtml || rHtml.trim().length < 20) {
+                rHtml = buildReviewTableHtml(questions);
+            }
+        }
+
         return {
             version: '2.0',
             timestamp: Date.now(),
             topicName: topicName,
-            questions: questions,
+            questions: (questions && questions.length > 0) ? questions : [],
             currentIdx: currentIdx,
             currentScore: currentScore,
             safeScore: safeScore,
@@ -1027,11 +1083,11 @@ document.addEventListener('DOMContentLoaded', () => {
             hiddenOptions: hiddenOptions,
             countdownPassed: (countdownOverlay && countdownOverlay.style.display === 'none'),
             statusMsg: statusMsg ? statusMsg.textContent : '',
-            reviewListHTML: reviewList ? reviewList.innerHTML : '',
-            resultModalOpen: (resultModal && resultModal.style.display === 'flex'),
-            resultTitleText: resultTitle ? resultTitle.textContent : '',
-            resultMessageText: resultMessage ? resultMessage.textContent : '',
-            resultTitleColor: resultTitle ? resultTitle.style.color : '',
+            reviewListHTML: rHtml,
+            resultModalOpen: isGameOver || (resultModal && resultModal.style.display === 'flex'),
+            resultTitleText: rTitle,
+            resultMessageText: rMsg,
+            resultTitleColor: rColor,
             // Synchronized Audio State
             isMuted: isMuted,
             audioCurrentTime: curAudioTime,
@@ -1040,27 +1096,33 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function applyGameStateSnapshot(snapshot) {
-        if (!snapshot || !snapshot.questions || snapshot.questions.length === 0) return false;
+        if (!snapshot) return false;
 
-        questions = snapshot.questions;
+        if (snapshot.questions && Array.isArray(snapshot.questions) && snapshot.questions.length > 0) {
+            questions = snapshot.questions;
+        }
         if (snapshot.topicName) {
             topicName = snapshot.topicName;
             if (lessonNumDisp) lessonNumDisp.textContent = topicName;
         }
 
-        currentIdx = snapshot.currentIdx || 0;
+        currentIdx = typeof snapshot.currentIdx === 'number' ? snapshot.currentIdx : 0;
         currentScore = snapshot.currentScore || "0";
         safeScore = snapshot.safeScore || "0";
         isGameOver = !!snapshot.isGameOver;
         isProcessing = false;
 
-        initLadder();
-        updateLadder();
+        try {
+            initLadder();
+            updateLadder();
+        } catch (e) {
+            console.warn("Ladder update warning:", e);
+        }
 
         // 1. Audio Mute State
         if (typeof snapshot.isMuted === 'boolean') {
             isMuted = snapshot.isMuted;
-            storage.setItem('musicMuted', isMuted ? 'true' : 'false');
+            try { storage.setItem('musicMuted', isMuted ? 'true' : 'false'); } catch (e) {}
             updateAudioMuteState();
         }
 
@@ -1109,30 +1171,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (resultModal) {
                 resultModal.style.display = 'flex';
                 if (resultTitle) {
-                    resultTitle.textContent = snapshot.resultTitleText || 'KẾT THÚC';
-                    if (snapshot.resultTitleColor) resultTitle.style.color = snapshot.resultTitleColor;
+                    const titleText = (snapshot.resultTitleText && snapshot.resultTitleText !== 'KẾT QUẢ')
+                        ? snapshot.resultTitleText
+                        : 'KẾT THÚC TRẬN ĐẤU';
+                    resultTitle.textContent = titleText;
+                    resultTitle.style.color = snapshot.resultTitleColor || 'var(--error)';
                 }
-                if (resultMessage) resultMessage.textContent = snapshot.resultMessageText || '';
+                if (resultMessage) {
+                    resultMessage.textContent = snapshot.resultMessageText ||
+                        `Bạn đã kết thúc lượt chơi tại câu ${currentIdx + 1}. Số tiền thưởng: ${currentScore || 0} VNĐ.`;
+                }
                 if (reviewList) {
-                    if (snapshot.reviewListHTML) {
+                    if (snapshot.reviewListHTML && snapshot.reviewListHTML.trim().length > 20) {
                         reviewList.innerHTML = snapshot.reviewListHTML;
-                    } else if (questions && questions.length > 0) {
-                        reviewList.innerHTML = `
-                            <table class="review-table">
-                                <thead><tr><th>Từ vựng</th><th>Phiên âm</th><th>Nghĩa</th></tr></thead>
-                                <tbody id="reviewTableBody"></tbody>
-                            </table>
-                        `;
-                        const tableBody = document.getElementById('reviewTableBody');
-                        questions.forEach(v => {
-                            const match = v.vocab.match(/^(.*?)\s*\((.*?)\)\s*-\s*(.*)$/);
-                            let zh = v.vocab, pinyin = '', meaning = '';
-                            if (match) { zh = match[1]; pinyin = match[2]; meaning = match[3]; }
-                            else { const parts = v.vocab.split(' - '); zh = parts[0]; meaning = parts[1] || ''; }
-                            const tr = document.createElement('tr');
-                            tr.innerHTML = `<td>${zh}</td><td>${pinyin}</td><td>${meaning}</td>`;
-                            tableBody.appendChild(tr);
-                        });
+                    } else {
+                        reviewList.innerHTML = buildReviewTableHtml(questions);
                     }
                 }
             }
@@ -1556,6 +1609,16 @@ document.addEventListener('DOMContentLoaded', () => {
             applyGameStateSnapshot(stateToApply);
             if (stateToApply.isGameOver && resultModal) {
                 resultModal.style.display = 'flex';
+                if (resultTitle && (!resultTitle.textContent || resultTitle.textContent === 'KẾT QUẢ')) {
+                    resultTitle.textContent = (stateToApply.resultTitleText && stateToApply.resultTitleText !== 'KẾT QUẢ') ? stateToApply.resultTitleText : 'KẾT THÚC TRẬN ĐẤU';
+                    resultTitle.style.color = stateToApply.resultTitleColor || 'var(--error)';
+                }
+                if (resultMessage && !resultMessage.textContent) {
+                    resultMessage.textContent = stateToApply.resultMessageText || `Bạn đã kết thúc lượt chơi tại câu ${(stateToApply.currentIdx || 0) + 1}. Số tiền thưởng: ${stateToApply.currentScore || "0"} VNĐ.`;
+                }
+                if (reviewList && (!reviewList.innerHTML || reviewList.innerHTML.trim().length < 20)) {
+                    reviewList.innerHTML = (stateToApply.reviewListHTML && stateToApply.reviewListHTML.trim().length > 20) ? stateToApply.reviewListHTML : buildReviewTableHtml(questions);
+                }
             }
             if (window.LMSAdapter && window.LMSAdapter.showToast) {
                 if (stateToApply.isGameOver) {
@@ -1565,9 +1628,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         } else {
-            window.resumeTimer();
-            if (!isMuted && !isGameOver && bgMusic && bgMusic.paused) {
-                window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(() => {});
+            if (isGameOver) {
+                if (resultModal) {
+                    resultModal.style.display = 'flex';
+                    if (resultTitle && (!resultTitle.textContent || resultTitle.textContent === 'KẾT QUẢ')) {
+                        resultTitle.textContent = 'KẾT THÚC TRẬN ĐẤU';
+                        resultTitle.style.color = 'var(--error)';
+                    }
+                    if (resultMessage && !resultMessage.textContent) {
+                        resultMessage.textContent = `Bạn đã kết thúc lượt chơi. Số tiền thưởng: ${currentScore || "0"} VNĐ.`;
+                    }
+                    if (reviewList && (!reviewList.innerHTML || reviewList.innerHTML.trim().length < 20)) {
+                        reviewList.innerHTML = buildReviewTableHtml(questions);
+                    }
+                }
+            } else {
+                window.resumeTimer();
+                if (!isMuted && !isGameOver && bgMusic && bgMusic.paused) {
+                    window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(() => {});
+                }
             }
         }
 
