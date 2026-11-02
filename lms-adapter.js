@@ -219,6 +219,17 @@
                 }
             });
 
+            // 5. Global Web Audio unlocker on user interaction
+            const unlockAudioCtx = () => {
+                const ctx = this.getAudioContext();
+                if (ctx && ctx.state === 'suspended') {
+                    ctx.resume().catch(() => {});
+                }
+            };
+            ['click', 'touchstart', 'pointerdown', 'keydown'].forEach(evt => {
+                document.addEventListener(evt, unlockAudioCtx, { passive: true });
+            });
+
             this.isInitialized = true;
             this.sendPostMessage('HSK2_LMS_READY', {
                 title: 'Ai Là Triệu Phú - HSK 2 Edition',
@@ -551,6 +562,21 @@
          */
         safePlayAudio(audio, synthFallbackType = null) {
             if (!audio) return;
+            const isBg = audio.isBackgroundMusic || audio.id === 'bgMusic' || audio === window.bgMusic;
+            try {
+                // Ensure SFX audio element is not muted and rewound; never touch background music position
+                if (!isBg) {
+                    audio.muted = false;
+                    audio.currentTime = 0;
+                }
+            } catch (e) {}
+
+            // Ensure audio context is running
+            const ctx = this.getAudioContext();
+            if (ctx && ctx.state === 'suspended') {
+                ctx.resume().catch(() => {});
+            }
+
             try {
                 const p = audio.play();
                 if (p && typeof p.catch === 'function') {
@@ -603,6 +629,9 @@
         playSynthesizedSound(type) {
             const ctx = this.getAudioContext();
             if (!ctx) return;
+            if (ctx.state === 'suspended') {
+                ctx.resume().catch(() => {});
+            }
 
             switch (type) {
                 case 'correct':
@@ -621,6 +650,13 @@
                     [523, 659, 784, 1046].forEach((f, i) => {
                         setTimeout(() => this.playTone(f, 'sine', 0.35, 0.2), i * 90);
                     });
+                    break;
+                case 'click':
+                case 'select':
+                    this.playTone(587.33, 'triangle', 0.1, 0.2);
+                    break;
+                case 'tap':
+                    this.playTone(440, 'sine', 0.08, 0.15);
                     break;
             }
         }

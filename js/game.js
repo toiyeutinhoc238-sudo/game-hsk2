@@ -204,6 +204,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const helpSound = new Audio('chonquyentrogiup.mp3');
     const clapSound = new Audio('votay.mp3');
     bgMusic.loop = true;
+    bgMusic.isBackgroundMusic = true;
+    window.bgMusic = bgMusic;
 
     // Music State Management (LMS-Safe Storage based on HSK 4)
     let isMuted = false;
@@ -239,6 +241,41 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Dedicated Sound Effects player (Always audible, independent of background music mute state)
+    function playSfx(audio, fallbackType = null) {
+        if (!audio) {
+            if (fallbackType && window.LMSAdapter) {
+                window.LMSAdapter.playSynthesizedSound(fallbackType);
+            }
+            return;
+        }
+        try {
+            audio.muted = false;
+            audio.currentTime = 0;
+        } catch (e) {}
+
+        // Resume AudioContext if suspended
+        if (window.LMSAdapter && window.LMSAdapter.getAudioContext) {
+            const ctx = window.LMSAdapter.getAudioContext();
+            if (ctx && ctx.state === 'suspended') {
+                ctx.resume().catch(() => {});
+            }
+        }
+
+        if (window.safePlayAudio) {
+            window.safePlayAudio(audio, fallbackType);
+        } else {
+            const p = audio.play();
+            if (p && typeof p.catch === 'function') {
+                p.catch(() => {
+                    if (window.LMSAdapter && fallbackType) {
+                        window.LMSAdapter.playSynthesizedSound(fallbackType);
+                    }
+                });
+            }
+        }
+    }
+
     function broadcastAudioSync(customTime = null) {
         const curTime = isFinite(customTime) && customTime !== null ? customTime : (bgMusic ? Number(bgMusic.currentTime.toFixed(2)) : 0);
         const msg = {
@@ -263,6 +300,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const now = Date.now();
         if (now - lastToggleTime < 250) return; // Prevent double trigger from touch+click
         lastToggleTime = now;
+
+        if (window.LMSAdapter) window.LMSAdapter.playSynthesizedSound('tap');
 
         isMuted = !isMuted;
         storage.setItem('musicMuted', isMuted ? 'true' : 'false');
@@ -301,14 +340,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize audio mute state
     updateAudioMuteState();
 
-    // Autoplay policy fallback: unlock and ensure audio position is maintained
+    // Autoplay policy fallback: unlock AudioContext and ensure audio position is maintained
     const unlockAudio = () => {
+        if (window.LMSAdapter && window.LMSAdapter.getAudioContext) {
+            const ctx = window.LMSAdapter.getAudioContext();
+            if (ctx && ctx.state === 'suspended') {
+                ctx.resume().catch(() => {});
+            }
+        }
         if (!isMuted && !isGameOver && bgMusic.paused && (!childWin || childWin.closed)) {
             window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(e => {});
         }
     };
-    ['click', 'touchstart'].forEach(evt => {
-        document.addEventListener(evt, unlockAudio, { once: true });
+    ['click', 'touchstart', 'keydown'].forEach(evt => {
+        document.addEventListener(evt, unlockAudio);
     });
 
     // Money Ladder Values
@@ -397,11 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     buttons[q.correct].classList.add('correct');
                 }
                 
-                if (window.safePlayAudio) {
-                    window.safePlayAudio(wrongSound);
-                } else {
-                    wrongSound.play().catch(e => {});
-                }
+                playSfx(wrongSound, 'wrong');
                 
                 currentScore = "0";
                 safeScore = "0";
@@ -423,11 +464,13 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.closeHelpModal = function (modalId) {
+        if (window.LMSAdapter) window.LMSAdapter.playSynthesizedSound('tap');
         document.getElementById(modalId).style.display = 'none';
         window.resumeTimer();
     };
 
     window.toggleLadderDrawer = function () {
+        if (window.LMSAdapter) window.LMSAdapter.playSynthesizedSound('tap');
         const ladder = document.getElementById('moneyLadder');
         const backdrop = document.getElementById('ladderBackdrop');
         if (ladder) ladder.classList.toggle('drawer-open');
@@ -441,7 +484,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.beginActualCountdown = function() {
-        // Ensure music plays on interaction
+        // Unlock audio system
+        if (window.LMSAdapter && window.LMSAdapter.getAudioContext) {
+            window.LMSAdapter.getAudioContext();
+        }
+        if (window.LMSAdapter) {
+            window.LMSAdapter.playSynthesizedSound('click');
+        }
+
+        // Ensure music plays on interaction if not muted
         if (!isMuted && bgMusic.paused) {
             window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(e => console.log("Autoplay blocked:", e));
         }
@@ -457,9 +508,11 @@ document.addEventListener('DOMContentLoaded', () => {
             count--;
             if (count > 0) {
                 countdownNumber.textContent = count;
+                if (window.LMSAdapter) window.LMSAdapter.playTone(440, 'sine', 0.1, 0.2);
             } else {
                 clearInterval(interval);
                 countdownOverlay.style.display = 'none';
+                if (window.LMSAdapter) window.LMSAdapter.playTone(880, 'triangle', 0.18, 0.25);
                 loadQuestion();
             }
         }, 1000);
@@ -497,6 +550,17 @@ document.addEventListener('DOMContentLoaded', () => {
         isProcessing = true;
         clearInterval(timerInterval); // Stop timer on choice
 
+        // Play immediate tactile button selection sound
+        if (window.LMSAdapter) {
+            window.LMSAdapter.playSynthesizedSound('select');
+        }
+
+        // Prime audio elements during user gesture
+        try {
+            correctSound.load();
+            wrongSound.load();
+        } catch (e) {}
+
         const q = questions[currentIdx];
         const buttons = optionsGrid.querySelectorAll('.option-btn');
 
@@ -508,7 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
         buttons.forEach(b => b.disabled = true);
         saveAndBroadcastState();
 
-        // Delay for suspense (3 seconds now)
+        // Delay for suspense (3 seconds)
         setTimeout(() => {
             if (idx === q.correct) {
                 // Correct
@@ -526,7 +590,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 statusMsg.textContent = 'Chính xác! Đang chuẩn bị câu hỏi tiếp theo...';
                 saveAndBroadcastState();
-                correctSound.onended = () => {
+
+                let hasAdvanced = false;
+                const proceed = () => {
+                    if (hasAdvanced) return;
+                    hasAdvanced = true;
                     currentIdx++;
                     isProcessing = false;
                     if (currentIdx < 15) {
@@ -536,10 +604,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     saveAndBroadcastState();
                 };
-                window.safePlayAudio ? window.safePlayAudio(correctSound) : correctSound.play().catch(e => {});
+
+                correctSound.onended = proceed;
+                // Safety timeout fallback if onended fails or audio restricted
+                setTimeout(proceed, 1800);
+
+                playSfx(correctSound, 'correct');
             } else {
                 // Wrong
-                window.safePlayAudio ? window.safePlayAudio(wrongSound) : wrongSound.play().catch(e => {});
+                playSfx(wrongSound, 'wrong');
                 if (window.LMSBridge) {
                     window.LMSBridge.reportProgress(currentIdx, false, "0");
                 }
@@ -556,7 +629,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.use5050 = function () {
         if (isGameOver || isProcessing) return;
         window.pauseTimer();
-        window.safePlayAudio ? window.safePlayAudio(helpSound) : helpSound.play().catch(e => {});
+        playSfx(helpSound, 'ding');
 
         const q = questions[currentIdx];
         const buttons = optionsGrid.querySelectorAll('.option-btn');
@@ -598,7 +671,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.useAudience = function () {
         if (isGameOver || isProcessing) return;
         window.pauseTimer();
-        window.safePlayAudio ? window.safePlayAudio(helpSound) : helpSound.play().catch(e => {});
+        playSfx(helpSound, 'ding');
         const q = questions[currentIdx];
         const helpBtn = document.getElementById('helpAudience');
         helpBtn.disabled = true;
@@ -680,7 +753,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.useExpert = function () {
         if (isGameOver || isProcessing) return;
         window.pauseTimer();
-        window.safePlayAudio ? window.safePlayAudio(helpSound) : helpSound.play().catch(e => {});
+        playSfx(helpSound, 'ding');
         const q = questions[currentIdx];
         const helpBtn = document.getElementById('helpExpert');
         helpBtn.disabled = true;
@@ -720,10 +793,12 @@ document.addEventListener('DOMContentLoaded', () => {
     window.stopGamePrompt = function () {
         if (isGameOver) return;
         window.pauseTimer();
+        if (window.LMSAdapter) window.LMSAdapter.playSynthesizedSound('tap');
         document.getElementById('stopModal').style.display = 'flex';
     };
 
     window.confirmStop = function () {
+        if (window.LMSAdapter) window.LMSAdapter.playSynthesizedSound('tap');
         document.getElementById('stopModal').style.display = 'none';
         endGame(false, true);
         saveAndBroadcastState();
@@ -776,21 +851,22 @@ document.addEventListener('DOMContentLoaded', () => {
             resultTitle.textContent = 'CHÚC MỪNG CHIẾN THẮNG!';
             resultTitle.style.color = 'var(--secondary)';
             resultMessage.textContent = `Bạn đã trở thành Triệu Phú HSK 2 với 500.000.000 VNĐ!`;
-            window.safePlayAudio ? window.safePlayAudio(clapSound) : clapSound.play().catch(e => {});
+            playSfx(clapSound, 'victory');
         } else if (stoppedManually) {
             resultTitle.textContent = 'BẢO TOÀN THÀNH CÔNG';
             resultTitle.style.color = 'var(--secondary)';
             resultMessage.textContent = `Bạn đã dừng cuộc chơi. Số tiền bạn mang về là: ${currentScore} VNĐ.`;
             if (currentScore === "0") {
-                window.safePlayAudio ? window.safePlayAudio(wrongSound) : wrongSound.play().catch(e => {});
+                playSfx(wrongSound, 'wrong');
             } else {
-                window.safePlayAudio ? window.safePlayAudio(clapSound) : clapSound.play().catch(e => {});
+                playSfx(clapSound, 'victory');
             }
         } else {
             resultTitle.textContent = 'KẾT THÚC TRẬN ĐẤU';
             resultTitle.style.color = 'var(--error)';
             if (isTimeout) {
                 resultMessage.textContent = `Hết thời gian! Bạn đã trắng tay. Số tiền thưởng: 0 VNĐ.`;
+                playSfx(wrongSound, 'wrong');
             } else {
                 const finalPrize = (currentIdx >= 10) ? safeScore : (currentIdx >= 5 ? ladderValues[4] : "0");
                 resultMessage.textContent = `Bạn đã trả lời sai tại câu số ${currentIdx + 1}. Số tiền thưởng: ${finalPrize} VNĐ.`;
@@ -809,6 +885,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isRestarting = false;
     window.restartGame = function (e) {
         if (e && e.preventDefault) e.preventDefault();
+        if (window.LMSAdapter) window.LMSAdapter.playSynthesizedSound('click');
         if (isRestarting) return;
         isRestarting = true;
         setTimeout(() => { isRestarting = false; }, 600);
@@ -1233,6 +1310,7 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function openGameInNewWindow(e) {
         if (e && e.preventDefault) e.preventDefault();
+        if (window.LMSAdapter) window.LMSAdapter.playSynthesizedSound('tap');
 
         if (isPopout) {
             closePopoutAndReturnToLMS();
@@ -1385,6 +1463,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function focusChildWindow() {
+        if (window.LMSAdapter) window.LMSAdapter.playSynthesizedSound('tap');
         let isAlive = false;
         if (childWin) {
             try { isAlive = !childWin.closed; } catch (e) { isAlive = false; }
@@ -1399,6 +1478,7 @@ document.addEventListener('DOMContentLoaded', () => {
      * Resume playing directly in the Parent LMS window
      */
     function resumeInLmsWindow(forceCloseChild = false) {
+        if (window.LMSAdapter) window.LMSAdapter.playSynthesizedSound('tap');
         if (popoutPollInterval) {
             clearInterval(popoutPollInterval);
             popoutPollInterval = null;

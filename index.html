@@ -111,6 +111,8 @@
     <script>
         const bgMusic = new Audio('ailatrieuphu.mp3');
         bgMusic.loop = true;
+        bgMusic.isBackgroundMusic = true;
+        window.bgMusic = bgMusic;
 
         const grid = document.getElementById('lessonGrid');
         const allTopics = Object.keys(hsk2Vocab);
@@ -149,6 +151,9 @@
                 }
 
                 card.onclick = () => {
+                    if (window.LMSAdapter) {
+                        window.LMSAdapter.playSynthesizedSound('select');
+                    }
                     card.style.transform = 'scale(0.95)';
                     if (window.markInternalNavigation) {
                         window.markInternalNavigation();
@@ -254,6 +259,10 @@
             if (now - lastToggleTime < 250) return;
             lastToggleTime = now;
 
+            if (window.LMSAdapter) {
+                window.LMSAdapter.playSynthesizedSound('tap');
+            }
+
             isMuted = !isMuted;
             safeStorage.setItem('musicMuted', isMuted ? 'true' : 'false');
             updateMusicUI();
@@ -276,12 +285,18 @@
 
         // Autoplay unlock
         const unlockAudio = () => {
+            if (window.LMSAdapter && window.LMSAdapter.getAudioContext) {
+                const ctx = window.LMSAdapter.getAudioContext();
+                if (ctx && ctx.state === 'suspended') {
+                    ctx.resume().catch(() => {});
+                }
+            }
             if (!isMuted && bgMusic.paused && (!childWin || childWin.closed)) {
                 window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(e => {});
             }
         };
-        ['click', 'touchstart'].forEach(evt => {
-            document.addEventListener(evt, unlockAudio, { once: true });
+        ['click', 'touchstart', 'keydown'].forEach(evt => {
+            document.addEventListener(evt, unlockAudio);
         });
 
         // -------------------------------------------------------------
@@ -375,6 +390,7 @@
         // -------------------------------------------------------------
         window.openGameInNewWindow = function (e) {
             if (e && e.preventDefault) e.preventDefault();
+            if (window.LMSAdapter) window.LMSAdapter.playSynthesizedSound('tap');
             if (isPopout) {
                 window.closePopoutAndReturnToLMS();
                 return;
@@ -470,6 +486,7 @@
         };
 
         window.focusChildWindow = function () {
+            if (window.LMSAdapter) window.LMSAdapter.playSynthesizedSound('tap');
             let isAlive = false;
             if (childWin) {
                 try { isAlive = !childWin.closed; } catch (e) { isAlive = false; }
@@ -481,6 +498,7 @@
         };
 
         window.resumeInLmsWindow = function (forceCloseChild = false) {
+            if (window.LMSAdapter) window.LMSAdapter.playSynthesizedSound('tap');
             if (popoutPollInterval) {
                 clearInterval(popoutPollInterval);
                 popoutPollInterval = null;
