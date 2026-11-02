@@ -374,14 +374,35 @@
             const topicEl = document.getElementById('sync-overlay-topic');
             const questionEl = document.getElementById('sync-overlay-question');
             const scoreEl = document.getElementById('sync-overlay-score');
+            const modal = document.getElementById('sync-active-modal');
+            const titleEl = modal ? modal.querySelector('.sync-title') : null;
+            const descEl = modal ? modal.querySelector('.sync-description') : null;
+            const badgeEl = modal ? modal.querySelector('.sync-badge') : null;
+            const resumeBtn = modal ? modal.querySelector('.sync-resume-btn') : null;
 
             if (topicEl) topicEl.textContent = state.topicName || "Đang chọn";
             if (questionEl) {
                 const cur = (typeof state.currentIdx === 'number' ? state.currentIdx + 1 : 1);
-                questionEl.textContent = `Câu ${cur} / 15`;
+                questionEl.textContent = state.isGameOver ? `Câu ${cur} / 15 (Kết thúc)` : `Câu ${cur} / 15`;
             }
             if (scoreEl) {
                 scoreEl.textContent = state.currentScore ? `${state.currentScore} đ` : '0 đ';
+            }
+
+            if (state.isGameOver) {
+                if (badgeEl) {
+                    badgeEl.innerHTML = `<span class="sync-dot" style="background:#ef4444;box-shadow:0 0 8px #ef4444;"></span><span>TRẬN ĐẤU ĐÃ KẾT THÚC</span>`;
+                }
+                if (titleEl) {
+                    titleEl.textContent = state.resultTitleText || "Trận Đấu Đã Kết Thúc";
+                    titleEl.style.color = state.resultTitleColor || "var(--secondary)";
+                }
+                if (descEl) {
+                    descEl.textContent = state.resultMessageText || `Kết quả trận đấu: ${state.currentScore || "0"} đ. Nhấn vào bên dưới để xem chi tiết kết quả và ôn tập từ vựng.`;
+                }
+                if (resumeBtn) {
+                    resumeBtn.textContent = "📊 Xem Kết Quả & Ôn Tập Tại Đây";
+                }
             }
         }
 
@@ -515,12 +536,17 @@
             if (syncModal) syncModal.classList.remove('show');
 
             let stateToApply = latestChildState;
-            if (!stateToApply) {
-                try {
-                    const raw = safeStorage.getItem('hsk2_synced_state');
-                    if (raw) stateToApply = JSON.parse(raw);
-                } catch (e) {}
-            }
+            try {
+                const raw = safeStorage.getItem('hsk2_synced_state');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed) {
+                        if (!stateToApply || (parsed.timestamp && parsed.timestamp > (stateToApply.timestamp || 0)) || parsed.isGameOver) {
+                            stateToApply = parsed;
+                        }
+                    }
+                }
+            } catch (e) {}
 
             // If child window started or played a game, navigate to game.html with state
             if (stateToApply && stateToApply.topicName && (stateToApply.currentIdx > 0 || stateToApply.questions || stateToApply.isGameOver)) {

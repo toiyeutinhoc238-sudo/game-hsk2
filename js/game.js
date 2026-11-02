@@ -411,6 +411,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function startTimer(isResume = false) {
+        if (isGameOver || isProcessing) return;
         clearInterval(timerInterval);
         if (!isResume) {
             timeLeft = 15;
@@ -421,6 +422,11 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         timerInterval = setInterval(() => {
+            if (isGameOver || isProcessing) {
+                clearInterval(timerInterval);
+                return;
+            }
+
             timeLeft -= 0.1;
             const percentage = Math.max(0, (timeLeft / 15) * 100);
             timerBar.style.width = `${percentage}%`;
@@ -433,6 +439,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (timeLeft <= 0) {
                 clearInterval(timerInterval);
                 isProcessing = true;
+                isGameOver = true;
                 statusMsg.textContent = 'Hết giờ rồi! Bạn đã mất trắng.';
                 
                 const q = questions[currentIdx];
@@ -448,7 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 safeScore = "0";
                 saveAndBroadcastState();
                 
-                setTimeout(() => endGame(false, false, true), 3000);
+                setTimeout(() => endGame(false, false, true), 2000);
             }
         }, 100);
     }
@@ -458,7 +465,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     window.resumeTimer = function () {
-        if (!isGameOver) {
+        if (!isGameOver && !isProcessing) {
             startTimer(true);
         }
     };
@@ -545,10 +552,19 @@ document.addEventListener('DOMContentLoaded', () => {
         saveAndBroadcastState();
     }
 
+    let help5050Timer = null;
+
     function handleChoice(idx) {
         if (isGameOver || isProcessing) return;
         isProcessing = true;
-        clearInterval(timerInterval); // Stop timer on choice
+        window.pauseTimer(); // Stop timer immediately on choice
+        clearInterval(timerInterval);
+
+        // Cancel any pending 50/50 timers
+        if (help5050Timer) {
+            clearTimeout(help5050Timer);
+            help5050Timer = null;
+        }
 
         // Play immediate tactile button selection sound
         if (window.LMSAdapter) {
@@ -566,7 +582,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Highlight selection
         buttons[idx].classList.add('selected');
-        statusMsg.textContent = 'Đang kiểm tra...';
+        statusMsg.textContent = 'Đang kiểm tra kết quả...';
 
         // Suspend clicks
         buttons.forEach(b => b.disabled = true);
@@ -611,15 +627,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 playSfx(correctSound, 'correct');
             } else {
-                // Wrong
+                // Wrong answer
+                isGameOver = true;
+                window.pauseTimer();
+                clearInterval(timerInterval);
                 playSfx(wrongSound, 'wrong');
+
+                const finalPrize = (currentIdx >= 10) ? safeScore : (currentIdx >= 5 ? ladderValues[4] : "0");
+                currentScore = finalPrize;
+
                 if (window.LMSBridge) {
-                    window.LMSBridge.reportProgress(currentIdx, false, "0");
+                    window.LMSBridge.reportProgress(currentIdx, false, finalPrize);
                 }
                 buttons[idx].classList.remove('selected');
                 buttons[idx].classList.add('wrong');
                 buttons[q.correct].classList.add('correct');
-                statusMsg.textContent = 'Tiếc quá! Bạn đã trả lời sai.';
+                statusMsg.textContent = `Tiếc quá! Bạn đã trả lời sai. Điểm thưởng: ${finalPrize} VNĐ.`;
                 saveAndBroadcastState();
                 setTimeout(() => endGame(false), 2000);
             }
@@ -634,38 +657,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const q = questions[currentIdx];
         const buttons = optionsGrid.querySelectorAll('.option-btn');
         const helpBtn = document.getElementById('help5050');
-        helpBtn.disabled = true;
-        helpBtn.style.opacity = '0.3';
-        helpBtn.style.cursor = 'not-allowed';
+        if (helpBtn) {
+            helpBtn.disabled = true;
+            helpBtn.style.opacity = '0.3';
+            helpBtn.style.cursor = 'not-allowed';
+        }
 
-        let count = 5;
-        const originalStatus = statusMsg.textContent;
-        statusMsg.textContent = `Hệ thống đang tính toán (${count}s)...`;
+        // Lock answer clicks briefly while 50/50 is calculated
+        isProcessing = true;
+        statusMsg.textContent = 'Hệ thống đang loại bỏ 2 phương án sai...';
 
-        const interval = setInterval(() => {
-            count--;
-            if (count > 0) {
-                statusMsg.textContent = `Hệ thống đang tính toán (${count}s)...`;
-            } else {
-                clearInterval(interval);
-                let removed = 0;
-                const indices = [0, 1, 2, 3].sort(() => Math.random() - 0.5);
-                for (let i = 0; i < indices.length && removed < 2; i++) {
-                    if (indices[i] !== q.correct) {
-                        buttons[indices[i]].style.visibility = 'hidden';
-                        buttons[indices[i]].disabled = true;
-                        removed++;
-                    }
+        if (help5050Timer) clearTimeout(help5050Timer);
+        help5050Timer = setTimeout(() => {
+            if (isGameOver) return;
+            let removed = 0;
+            const indices = [0, 1, 2, 3].sort(() => Math.random() - 0.5);
+            for (let i = 0; i < indices.length && removed < 2; i++) {
+                if (indices[i] !== q.correct) {
+                    buttons[indices[i]].style.visibility = 'hidden';
+                    buttons[indices[i]].disabled = true;
+                    removed++;
                 }
-                statusMsg.textContent = 'Hệ thống đã loại bỏ 2 phương án sai.';
-                used5050 = true;
-                saveAndBroadcastState();
-                setTimeout(() => {
-                    statusMsg.textContent = 'Tiếp tục suy nghĩ...';
-                    window.resumeTimer();
-                }, 1000);
             }
-        }, 1000);
+            used5050 = true;
+            isProcessing = false; // Re-enable choice processing
+            statusMsg.textContent = 'Đã loại bỏ 2 phương án sai. Hãy chọn đáp án!';
+            saveAndBroadcastState();
+            window.resumeTimer();
+        }, 1200);
     };
 
     window.useAudience = function () {
@@ -873,9 +892,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        const finalPrize = isWin ? "500.000.000" : (stoppedManually ? currentScore : ((currentIdx >= 10) ? safeScore : (currentIdx >= 5 ? ladderValues[4] : "0")));
+        currentScore = finalPrize;
+
         // Report Game Results to LMS (SCORM and postMessage)
         if (window.LMSBridge) {
-            const finalPrize = isWin ? "500.000.000" : (stoppedManually ? currentScore : ((currentIdx >= 10) ? safeScore : (currentIdx >= 5 ? ladderValues[4] : "0")));
             window.LMSBridge.reportComplete(isWin, currentIdx, finalPrize, stoppedManually);
         }
         saveAndBroadcastState();
@@ -1158,14 +1179,35 @@ document.addEventListener('DOMContentLoaded', () => {
         const topicEl = document.getElementById('sync-overlay-topic');
         const questionEl = document.getElementById('sync-overlay-question');
         const scoreEl = document.getElementById('sync-overlay-score');
+        const modal = document.getElementById('sync-active-modal');
+        const titleEl = modal ? modal.querySelector('.sync-title') : null;
+        const descEl = modal ? modal.querySelector('.sync-description') : null;
+        const badgeEl = modal ? modal.querySelector('.sync-badge') : null;
+        const resumeBtn = modal ? modal.querySelector('.sync-resume-btn') : null;
 
         if (topicEl) topicEl.textContent = state.topicName || topicName || "Chưa chọn";
         if (questionEl) {
             const cur = (typeof state.currentIdx === 'number' ? state.currentIdx + 1 : 1);
-            questionEl.textContent = `Câu ${cur} / 15`;
+            questionEl.textContent = state.isGameOver ? `Câu ${cur} / 15 (Kết thúc)` : `Câu ${cur} / 15`;
         }
         if (scoreEl) {
             scoreEl.textContent = state.currentScore ? `${state.currentScore} đ` : '0 đ';
+        }
+
+        if (state.isGameOver) {
+            if (badgeEl) {
+                badgeEl.innerHTML = `<span class="sync-dot" style="background:#ef4444;box-shadow:0 0 8px #ef4444;"></span><span>TRẬN ĐẤU ĐÃ KẾT THÚC</span>`;
+            }
+            if (titleEl) {
+                titleEl.textContent = state.resultTitleText || "Trận Đấu Đã Kết Thúc";
+                titleEl.style.color = state.resultTitleColor || "var(--secondary)";
+            }
+            if (descEl) {
+                descEl.textContent = state.resultMessageText || `Kết quả trận đấu: ${state.currentScore || "0"} đ. Bạn có thể xem kết quả chi tiết và ôn tập từ vựng tại đây.`;
+            }
+            if (resumeBtn) {
+                resumeBtn.textContent = "📊 Xem Kết Quả & Ôn Tập Tại Màn Hình Này";
+            }
         }
     }
 
@@ -1498,15 +1540,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let stateToApply = latestSyncedState;
-        if (!stateToApply) {
-            try {
-                const raw = storage.getItem('hsk2_synced_state');
-                if (raw) stateToApply = JSON.parse(raw);
-            } catch (e) {}
-        }
+        try {
+            const raw = storage.getItem('hsk2_synced_state');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed) {
+                    if (!stateToApply || (parsed.timestamp && parsed.timestamp > (stateToApply.timestamp || 0)) || parsed.isGameOver) {
+                        stateToApply = parsed;
+                    }
+                }
+            }
+        } catch (e) {}
 
         if (stateToApply) {
             applyGameStateSnapshot(stateToApply);
+            if (stateToApply.isGameOver && resultModal) {
+                resultModal.style.display = 'flex';
+            }
             if (window.LMSAdapter && window.LMSAdapter.showToast) {
                 if (stateToApply.isGameOver) {
                     window.LMSAdapter.showToast("🏆 Đã đồng bộ kết quả từ cửa sổ mới!");
