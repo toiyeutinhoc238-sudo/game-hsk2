@@ -1044,10 +1044,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function getGameStateSnapshot() {
         const hiddenOptions = [];
+        const optionStates = {};
+        let selectedOptionIdx = null;
+        let areOptionsDisabled = false;
+
         if (optionsGrid) {
             const btns = optionsGrid.querySelectorAll('.option-btn');
             btns.forEach((b, idx) => {
                 if (b.style.visibility === 'hidden') hiddenOptions.push(idx);
+                if (b.classList.contains('selected')) {
+                    optionStates[idx] = 'selected';
+                    selectedOptionIdx = idx;
+                } else if (b.classList.contains('wrong')) {
+                    optionStates[idx] = 'wrong';
+                    selectedOptionIdx = idx;
+                } else if (b.classList.contains('correct')) {
+                    optionStates[idx] = 'correct';
+                }
+                if (b.disabled) areOptionsDisabled = true;
             });
         }
 
@@ -1090,10 +1104,13 @@ document.addEventListener('DOMContentLoaded', () => {
             usedAudience: !!document.getElementById('helpAudience')?.disabled,
             usedExpert: !!document.getElementById('helpExpert')?.disabled,
             hiddenOptions: hiddenOptions,
+            optionStates: optionStates,
+            selectedOptionIdx: selectedOptionIdx,
+            optionsDisabled: areOptionsDisabled,
             countdownPassed: (countdownOverlay && countdownOverlay.style.display === 'none'),
             statusMsg: statusMsg ? statusMsg.textContent : '',
             reviewListHTML: rHtml,
-            resultModalOpen: isGameOver || (resultModal && resultModal.style.display === 'flex'),
+            resultModalOpen: (resultModal && resultModal.style.display === 'flex'),
             resultTitleText: rTitle,
             resultMessageText: rMsg,
             resultTitleColor: rColor,
@@ -1119,7 +1136,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentScore = snapshot.currentScore || "0";
         safeScore = snapshot.safeScore || "0";
         isGameOver = !!snapshot.isGameOver;
-        isProcessing = false;
+        isProcessing = !!snapshot.isProcessing;
 
         try {
             initLadder();
@@ -1173,14 +1190,49 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (e) {}
         }
 
-        // 5. Game status
+        // 5. Always Render Question & Option Buttons with Selected / Correct / Wrong states
+        const q = questions[currentIdx];
+        if (q && optionsGrid) {
+            if (questionNumNum) questionNumNum.textContent = `Câu ${currentIdx + 1}/15`;
+            if (questionText) questionText.textContent = q.q;
+            optionsGrid.innerHTML = '';
+            if (statusMsg) {
+                statusMsg.textContent = snapshot.statusMsg || (isGameOver ? 'Trận đấu đã kết thúc' : 'Suy nghĩ và chọn đáp án...');
+            }
+
+            const prefixes = ['A', 'B', 'C', 'D'];
+            q.a.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.setAttribute('data-prefix', `${prefixes[idx]}. `);
+                btn.textContent = opt;
+                btn.onclick = () => handleChoice(idx);
+
+                // Restore 50/50 lifeline hidden state
+                if (snapshot.hiddenOptions && snapshot.hiddenOptions.includes(idx)) {
+                    btn.style.visibility = 'hidden';
+                    btn.disabled = true;
+                }
+
+                // Restore selected, correct, or wrong classes
+                if (snapshot.optionStates && snapshot.optionStates[idx]) {
+                    btn.classList.add(snapshot.optionStates[idx]);
+                }
+
+                // Disable if options were answered, evaluating, or game over
+                if (snapshot.optionsDisabled || snapshot.isProcessing || isGameOver) {
+                    btn.disabled = true;
+                }
+
+                optionsGrid.appendChild(btn);
+            });
+        }
+
+        // 6. Game status
         if (isGameOver) {
             clearInterval(timerInterval);
             if (bgMusic) bgMusic.pause();
             if (resultModal) {
-                if (resultModal && !isLmsOverlayActive()) {
-            resultModal.style.display = 'flex';
-        }
                 if (resultTitle) {
                     const titleText = (snapshot.resultTitleText && snapshot.resultTitleText !== 'KẾT QUẢ')
                         ? snapshot.resultTitleText
@@ -1199,39 +1251,109 @@ document.addEventListener('DOMContentLoaded', () => {
                         reviewList.innerHTML = buildReviewTableHtml(questions);
                     }
                 }
+
+                // Smooth result modal presentation:
+                // If resultModal was ALREADY open in the snapshot, show it (unless in waiting LMS overlay).
+                // If it was still in the answer reveal phase (red/green buttons visible),
+                // keep modal closed so the user sees the answer result first, then display modal after 2s.
+                if (snapshot.resultModalOpen && !isLmsOverlayActive()) {
+                    resultModal.style.display = 'flex';
+                } else {
+                    resultModal.style.display = 'none';
+                    if (!isLmsOverlayActive()) {
+                        setTimeout(() => {
+                            if (isGameOver && !isLmsOverlayActive() && resultModal) {
+                                resultModal.style.display = 'flex';
+                            }
+                        }, 2000);
+                    }
+                }
             }
         } else {
             if (resultModal) resultModal.style.display = 'none';
 
-            const q = questions[currentIdx];
-            if (q) {
-                questionNumNum.textContent = `Câu ${currentIdx + 1}/15`;
-                questionText.textContent = q.q;
-                optionsGrid.innerHTML = '';
-                statusMsg.textContent = snapshot.statusMsg || 'Suy nghĩ và chọn đáp án...';
+            const hasCorrectOption = snapshot.optionStates && Object.values(snapshot.optionStates).includes('correct');
+            const hasSelectedOption = snapshot.optionStates && Object.values(snapshot.optionStates).includes('selected');
 
-                const prefixes = ['A', 'B', 'C', 'D'];
-                q.a.forEach((opt, idx) => {
-                    const btn = document.createElement('button');
-                    btn.className = 'option-btn';
-                    btn.setAttribute('data-prefix', `${prefixes[idx]}. `);
-                    btn.textContent = opt;
-                    btn.onclick = () => handleChoice(idx);
-                    if (snapshot.hiddenOptions && snapshot.hiddenOptions.includes(idx)) {
-                        btn.style.visibility = 'hidden';
-                        btn.disabled = true;
+            if (hasCorrectOption) {
+                // Show green button and smoothly advance to next question
+                setTimeout(() => {
+                    if (!isGameOver && currentIdx < 14) {
+                        currentIdx++;
+                        isProcessing = false;
+                        loadQuestion();
+                        saveAndBroadcastState();
+                    } else if (!isGameOver && currentIdx >= 14) {
+                        endGame(true);
                     }
-                    optionsGrid.appendChild(btn);
-                });
+                }, 1800);
+            } else if (hasSelectedOption) {
+                // Suspense checking animation in new window
+                setTimeout(() => {
+                    if (isGameOver) return;
+                    const curQ = questions[currentIdx];
+                    if (!curQ) return;
+                    const chosenIdx = snapshot.selectedOptionIdx;
+                    if (chosenIdx === null || chosenIdx === undefined) return;
 
+                    const btns = optionsGrid.querySelectorAll('.option-btn');
+                    if (chosenIdx === curQ.correct) {
+                        if (btns[chosenIdx]) {
+                            btns[chosenIdx].classList.remove('selected');
+                            btns[chosenIdx].classList.add('correct');
+                        }
+                        currentScore = ladderValues[currentIdx];
+                        if (currentIdx === 4) safeScore = ladderValues[4];
+                        if (currentIdx === 9) safeScore = ladderValues[9];
+                        statusMsg.textContent = 'Chính xác! Đang chuẩn bị câu hỏi tiếp theo...';
+                        playSfx(correctSound, 'correct');
+                        saveAndBroadcastState();
+                        setTimeout(() => {
+                            if (!isGameOver && currentIdx < 14) {
+                                currentIdx++;
+                                isProcessing = false;
+                                loadQuestion();
+                                saveAndBroadcastState();
+                            } else if (!isGameOver) {
+                                endGame(true);
+                            }
+                        }, 1800);
+                    } else {
+                        isGameOver = true;
+                        window.pauseTimer();
+                        clearInterval(timerInterval);
+                        playSfx(wrongSound, 'wrong');
+                        const finalPrize = (currentIdx >= 10) ? safeScore : (currentIdx >= 5 ? ladderValues[4] : "0");
+                        currentScore = finalPrize;
+                        if (btns[chosenIdx]) {
+                            btns[chosenIdx].classList.remove('selected');
+                            btns[chosenIdx].classList.add('wrong');
+                        }
+                        if (btns[curQ.correct]) {
+                            btns[curQ.correct].classList.add('correct');
+                        }
+                        statusMsg.textContent = `Tiếc quá! Bạn đã trả lời sai. Điểm thưởng: ${finalPrize} VNĐ.`;
+                        if (resultTitle) {
+                            resultTitle.textContent = 'KẾT THÚC TRẬN ĐẤU';
+                            resultTitle.style.color = 'var(--error)';
+                        }
+                        if (resultMessage) {
+                            resultMessage.textContent = `Bạn đã trả lời sai tại câu số ${currentIdx + 1}. Số tiền thưởng: ${finalPrize} VNĐ.`;
+                        }
+                        if (reviewList) {
+                            reviewList.innerHTML = buildReviewTableHtml(questions);
+                        }
+                        saveAndBroadcastState();
+                        setTimeout(() => endGame(false), 2000);
+                    }
+                }, 2000);
+            } else if (!snapshot.optionsDisabled && !snapshot.isProcessing && !isLmsOverlayActive()) {
                 timeLeft = typeof snapshot.timeLeft === 'number' ? snapshot.timeLeft : 15;
-                if (!isLmsOverlayActive()) {
-                    startTimer(true);
-                }
+                startTimer(true);
             }
 
             // Resume audio continuation seamlessly if not muted and not in paused parent
-            if (!isMuted && (!childWin || childWin.closed)) {
+            if (!isMuted && (!childWin || childWin.closed) && !isLmsOverlayActive()) {
                 if (bgMusic && bgMusic.paused) {
                     window.safePlayAudio ? window.safePlayAudio(bgMusic) : bgMusic.play().catch(() => {});
                 }

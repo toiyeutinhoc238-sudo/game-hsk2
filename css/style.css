@@ -619,6 +619,12 @@ body.is-child-window #popout-btn:hover {
     cursor: not-allowed;
 }
 
+.option-btn.selected:disabled,
+.option-btn.correct:disabled,
+.option-btn.wrong:disabled {
+    opacity: 1 !important;
+}
+
 .option-btn::before {
     content: attr(data-prefix);
     margin-right: 0.6rem;
