@@ -71,6 +71,29 @@
                     <div id="questionText" class="question-text">Đang tải câu hỏi...</div>
                     <div class="timer-container">
                         <div id="timerBar" class="timer-bar"></div>
+                        <script>
+                            (function () {
+                                try {
+                                    const p = new URLSearchParams(window.location.search);
+                                    const tl = parseFloat(p.get('timeLeft'));
+                                    if (isFinite(tl) && tl >= 0 && tl <= 15) {
+                                        const tb = document.getElementById('timerBar');
+                                        if (tb) {
+                                            const pct = Math.max(0, Math.min(100, (tl / 15) * 100));
+                                            tb.style.transition = 'none';
+                                            tb.style.width = pct + '%';
+                                            if (tl > 7) {
+                                                tb.style.background = 'linear-gradient(to right, #10b981, #22c55e)';
+                                            } else if (tl > 3) {
+                                                tb.style.background = 'linear-gradient(to right, #f59e0b, #eab308)';
+                                            } else {
+                                                tb.style.background = 'linear-gradient(to right, #ef4444, #dc2626)';
+                                            }
+                                        }
+                                    }
+                                } catch (e) { }
+                            })();
+                        </script>
                     </div>
                     <div id="optionsGrid" class="options-grid">
                         <!-- Options will be generated here -->

@@ -25,23 +25,88 @@ document.addEventListener('DOMContentLoaded', () => {
     let popoutPollInterval = null;
     window.isWaitingForChild = false;
 
-    // Check for existing state snapshot to resume
-    let initialSyncedState = null;
-    if (isPopout || params.get('resume_sync') === '1') {
+    // Detect whether this page load is a browser reload (F5 / Refresh button)
+    const isPageReload = (() => {
         try {
-            const raw = storage.getItem('hsk2_synced_state');
-            if (raw) {
-                const parsed = JSON.parse(raw);
-                if (parsed && parsed.questions && parsed.questions.length === 15 && (Date.now() - parsed.timestamp < 7200000)) {
-                    initialSyncedState = parsed;
-                }
+            const navEntries = performance.getEntriesByType('navigation');
+            if (navEntries && navEntries.length > 0) {
+                return navEntries[0].type === 'reload';
             }
-        } catch (err) { }
+            return performance.navigation && performance.navigation.type === 1;
+        } catch (e) {
+            return false;
+        }
+    })();
+
+    // On browser reload, ALWAYS clean up synced state and reset to fresh game (Question 1)
+    if (isPageReload) {
         try {
-            if (!initialSyncedState && window.opener && window.opener.__HSK2_LATEST_STATE__) {
-                initialSyncedState = window.opener.__HSK2_LATEST_STATE__;
+            storage.removeItem('hsk2_synced_state');
+            storage.removeItem('hsk2_active_session');
+            storage.removeItem('hsk2_popout_closed');
+            const cleanUrl = new URL(window.location.href);
+            cleanUrl.searchParams.delete('session');
+            cleanUrl.searchParams.delete('timeLeft');
+            cleanUrl.searchParams.delete('qIdx');
+            cleanUrl.searchParams.delete('resume_sync');
+            window.history.replaceState({}, '', cleanUrl.toString());
+        } catch (e) { }
+    }
+
+    // Check for existing state snapshot to resume ONLY on initial open handover (not reload)
+    let initialSyncedState = null;
+    if (!isPageReload && (isPopout || params.get('resume_sync') === '1')) {
+        const sessionParam = params.get('session');
+        const sessionConsumedKey = sessionParam ? ('hsk2_session_consumed_' + sessionParam) : null;
+        let isSessionAlreadyConsumed = false;
+        try {
+            if (sessionConsumedKey) {
+                isSessionAlreadyConsumed = (sessionStorage.getItem(sessionConsumedKey) === 'true');
             }
         } catch (e) { }
+
+        if (!isSessionAlreadyConsumed) {
+            try {
+                const raw = storage.getItem('hsk2_synced_state');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    // Snapshot must be fresh (within 45 seconds of popup opening, not hours!)
+                    if (parsed && parsed.questions && parsed.questions.length === 15 && (Date.now() - parsed.timestamp < 45000)) {
+                        if (!sessionParam || parsed.syncSessionId === sessionParam) {
+                            initialSyncedState = parsed;
+                        }
+                    }
+                }
+            } catch (err) { }
+            try {
+                if (!initialSyncedState && window.opener && window.opener.__HSK2_LATEST_STATE__) {
+                    const opState = window.opener.__HSK2_LATEST_STATE__;
+                    if (opState && (Date.now() - (opState.timestamp || 0) < 45000)) {
+                        if (!sessionParam || opState.syncSessionId === sessionParam) {
+                            initialSyncedState = opState;
+                        }
+                    }
+                }
+            } catch (e) { }
+
+            // If found, mark session consumed so any subsequent reload starts fresh!
+            if (initialSyncedState && sessionConsumedKey) {
+                try {
+                    sessionStorage.setItem(sessionConsumedKey, 'true');
+                    storage.removeItem('hsk2_synced_state');
+                } catch (e) { }
+            }
+        }
+    }
+
+    // If timeLeft was passed in URL, enforce it onto initialSyncedState
+    if (params.has('timeLeft')) {
+        const urlTime = parseFloat(params.get('timeLeft'));
+        if (isFinite(urlTime) && urlTime >= 0 && urlTime <= 15) {
+            if (initialSyncedState) {
+                initialSyncedState.timeLeft = urlTime;
+            }
+        }
     }
 
     // Signal parent that child window is ready to receive latest state
@@ -457,16 +522,29 @@ document.addEventListener('DOMContentLoaded', () => {
         return !!(window.isWaitingForChild && overlay && overlay.style.display !== 'none' && overlay.classList.contains('show'));
     }
 
+    function updateTimerUI(sec) {
+        if (!timerBar) return;
+        const percentage = Math.max(0, Math.min(100, (sec / 15) * 100));
+        timerBar.style.width = `${percentage}%`;
+        if (sec > 7) {
+            timerBar.style.background = 'linear-gradient(to right, #10b981, #22c55e)';
+            timerBar.style.boxShadow = '0 0 10px rgba(34, 197, 94, 0.4)';
+        } else if (sec > 3) {
+            timerBar.style.background = 'linear-gradient(to right, #f59e0b, #eab308)';
+            timerBar.style.boxShadow = '0 0 10px rgba(234, 179, 8, 0.4)';
+        } else {
+            timerBar.style.background = 'linear-gradient(to right, #ef4444, #dc2626)';
+            timerBar.style.boxShadow = '0 0 12px rgba(239, 68, 68, 0.7)';
+        }
+    }
+
     function startTimer(isResume = false) {
         if (isGameOver || isProcessing || isLmsOverlayActive()) return;
         clearInterval(timerInterval);
         if (!isResume) {
             timeLeft = 15;
-            timerBar.style.width = '100%';
-        } else {
-            const percentage = Math.max(0, Math.min(100, (timeLeft / 15) * 100));
-            timerBar.style.width = `${percentage}%`;
         }
+        updateTimerUI(timeLeft);
 
         timerInterval = setInterval(() => {
             if (isGameOver || isProcessing || isLmsOverlayActive()) {
@@ -474,9 +552,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            timeLeft -= 0.1;
-            const percentage = Math.max(0, (timeLeft / 15) * 100);
-            timerBar.style.width = `${percentage}%`;
+            timeLeft = Math.max(0, Number((timeLeft - 0.1).toFixed(2)));
+            updateTimerUI(timeLeft);
 
             // Periodic sync every 1 second when in popout
             if (isPopout && Math.abs(Math.round(timeLeft) - timeLeft) < 0.05) {
@@ -987,6 +1064,8 @@ document.addEventListener('DOMContentLoaded', () => {
             used5050 = false;
             currentScore = "0";
             safeScore = "0";
+            timeLeft = 15;
+            updateTimerUI(15);
 
             // 3. Reset all lifelines
             if (help5050Btn) {
@@ -1358,7 +1437,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }, 2000);
             } else if (!snapshot.optionsDisabled && !snapshot.isProcessing && !isLmsOverlayActive()) {
-                timeLeft = typeof snapshot.timeLeft === 'number' ? snapshot.timeLeft : 15;
+                const targetTime = (typeof snapshot.timeLeft === 'number') ? snapshot.timeLeft : (params.has('timeLeft') ? parseFloat(params.get('timeLeft')) : 15);
+                timeLeft = Math.max(0.1, Number(targetTime.toFixed(1)));
+                updateTimerUI(timeLeft);
                 startTimer(true);
             }
 
@@ -1587,10 +1668,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // 3. Snapshot current state with audio details
         const snapshot = getGameStateSnapshot();
+        const currentExactTimeLeft = Math.max(0.1, Number(timeLeft.toFixed(1)));
         snapshot.isLmsWaiting = true;
         snapshot.syncSessionId = 'sync_' + Date.now();
         snapshot.audioCurrentTime = currentAudioTime;
         snapshot.isMuted = isMuted;
+        snapshot.timeLeft = currentExactTimeLeft;
 
         try {
             storage.setItem('hsk2_synced_state', JSON.stringify(snapshot));
@@ -1612,7 +1695,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateSyncOverlayInfo(snapshot);
         }
 
-        // 5. Build clean URL passing session, topic, audioTime and muted state
+        // 5. Build clean URL passing session, topic, audioTime, muted state, exact timer & question
         const targetUrl = new URL(window.location.href);
         targetUrl.searchParams.delete('state');
         targetUrl.hash = '';
@@ -1621,6 +1704,8 @@ document.addEventListener('DOMContentLoaded', () => {
         targetUrl.searchParams.set('session', snapshot.syncSessionId);
         targetUrl.searchParams.set('audioTime', currentAudioTime);
         targetUrl.searchParams.set('muted', isMuted ? '1' : '0');
+        targetUrl.searchParams.set('timeLeft', currentExactTimeLeft.toString());
+        targetUrl.searchParams.set('qIdx', currentIdx.toString());
 
         const scrWidth = (window.screen && window.screen.availWidth) || window.innerWidth || 1280;
         const scrHeight = (window.screen && window.screen.availHeight) || window.innerHeight || 800;
@@ -1676,6 +1761,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (child) {
             if (child !== true) {
                 childWin = child;
+                try {
+                    child.__HSK2_LATEST_STATE__ = snapshot;
+                } catch (err) { }
                 try { child.focus(); } catch (err) { }
             }
 
